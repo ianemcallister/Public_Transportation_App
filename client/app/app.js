@@ -1,10 +1,11 @@
 'use strict';
 
-angular.module('transitAppApp', [
-  'transitAppApp.constants',
+angular.module('transitApp', [
+  'transitApp.constants',
   'ngCookies',
   'ngResource',
   'ngSanitize',
+  'btford.socket-io',
   'ui.router',
   'ui.bootstrap'
 ])

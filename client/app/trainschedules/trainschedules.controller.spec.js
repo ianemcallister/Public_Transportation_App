@@ -3,7 +3,7 @@
 describe('Component: TrainschedulesComponent', function () {
 
   // load the controller's module
-  beforeEach(module('transitAppApp'));
+  beforeEach(module('transitApp'));
 
   var TrainschedulesComponent, scope;
 

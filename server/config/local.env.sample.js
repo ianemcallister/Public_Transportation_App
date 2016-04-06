@@ -7,7 +7,7 @@
 
 module.exports = {
   DOMAIN:           'http://localhost:9000',
-  SESSION_SECRET:   'transitapp-secret',
+  SESSION_SECRET:   'transit-secret',
 
   // Control debug level for modules using visionmedia/debug
   DEBUG: ''

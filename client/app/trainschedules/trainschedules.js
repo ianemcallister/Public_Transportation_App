@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('transitAppApp')
+angular.module('transitApp')
   .config(function ($stateProvider) {
     $stateProvider
       .state('trainschedules', {

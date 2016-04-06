@@ -1,3 +1,3 @@
 'use strict';
 
-angular.module('transitAppApp.util', []);
+angular.module('transitApp.util', []);

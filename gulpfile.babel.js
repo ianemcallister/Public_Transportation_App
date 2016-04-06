@@ -1,4 +1,4 @@
-// Generated on 2016-04-04 using generator-angular-fullstack 3.5.0
+// Generated on 2016-04-06 using generator-angular-fullstack 3.5.0
 'use strict';
 
 import _ from 'lodash';
@@ -494,7 +494,7 @@ gulp.task('build:client', ['transpile:client', 'styles', 'html', 'constant'], ()
 gulp.task('html', function() {
     return gulp.src(`${clientPath}/{app,components}/**/*.html`)
         .pipe(plugins.angularTemplatecache({
-            module: 'transitAppApp'
+            module: 'transitApp'
         }))
         .pipe(gulp.dest('.tmp'));
 });
@@ -502,7 +502,7 @@ gulp.task('html', function() {
 gulp.task('constant', function() {
   let sharedConfig = require(`./${serverPath}/config/environment/shared`);
   return plugins.ngConstant({
-    name: 'transitAppApp.constants',
+    name: 'transitApp.constants',
     deps: [],
     wrap: true,
     stream: true,

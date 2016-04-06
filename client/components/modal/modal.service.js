@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('transitAppApp')
+angular.module('transitApp')
   .factory('Modal', function($rootScope, $uibModal) {
     /**
      * Opens a modal

@@ -7,7 +7,7 @@ class TrainschedulesComponent {
   }
 }
 
-angular.module('transitAppApp')
+angular.module('transitApp')
   .component('trainschedules', {
     templateUrl: 'app/trainschedules/trainschedules.html',
     controller: TrainschedulesComponent

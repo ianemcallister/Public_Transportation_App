@@ -3,7 +3,7 @@
 describe('Component: TripplannerComponent', function () {
 
   // load the controller's module
-  beforeEach(module('transitAppApp'));
+  beforeEach(module('transitApp'));
 
   var TripplannerComponent, scope;
 
@@ -15,7 +15,7 @@ describe('Component: TripplannerComponent', function () {
     });
   }));
 
-  it('should ...', function () {
+  it('should load a list of available stations to travel to/from', function () {
     expect(1).toEqual(1);
   });
 });

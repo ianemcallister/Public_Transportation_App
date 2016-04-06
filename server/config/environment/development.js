@@ -6,7 +6,7 @@ module.exports = {
 
   // MongoDB connection options
   mongo: {
-    uri: 'mongodb://localhost/transitapp-dev'
+    uri: 'mongodb://localhost/transit-dev'
   },
 
   // Seed database on startup

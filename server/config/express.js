@@ -41,7 +41,7 @@ export default function(app) {
     resave: false,
     store: new MongoStore({
       mongooseConnection: mongoose.connection,
-      db: 'transit-app'
+      db: 'transit'
     })
   }));
 

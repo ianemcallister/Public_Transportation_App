@@ -7,7 +7,7 @@ class TripplannerComponent {
   }
 }
 
-angular.module('transitAppApp')
+angular.module('transitApp')
   .component('tripplanner', {
     templateUrl: 'app/tripplanner/tripplanner.html',
     controller: TripplannerComponent

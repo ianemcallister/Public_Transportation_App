@@ -1,9 +1,9 @@
-'use strict';
+/*'use strict';
 
 describe('Directive: tripBookendsSelector', function () {
 
   // load the directive's module and view
-  beforeEach(module('transitAppApp.tripBookendsSelector'));
+  beforeEach(module('transitApp.tripBookendsSelector'));
   beforeEach(module('app/tripBookendsSelector/tripBookendsSelector.html'));
 
   var element, scope;
@@ -19,3 +19,4 @@ describe('Directive: tripBookendsSelector', function () {
     expect(element.text()).toBe('this is the tripBookendsSelector directive');
   }));
 });
+*/

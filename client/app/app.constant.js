@@ -1,5 +1,5 @@
 (function(angular, undefined) {
-  angular.module("transitAppApp.constants", [])
+  angular.module("transitApp.constants", [])
 
 .constant("appConfig", {
 	"userRoles": [

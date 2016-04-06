@@ -3,8 +3,9 @@
 describe('Component: mainComponent', function() {
 
   // load the controller's module
-  beforeEach(module('transitAppApp'));
+  beforeEach(module('transitApp'));
   beforeEach(module('stateMock'));
+  beforeEach(module('socketMock'));
 
   var scope;
   var mainComponent;
@@ -17,7 +18,8 @@ describe('Component: mainComponent', function() {
     $http,
     $componentController,
     $rootScope,
-    $state) {
+    $state,
+    socket) {
       $httpBackend = _$httpBackend_;
       $httpBackend.expectGET('/api/things')
         .respond(['HTML5 Boilerplate', 'AngularJS', 'Karma', 'Express']);
@@ -26,7 +28,8 @@ describe('Component: mainComponent', function() {
       state = $state;
       mainComponent = $componentController('main', {
         $http: $http,
-        $scope: scope
+        $scope: scope,
+        socket: socket
       });
   }));
 

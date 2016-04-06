@@ -18,5 +18,5 @@ class NavbarController {
     }
 }
 
-angular.module('transitAppApp')
+angular.module('transitApp')
   .controller('NavbarController', NavbarController);
