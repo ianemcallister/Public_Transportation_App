@@ -44,14 +44,17 @@ function TrainschedulesComponent($scope) {
 	//view model variables
 	//TODO: update this via a service instead
 	$scope.trainLines = [
-		'Red Line',
-		'Blue Line',
-		'Yellow Line',
-		'Green Line',
-		'Orange Line',
+		'MAX Red Line',
+		'MAX Blue Line',
+		'MAX Yellow Line',
+		'MAX Green Line',
+		'MAX Orange Line',
 	];
 	//local methods
 	//view model methods
+	$scope.validLineSelected = function() {
+		$scope.selectedLine = $scope.tempLine;
+	}
 	//actions
 	
 }

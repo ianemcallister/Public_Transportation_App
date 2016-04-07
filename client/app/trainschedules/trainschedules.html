@@ -7,7 +7,9 @@
     <label for="lineSelector">Line:
       <input  list='linePicker'
               name='lineSelector'
-              class='col-xs-12 col-sm-12 col-md-12 col-lg-12'>
+              class='col-xs-12 col-sm-12 col-md-12 col-lg-12'
+              ng-model='tempLine'
+              ng-blur='validLineSelected()'>
       <datalist id='linePicker'>
         <option ng-repeat='line in trainLines' value='{{ line }}'>{{ line }}</option>
       </datalist>
@@ -16,5 +18,5 @@
 </header>
 
 <div class="container">
-  <select-train-schedule></select-train-schedule>
+  <select-train-schedule selected-line='selectedLine'></select-train-schedule>
 </div>
