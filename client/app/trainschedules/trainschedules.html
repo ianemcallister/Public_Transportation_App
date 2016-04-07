@@ -9,15 +9,12 @@
               name='lineSelector'
               class='col-xs-12 col-sm-12 col-md-12 col-lg-12'>
       <datalist id='linePicker'>
-        <option value='Red Line'>1</option>
+        <option ng-repeat='line in trainLines' value='{{ line }}'>{{ line }}</option>
       </datalist>
     </label>
   </div>
 </header>
 
 <div class="container">
-  <div class="col-lg-12">
-    <h3>Results</h3>
-    <p>Go from here to here</p>
-  </div>
+  <select-train-schedule></select-train-schedule>
 </div>

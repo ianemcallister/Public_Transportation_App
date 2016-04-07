@@ -10,7 +10,7 @@ describe('Component: TripplannerComponent', function () {
   // Initialize the controller and a mock scope
   beforeEach(inject(function ($componentController, $rootScope) {
     scope = $rootScope.$new();
-    TripplannerComponent = $componentController('TripplannerComponent', {
+    TripplannerComponent = $componentController('tripplanner', {
       $scope: scope
     });
   }));
