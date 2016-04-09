@@ -1,0 +1,20 @@
+//used to build trainline JSON file
+module.exports = {
+	route_long_name: '',	//from routes.txt
+	agency_id: '',			//from routes.txt
+	route_id: null,			//from routes.txt
+	service: {				//
+		0: {
+			headsign: '',
+			direction: '',
+			stations: [],
+			trainTimes: []
+		},
+		1: {
+			headsign: '',
+			direction: '',
+			stations: [],
+			trainTimes: []
+		}
+	}
+}

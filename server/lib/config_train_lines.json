@@ -1,0 +1,11 @@
+module.exports = [{ 
+	route_id: 90, route_long_name: 'MAX Red Line' 
+}, { 
+	route_id: 100, route_long_name: 'MAX Blue Line' 
+}, { 
+	route_id: 190, route_long_name: 'MAX Yellow Line' 
+}, { 
+	route_id: 200, route_long_name: 'MAX Green Line' 
+}, { 
+	route_id: 290, route_long_name: 'MAX Orange Line' 
+}];
