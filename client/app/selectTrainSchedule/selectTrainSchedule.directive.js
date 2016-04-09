@@ -74,6 +74,7 @@ angular.module('transitApp')
       ]
       vm.horizontalView = true;
       vm.selectedTime;
+      vm.travelDirection = 'eastbound';
 
       //local function
       function onResize(width) {
@@ -86,11 +87,14 @@ angular.module('transitApp')
         //load the JSON from the service
         allTrainSchedules = {
           'MAX Red Line': {
-            'headings': [],
-            trips: [
-              [,,,,,,,,,,,'3:35am','3:38am','3:50am','4:00am'],
-              [,,,,,,,,,,,'4:10am','4:12am','4:21am','4:30am']
-            ]
+            'eastbound': {
+                'stopHeadings': [],
+              trips: [
+                [,,,,,,,,,,,'3:35am','3:38am','3:50am','4:00am'],
+                [,,,,,,,,,,,'4:10am','4:12am','4:21am','4:30am']
+              ]
+            },
+            'westbound': {}
           },
           'MAX Blue Line': {},
           'MAX Yellow Line': {},
