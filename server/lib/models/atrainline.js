@@ -29,7 +29,9 @@ module.exports = {
 	addNewTrip: function(aNewTrip) {
 		//declare local variables
 		var serviceDirection = aNewTrip.direction_id;
-		var thisTripId = addNewTrip.trip_id;
+		var thisTripId = aNewTrip.trip_id;
+
+		console.log(aNewTrip);
 
 		this.service[serviceDirection].headsign = aNewTrip.stop_headsign;
 		this.service[serviceDirection].direction = aNewTrip.getDirectionString();

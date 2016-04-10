@@ -24,20 +24,20 @@ var parse = require('../lib/parseGTFS');
 
 
 //PARSE RAW MODELS & BUILD 
-//define promises
-var buildStop_timesModel = new Promise(function(resolve, reject) { 
-	parse.stop_times()
-	.then(function(returnedSystemStops) { resolve(returnedSystemStops); })
-	.catch(function(error) { throw new Error(error); }); 
-});
-
-//chain of asynchronous work
 //first build a model from the systems stops file
-buildStop_timesModel
-.then(function(returnedSystemStops) {
-	console.log(returnedSystemStops);
+parse.stop_times()
+.then(function(returnedCollection) { 
+	
+	//then go into trips
+	parse.trips()
+	.then(function(returnedCollection) { 
+		
+		
+	})
+	.catch(function(error) { throw new Error(error); });
+	
 })
-.catch();
+.catch(function(error) { throw new Error(error); });
 
 //BUILD REQUIRED MOEDELS
 
