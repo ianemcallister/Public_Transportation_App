@@ -4,6 +4,7 @@ var Trip = function() {
 	this.stop_headsign = '';	//from stop_times.txt
 	this.direction_id = null;	//from trips.txt
 	this.route_id = null;		//from trips.txt
+	this.noOfStops = 0;			//to be calculated
 	this.stop_sequence = {};	//collection of tripstops with stop_sequence keys from stop_times.txt
 	this.received_data = false;	
 }
@@ -70,6 +71,10 @@ Trip.prototype._setRouteId = function(newRouteId) {
 	if(!this.received_data) this._setReceivedData();
 };
 
+Trip.prototype.countStops = function() {
+	this.noOfStops++;
+};
+
 Trip.prototype._setNewStop = function(aNewStop) {
 	//define local variables
 	var stopNumber = aNewStop._getStopSequenceId();
@@ -101,6 +106,9 @@ Trip.prototype._setNewStop = function(aNewStop) {
 
 	//update the flag if need be
 	if(!this.received_data) this._setReceivedData();
+
+	//count the stop
+	this.countStops();
 };
 
 module.exports = Trip;

@@ -306,7 +306,7 @@ module.exports = {
 				console.log('Trips took ' + readTimer() + ' seconds ('+ timer.end + ' ' + timer.start + ')');
 
 				//write the model
-				TEMP_log.write(JSON.stringify(tripCollection,'','\t'));
+				TEMP_trips.write(JSON.stringify(tripCollection,'','\t'));
 				TEMP_importantStops.write(JSON.stringify(importantStops,'','\t'));
 				
 				TEMP_log.write(JSON.stringify(readLog,'','\t'));
@@ -331,7 +331,7 @@ module.exports = {
 	stops: function() {
 
 		//REMOVE THIS LATER
-		var contents = fs.readFileSync(path.join(__dirname, '../assets/tests/tripsLog.json'));
+		var contents = fs.readFileSync(path.join(__dirname, '../assets/tests/tripsModel.json'));
 		tripCollection = JSON.parse(contents);
 		//AND REMOVE THIS
 		var contents2 = fs.readFileSync(path.join(__dirname, '../assets/tests/importantStops.json'));
@@ -518,6 +518,7 @@ module.exports = {
 		var Yellow_LineJSON = fs.createWriteStream(path.join(__dirname, '../assets/JSON/190_Yellow_Line.json'));
 		var Green_LineJSON = fs.createWriteStream(path.join(__dirname, '../assets/JSON/200_Green_Line.json'));
 		var Orange_LineJSON = fs.createWriteStream(path.join(__dirname, '../assets/JSON/290_Orange_Line.json'));
+		var TEMP_line_Log = fs.createWriteStream(path.join(__dirname, '../assets/tests/line_log.json'));
 
 		//start the timer
 		startTimer();
@@ -527,7 +528,7 @@ module.exports = {
 			trainlines[short_name] = new TrainLine;
 		});
 
-		//run through the objects
+		//run through the objects, adding all trips to each line
 		Object.keys(tripCollection).forEach(function(trip) {
 
 			//add this trip the the appropriate line and service direction
@@ -536,10 +537,30 @@ module.exports = {
 			var thisTripId = tripCollection[trip].trip_id;
 
 			//update the model
-			trainlines[thisLine].route_id = thisLine
+			trainlines[thisLine].addNewTrip(thisLine, tripCollection[trip]);
+
+		});
+		
+		//then build the station sequence from the longest line
+		Object.keys(trainlines).forEach(function(line) {
+
+			var lngstOnLine = trainlines[line].getLongestTripId();
+			
+			trainlines[line].buildStationSequence( { 0: tripCollection[lngstOnLine[0]].stop_sequence, 1: tripCollection[lngstOnLine[1]].stop_sequence } );
+
+		});
+
+		//from the station sequence build a timetable
+		Object.keys(trainlines).forEach(function(line) {
+
+			trainlines[line].buildTimeTables(tripCollection);
+			console.log(trainlines[line].service[0].stopSequence);
+			console.log(trainlines[line].service[0].timeTable);
+		});
+			
 
 			//loop through the stops on this trip
-			Object.keys(tripCollection[trip].stop_sequence).forEach(function(stop) {
+			/*Object.keys(tripCollection[trip].stop_sequence).forEach(function(stop) {
 
 				//pull out the important variables
 				var thisStopId = tripCollection[trip].stop_sequence[stop].stop_id;
@@ -548,7 +569,7 @@ module.exports = {
 				var thisTrainTime = tripCollection[trip].stop_sequence[stop].departure_time;
 
 				//and build the station object
-				var thisStation = { id: null, name: '', desc: '' };
+				var thisStation = { id: null, name: '', desc: '', seqId: stop };
 
 				
 				//if the station has a parent use the parent station info
@@ -563,7 +584,7 @@ module.exports = {
 					thisStation.name = tripCollection[trip].stop_sequence[stop].stop_name;
 				}
 				
-				thisStation.name = tripCollection[trip].stop_sequence[stop].stop_desc;
+				thisStation.desc = tripCollection[trip].stop_sequence[stop].stop_desc;
 
 
 				//add the the values to the model
@@ -578,9 +599,38 @@ module.exports = {
 				trainlines[thisLine].addAStation(serviceDirection, thisStation);
 				trainlines[thisLine].addADepartureTime(serviceDirection, thisTripId, thisStopId, thisTrainTime);
 
+				//monitor the findings
+				console.log(
+								' thisLine: ' + thisLine +
+								' serviceDirection: ' + serviceDirection +
+								' thisTripId: ' + thisTripId +
+								' thisStopId: ' + thisStopId +
+								' thisDirection: ' + thisDirection +
+								' thisHeadsign: ' + thisHeadsign +
+								' thisTrainTime: ' + thisTrainTime +
+								' thisStationId: ' + thisStation.id +
+								' thisStationName: ' + thisStation.name +
+								' thisStationDesc: ' + thisStation.desc
+							);
+
+				//output for later evaluation
+				TEMP_line_Log.write(' thisLine: ' + thisLine +
+									' serviceDirection: ' + serviceDirection +
+									' thisTripId: ' + thisTripId +
+									' thisStopId: ' + thisStopId +
+									' thisDirection: ' + thisDirection +
+									' thisHeadsign: ' + thisHeadsign +
+									' thisTrainTime: ' + thisTrainTime +
+									' thisStationId: ' + thisStation.id +
+									' thisStationName: ' + thisStation.name +
+									' thisStationDesc: ' + thisStation.desc +
+									'\n');
+
 			});
 
-		});
+		});*/
+
+
 
 		//write out the files
 		Red_LineJSON.write(JSON.stringify(trainlines[90],'','\t'));
