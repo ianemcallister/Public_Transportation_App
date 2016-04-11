@@ -37,7 +37,8 @@ var parse = require('../lib/parseGTFS');
 		.then(function(returnedCollection) {
 
 			//into here
-
+			parse.exportLineFiles();
+			
 		})
 		.catch(function(error) { throw new Error(error); });
 

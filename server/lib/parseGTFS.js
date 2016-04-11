@@ -1,6 +1,6 @@
 /*	PARESGTFS.JS
 *	Accesses the following csv files to export JSON
-*		1. assets/downloads/gtfs/routes.txt
+*		1. assets/downloads/gtfs/routes.txt 			may not even need routes
 *		2. assets/downloads/gtfs/stop_times.txt
 *		3. assets/downloads/gtfs/stops.txt
 *		4. assets/downloads/gtfs/trips.txt
@@ -30,13 +30,6 @@ var importantStops = {};
 
 //define sources
 var routesSource = fs.createReadStream(path.join(__dirname, '../assets/downloads/gtfs/routes.txt'));
-
-//define target files
-var Red_LineJSON = fs.createWriteStream(path.join(__dirname, '../assets/JSON/90_Red_Line.json'));
-var Blue_LineJSON = fs.createWriteStream(path.join(__dirname, '../assets/JSON/100_Blue_Line.json'));
-var Yellow_LineJSON = fs.createWriteStream(path.join(__dirname, '../assets/JSON/190_Yellow_Line.json'));
-var Green_LineJSON = fs.createWriteStream(path.join(__dirname, '../assets/JSON/200_Green_Line.json'));
-var Orange_LineJSON = fs.createWriteStream(path.join(__dirname, '../assets/JSON/290_Orange_Line.json'));
 
 //define streams
 var rl_routes = readline.createInterface({ input: routesSource });
@@ -503,6 +496,101 @@ module.exports = {
 
 		});
 
+	},
+
+	/*	BUILD LINE FILES Function
+	*	From the trips collection, build each of the respective line files
+	*	1. 90_Red_Line.JSON
+	*	2. 100_Blue_Line.JSON
+	*	3. 190_Yellow_Line.JSON
+	*	4. 200_Green_Line.JSON
+	*	5. 290_Orange_Line.JSON
+	*/
+	exportLineFiles: function() {
+
+		//declare local variables
+		var trainlines = {};
+		var TrainLine = require(path.join(__dirname, 'models/atrainline.js'));
+
+		//define target files
+		var Red_LineJSON = fs.createWriteStream(path.join(__dirname, '../assets/JSON/90_Red_Line.json'));
+		var Blue_LineJSON = fs.createWriteStream(path.join(__dirname, '../assets/JSON/100_Blue_Line.json'));
+		var Yellow_LineJSON = fs.createWriteStream(path.join(__dirname, '../assets/JSON/190_Yellow_Line.json'));
+		var Green_LineJSON = fs.createWriteStream(path.join(__dirname, '../assets/JSON/200_Green_Line.json'));
+		var Orange_LineJSON = fs.createWriteStream(path.join(__dirname, '../assets/JSON/290_Orange_Line.json'));
+
+		//start the timer
+		startTimer();
+
+		//build the trains model
+		routesToTrack.forEach(function(short_name) {
+			trainlines[short_name] = new TrainLine;
+		});
+
+		//run through the objects
+		Object.keys(tripCollection).forEach(function(trip) {
+
+			//add this trip the the appropriate line and service direction
+			var thisLine = tripCollection[trip].route_id;
+			var serviceDirection = tripCollection[trip].direction_id;
+			var thisTripId = tripCollection[trip].trip_id;
+
+			//update the model
+			trainlines[thisLine].route_id = thisLine
+
+			//loop through the stops on this trip
+			Object.keys(tripCollection[trip].stop_sequence).forEach(function(stop) {
+
+				//pull out the important variables
+				var thisStopId = tripCollection[trip].stop_sequence[stop].stop_id;
+				var thisDirection = tripCollection[trip].stop_sequence[stop].direction;
+				var thisHeadsign = tripCollection[trip].stop_sequence[stop].stop_headsign;
+				var thisTrainTime = tripCollection[trip].stop_sequence[stop].departure_time;
+
+				//and build the station object
+				var thisStation = { id: null, name: '', desc: '' };
+
+				
+				//if the station has a parent use the parent station info
+				if(typeof tripCollection[trip].stop_sequence[stop].parent_station !== 'undefined') {
+
+					thisStation.id = tripCollection[trip].stop_sequence[stop].parent_station.stop_id;
+					thisStation.name = tripCollection[trip].stop_sequence[stop].parent_station.stop_name;
+
+				} else {	//if there is no parent station use the station info itself
+
+					thisStation.id = tripCollection[trip].stop_sequence[stop].stop_id;
+					thisStation.name = tripCollection[trip].stop_sequence[stop].stop_name;
+				}
+				
+				thisStation.name = tripCollection[trip].stop_sequence[stop].stop_desc;
+
+
+				//add the the values to the model
+				if(trainlines[thisLine].service[serviceDirection].headsign == '') {
+					trainlines[thisLine].service[serviceDirection].headsign = thisHeadsign;
+				}
+				
+				if(trainlines[thisLine].service[serviceDirection].direction == '') {
+					trainlines[thisLine].service[serviceDirection].direction = thisDirection;
+				}
+				
+				trainlines[thisLine].addAStation(serviceDirection, thisStation);
+				trainlines[thisLine].addADepartureTime(serviceDirection, thisTripId, thisStopId, thisTrainTime);
+
+			});
+
+		});
+
+		//write out the files
+		Red_LineJSON.write(JSON.stringify(trainlines[90],'','\t'));
+		Blue_LineJSON.write(JSON.stringify(trainlines[100],'','\t'));
+		Yellow_LineJSON.write(JSON.stringify(trainlines[190],'','\t'));
+		Green_LineJSON.write(JSON.stringify(trainlines[200],'','\t'));
+		Orange_LineJSON.write(JSON.stringify(trainlines[290],'','\t'));
+
+		//finish the timer
+		stopTimer();
 	}
 
 }
