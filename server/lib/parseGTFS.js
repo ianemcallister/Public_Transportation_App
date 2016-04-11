@@ -26,10 +26,10 @@ var TripStop = require(path.join(__dirname, 'models/atripstop.js'));
 var timer = { start: 0, end: 0 };
 var routesToTrack = [90, 100, 190, 200, 290];//require(path.join(__dirname, 'config_train_lines'));
 var tripCollection = {};
+var importantStops = {};
 
 //define sources
 var routesSource = fs.createReadStream(path.join(__dirname, '../assets/downloads/gtfs/routes.txt'));
-var stopsSource = fs.createReadStream(path.join(__dirname, '../assets/downloads/gtfs/stops.txt'));
 
 //define target files
 var Red_LineJSON = fs.createWriteStream(path.join(__dirname, '../assets/JSON/90_Red_Line.json'));
@@ -40,7 +40,6 @@ var Orange_LineJSON = fs.createWriteStream(path.join(__dirname, '../assets/JSON/
 
 //define streams
 var rl_routes = readline.createInterface({ input: routesSource });
-var rl_stops = readline.createInterface({ input: stopsSource });
 
 //private functions
 function dateTimeToUnixTime(dateTime) {
@@ -83,7 +82,7 @@ module.exports = {
 		var trip = { old: 0, new: 0, isANewTrip: false, checkNewTrip: function() { if(this.old !== this.new) this.isANewTrip = true; else this.isANewTrip = false; } };
 
 		//define sources
-		var stop_timesSource = fs.createReadStream(path.join(__dirname, '../assets/downloads/gtfs/Shorter_stop_times.txt'));
+		var stop_timesSource = fs.createReadStream(path.join(__dirname, '../assets/downloads/gtfs/stop_times.txt'));
 
 		//define target files
 		var TEMP_stopTimes = fs.createWriteStream(path.join(__dirname, '../assets/tests/stopTimesModel.json'));
@@ -129,8 +128,6 @@ module.exports = {
 										' route_id: ' + aTrip.route_id + 
 										' received_data: ' + aTrip.received_data + 
 										' stops on line: ' + stopsOnLine +
-										//' stop_sequence1: ' + aTrip.stop_sequence['1'].trip_id +
-										//' stop_sequence2: ' + aTrip.stop_sequence['2'].trip_id +
 										'\n');
 
 								//and start building a new trip
@@ -151,7 +148,7 @@ module.exports = {
 
 						//log the results
 						console.log(
-							Math.floor((lineCounter / 451615) * 100) + '%' +	//  1604478 // 169311
+							Math.floor((lineCounter / 1604478) * 100) + '%' +	//   // 169311 //451615
 							' trip: ' + thisTripId +
 							' departure: ' + thisDeparture +
 							' stopID: ' + thisStopID +
@@ -203,13 +200,12 @@ module.exports = {
 	},
 
 	/*	TRIPS Function
-	*	return a JSON object with all the trips information added to the model
+	*	TODO: ADD AN EXPLAINATION HERE
 	*/
 	trips: function() {
 		
 		//declare local variables
 		var lineCounter = 0;
-		var trackThisRoute = false;
 		var aTrip;
 		var errorLog = [];
 		var readLog = {};
@@ -221,14 +217,14 @@ module.exports = {
 		var TEMP_trips = fs.createWriteStream(path.join(__dirname, '../assets/tests/tripsModel.json'));
 		var TEMP_errors = fs.createWriteStream(path.join(__dirname, '../assets/tests/errors.json'));
 		var TEMP_log = fs.createWriteStream(path.join(__dirname, '../assets/tests/tripsLog.json'));
+		var TEMP_importantStops = fs.createWriteStream(path.join(__dirname, '../assets/tests/importantStops.json'));
+		//TEMP_log.write('testing testing\n');
+		//TEMP_log.write(JSON.stringify(tripCollection,'','\t'));
 
 		//define streams
 		var rl_trips = readline.createInterface({ input: tripsSource });
 
 		startTimer();
-
-		//if the trip collection is empty, create a new one
-		//if(typeof tripCollection === 'undefined') tripCollection = {};
 
 		return tripsPromise = new Promise(function(resolve, reject) {
 			
@@ -241,6 +237,7 @@ module.exports = {
 					if(typeof parseInt(output[0][0]) === 'number') {
 
 						//if so, load the variables we want to track
+						var trackThisRoute = false;
 						var thisRouteId = output[0][0];
 						var thisTripId = output[0][2];
 						var thisDirection = output[0][3];
@@ -265,9 +262,8 @@ module.exports = {
 						if(typeof tripCollection[thisTripId] !== 'undefined') {
 
 							//if it is in the model is it one of the trips we want to track?
-							for(var i = 0; i < routesToTrack.length; i++) { 
+							for(var i = 0; i < 5; i++) { 
 								if(thisRouteId == routesToTrack[i]) trackThisRoute = true;
-								else trackThisRoute = false;
 							}
 							
 							//write the results of the search
@@ -284,6 +280,14 @@ module.exports = {
 								//add the values we've found
 								tripCollection[thisTripId].route_id = thisRouteId;
 								tripCollection[thisTripId].direction_id = thisDirection;
+
+								//save the stop id as a hash for later
+								Object.keys(tripCollection[thisTripId].stop_sequence).forEach(function(stop) {
+									//run through all the stops on this route and save them for later
+									var neededStopId = tripCollection[thisTripId].stop_sequence[stop].stop_id;
+									importantStops[neededStopId] = true;
+								});
+								
 
 							} else {
 								
@@ -309,7 +313,9 @@ module.exports = {
 				console.log('Trips took ' + readTimer() + ' seconds ('+ timer.end + ' ' + timer.start + ')');
 
 				//write the model
-				TEMP_trips.write(JSON.stringify(tripCollection,'','\t'));
+				TEMP_log.write(JSON.stringify(tripCollection,'','\t'));
+				TEMP_importantStops.write(JSON.stringify(importantStops,'','\t'));
+				
 				TEMP_log.write(JSON.stringify(readLog,'','\t'));
 
 				//close the stream
@@ -323,6 +329,179 @@ module.exports = {
 			});
 
 		})
+
+	},
+
+	/*	STOPS Function
+	*	TODO: ADD AN EXPLAINATION HERE
+	*/
+	stops: function() {
+
+		//REMOVE THIS LATER
+		var contents = fs.readFileSync(path.join(__dirname, '../assets/tests/tripsLog.json'));
+		tripCollection = JSON.parse(contents);
+		//AND REMOVE THIS
+		var contents2 = fs.readFileSync(path.join(__dirname, '../assets/tests/importantStops.json'));
+		importantStops = JSON.parse(contents2);
+
+		//declare local variables
+		var lineCounter = 0;
+		var ParentStation = require(path.join(__dirname, 'models/aparentStation.js')); 
+		var parentStations = {};
+
+		//define sources
+		var stopsSource = fs.createReadStream(path.join(__dirname, '../assets/downloads/gtfs/stops.txt'));
+
+		//define target files
+		var TEMP_stops = fs.createWriteStream(path.join(__dirname, '../assets/tests/stopsModel.json'));
+		var TEMP_stops_Log = fs.createWriteStream(path.join(__dirname, '../assets/tests/stops_Log.json'));
+		var TEMP_parentStations = fs.createWriteStream(path.join(__dirname, '../assets/tests/parentStations.json'));
+
+		//define streams
+		var rl_stops = readline.createInterface({ input: stopsSource });
+
+		startTimer();
+
+		return tripsPromise = new Promise(function(resolve, reject) {
+			
+			rl_stops.on('line', function(line) {
+
+				//parse through the csv file
+				csv.parse(line, {delimiter: ','}, function(err, output) {
+					
+					//does the line have data?
+					if(typeof parseInt(output[0][0]) === 'number') {
+
+						//test for parent station
+						if(typeof parentStations[output[0][0]] !== 'undefined') isAParentStation = true;
+						else isAParentStation = false;
+
+						//is this a stop we care about?
+						if(importantStops[output[0][0]] || isAParentStation) {
+
+							//if so define the variables we're looking for
+							var thisStopId = output[0][0];			
+							var thisStopName = output[0][2];		//stop_name
+							var thisStopDesc = output[0][3];		//stop_desc
+							var thisLocationType = output[0][8];
+							var thisParentStation = output[0][9];	//parent_station
+							var thisDirection = output[0][10];		//direction
+
+							//log the results 
+							console.log(
+								Math.floor((lineCounter / 6972) * 100) + '%' +
+								' thisStopId: ' + thisStopId +
+								' thisStopName: ' + thisStopName +
+								' thisStopDesc: ' + thisStopDesc +
+								' thisLocationType: ' + thisLocationType +
+								' thisParentStation: ' + thisParentStation +
+								' thisDirection: ' + thisDirection
+							);
+
+							//Save for later analysis
+							TEMP_stops_Log.write(' percentage: ' + Math.floor((lineCounter / 6972) * 100) + 
+										' thisStopId: ' + thisStopId +
+										' thisStopName: ' + thisStopName +
+										' thisStopDesc: ' + thisStopDesc +
+										' thisLocationType: ' + thisLocationType +
+										' thisParentStation: ' + thisParentStation +
+										' thisDirection: ' + thisDirection +
+										'\n');
+							
+							//turn the value into an object
+							importantStops[thisStopId] = {};
+
+							//add the station specific details
+							if(thisLocationType == 0) {			//this is a child station record
+								//if this is a child station...
+								//add the station information to the importantStops model
+								importantStops[thisStopId]['stop_name'] = thisStopName;
+								importantStops[thisStopId]['stop_desc'] = thisStopDesc;
+								importantStops[thisStopId]['direction'] = thisDirection;
+
+								if(thisParentStation !== '') {
+									
+									//check if the parent station has already been created
+									if(typeof importantStops[thisStopId]['parent_station'] == 'undefined') {
+
+										//define a new variable
+										importantStops[thisStopId]['parent_station'] = new ParentStation;
+
+										//add the station name
+										importantStops[thisStopId]['parent_station'].setStopId(thisParentStation);
+
+										//track all parent stations to update later
+										parentStations[thisParentStation] = importantStops[thisStopId]['parent_station'];
+										
+									}
+
+									//add this stop to the list of stations served by this parent
+									importantStops[thisStopId]['parent_station'].addChildStation(thisStopId);
+
+								}
+
+							} else if(thisLocationType == 1) {	//this is a parent station record
+								console.log(thisStopName);
+								//if this is a parent station...
+								parentStations[thisStopId].setStopName(thisStopName);
+							}
+
+						}
+
+					}
+
+					//incriment the counter
+					lineCounter++;
+
+				});
+			
+			});
+
+			rl_stops.on('close', function() {
+				
+				//after all the important stations have been identified...
+				//run through the model and update station information for all records
+				Object.keys(tripCollection).forEach(function(trip) {
+
+					Object.keys(tripCollection[trip].stop_sequence).forEach(function(stop) {
+						//the current stop
+						var stopId = tripCollection[trip].stop_sequence[stop].stop_id;
+
+						tripCollection[trip].stop_sequence[stop].stop_name = importantStops[stopId].stop_name;
+						tripCollection[trip].stop_sequence[stop].stop_desc = importantStops[stopId].stop_desc;
+						tripCollection[trip].stop_sequence[stop].direction = importantStops[stopId].direction;
+						tripCollection[trip].stop_sequence[stop].parent_station = importantStops[stopId].parent_station;
+
+						if(typeof importantStops[stopId].parent_station !=='undefined' && importantStops[stopId].parent_station !== '') {
+							
+							//get the parent station id
+							var parentStationId = importantStops[stopId].parent_station.stop_id;
+							//if it exists add the parent station name
+							if(typeof parentStations[parentStationId] !== 'undefined') {
+								tripCollection[trip].stop_sequence[stop].parent_station.stop_name = parentStations[parentStationId].stop_name;
+							}
+							
+						}
+
+					});
+
+				});
+
+				//stop the timer and read the result
+				stopTimer();
+				console.log('Trips took ' + readTimer() + ' seconds ('+ timer.end + ' ' + timer.start + ')');
+
+				//write the model
+				TEMP_stops.write(JSON.stringify(tripCollection,'','\t'));
+				TEMP_parentStations.write(JSON.stringify(parentStations,'','\t'));
+				//close the stream
+				rl_stops.close();
+
+				//return the results
+				resolve();
+			});
+
+		});
 
 	}
 

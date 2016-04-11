@@ -25,19 +25,27 @@ var parse = require('../lib/parseGTFS');
 
 //PARSE RAW MODELS & BUILD 
 //first build a model from the systems stops file
-parse.stop_times()
-.then(function(returnedCollection) { 
+//parse.stop_times()
+//.then(function(returnedCollection) { 
 	
 	//then go into trips
-	parse.trips()
-	.then(function(returnedCollection) { 
+	//parse.trips()
+	//.then(function(returnedCollection) { 
 		
-		
-	})
-	.catch(function(error) { throw new Error(error); });
+		//then go into stops
+		parse.stops()
+		.then(function(returnedCollection) {
+
+			//into here
+
+		})
+		.catch(function(error) { throw new Error(error); });
+
+	//})
+	//.catch(function(error) { throw new Error(error); });
 	
-})
-.catch(function(error) { throw new Error(error); });
+//})
+//.catch(function(error) { throw new Error(error); });
 
 //BUILD REQUIRED MOEDELS
 
