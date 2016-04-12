@@ -35,9 +35,9 @@ angular
 	    controller: TrainschedulesComponent
 	  });
 
-TrainschedulesComponent.$injector = ['$scope'];
+TrainschedulesComponent.$injector = ['$scope', 'trainsSchedulesService'];
 
-function TrainschedulesComponent($scope) {
+function TrainschedulesComponent($scope, trainsSchedulesService) {
 
 	//local variables
 	
@@ -56,7 +56,13 @@ function TrainschedulesComponent($scope) {
 		$scope.selectedLine = $scope.tempLine;
 	}
 	//actions
+	trainsSchedulesService.getAllTrainSchedules();
 	
+	
+
+	$scope.download = function() {
+		trainsSchedulesService.download();
+	}
 }
 
 /*

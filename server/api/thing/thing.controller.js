@@ -11,6 +11,7 @@
 
 import _ from 'lodash';
 import Thing from './thing.model';
+import fileGrabber from './thing.fileGrabber';
 
 function respondWithResult(res, statusCode) {
   statusCode = statusCode || 200;
@@ -57,6 +58,23 @@ function handleError(res, statusCode) {
   return function(err) {
     res.status(statusCode).send(err);
   };
+}
+
+//THIS IS MY CUSTOM FUNCTION TO DOWNLOAD THE JSON FILES
+export function returnTrains(req, res) {
+  //declare local variables
+  
+  fileGrabber.alertMe();
+  var allTrainLines = fileGrabber.getAllTrainlines();
+
+  console.log('got to return trains')
+  return new Promise(function(resolve, reject) { 
+    
+
+    resolve(allTrainLines); 
+  })
+  .then(respondWithResult(res))
+  .catch(handleError(res));
 }
 
 // Gets a list of Things
