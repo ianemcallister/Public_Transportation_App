@@ -1,4 +1,14 @@
-# Public Transportation App
+# Project 2: Public Transportation App
+
+This is the second project as part of the Senior Web Developer Nano Degree through Udacity.
+
+It is a transporation app for the Portland Oregon MAX train system.  Users can view train timetables and search routes by entering a starting station and ending station.
+
+*Offline Capable:* This project uses service workers to provide offline functionality to users.  They are able to pull up timetables for each of the lines as long as the timetable has been cached for later use.
+
+## Features
+
+TODO: add this later
 
 ## Instructions
 1. **Clone the repository**
