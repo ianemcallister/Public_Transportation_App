@@ -554,8 +554,7 @@ module.exports = {
 		Object.keys(trainlines).forEach(function(line) {
 
 			trainlines[line].buildTimeTables(tripCollection);
-			console.log(trainlines[line].service[0].stopSequence);
-			console.log(trainlines[line].service[0].timeTable);
+			
 		});
 			
 
@@ -612,7 +611,7 @@ module.exports = {
 								' thisStationName: ' + thisStation.name +
 								' thisStationDesc: ' + thisStation.desc
 							);
-
+				
 				//output for later evaluation
 				TEMP_line_Log.write(' thisLine: ' + thisLine +
 									' serviceDirection: ' + serviceDirection +

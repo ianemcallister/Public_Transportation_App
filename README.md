@@ -15,11 +15,11 @@ TODO: add this later
 
 	`git clone <git@github.com:ianemcallister/Public_Transportation_App.git>
 
-2. **Install the dependencies**
+2. ** Install the dependencies**
 	
 	To install the required dependencies call `npm install` from the root directory.
 
-3. **Load Serverside Resources
+3. ** Load Serverside Resources
 
 	This project utilizies a serverside component to download the GTFS.zip file from [Trimet.org](https://developer.trimet.org/GTFS.shtml), parse the csv files, then save JSON files to be used by the application.
 

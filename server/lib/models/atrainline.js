@@ -62,7 +62,7 @@ TrainLine.prototype.addSequenceStop = function(direction, station) {
 	};
 
 	this.service[direction].stopSequence.push(stopObject);
-	this.service[direction].timeTable.push('-');
+
 };
 
 TrainLine.prototype.checkForLongestTrip = function(aNewTrip) {
@@ -80,7 +80,7 @@ TrainLine.prototype.buildStationSequence = function(lngstTrips) {
 			
 			//something
 			if(typeof station !== 'undefined') {
-				//console.log(this);
+				
 				local.addSequenceStop(direction, lngstTrips[direction][station]);
 			}
 			
@@ -98,15 +98,87 @@ TrainLine.prototype.buildStationSequence = function(lngstTrips) {
 TrainLine.prototype.buildTimeTables = function(allTrips) {
 	//define local
 	var local = this;
+	
 	//build in both directions
 	Object.keys(this.service).forEach(function(direction) {
+
+		//declare local variables
+		var tripsOnThisLine = 0;
 
 		//loop through all trips
 		Object.keys(allTrips).forEach(function(trip) {
 
+			console.log('Adding trip ' + trip);
+
 			//only work with the current route
 			if(allTrips[trip].route_id == local.route_id) {
 
+				//if the trip is in the same direction as the current direction, explore further
+				if(allTrips[trip].direction_id == direction) {
+
+					//decalare local variables
+					var firstStationFound = false;
+					var currentLocalstopSequencePosition = 0;
+
+					//looking at the stop squence what is the station_id?
+					Object.keys(allTrips[trip].stop_sequence).forEach(function(stop) {
+
+						//declare local variables
+						var allTripsStopId;
+						
+						//define the allTripsStopId base on parent or child
+						if(typeof allTrips[trip].stop_sequence[stop].parent_station !== 'undefined') {
+							allTripsStopId = allTrips[trip].stop_sequence[stop].parent_station.stop_id;
+						} else {
+							allTripsStopId = allTrips[trip].stop_sequence[stop].stop_id;
+						}
+
+						//loop through local stop sequence array until the matching station id is found or the whole array is checked
+						while(!firstStationFound && currentLocalstopSequencePosition < local.service[direction].stopSequence.length) {
+
+							if(allTripsStopId == local.service[direction].stopSequence[currentLocalstopSequencePosition].id) {
+
+								console.log('found the first station');
+								//throw the flag
+								firstStationFound = true;
+								
+								//add a new trip array to the timeTable
+								local.service[direction].timeTable.push([]);
+
+								//best time to incriment, but count backwards
+								tripsOnThisLine++;
+
+							} else {
+
+								//incriment the counter
+								currentLocalstopSequencePosition++;
+
+							}
+
+						}
+
+						//if a match was found add the departure times
+						if(firstStationFound) {
+
+							console.log('Adding stop: ' + stop + ' with ' + allTrips[trip].stop_sequence[stop].departure_time + ' to ' + (tripsOnThisLine - 1) + ' ' + currentLocalstopSequencePosition);
+							//add to the model
+							local.service[direction].timeTable[tripsOnThisLine - 1][currentLocalstopSequencePosition] = allTrips[trip].stop_sequence[stop].departure_time;
+
+							//log the success
+
+						} else {
+
+							//otherwise throw an error
+							console.log('an error occured with the timetable');
+						}
+
+						//incriment the counter
+						currentLocalstopSequencePosition++;
+
+					});
+
+
+				}
 
 			}
 
