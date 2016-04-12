@@ -556,87 +556,13 @@ module.exports = {
 			trainlines[line].buildTimeTables(tripCollection);
 			
 		});
-			
-
-			//loop through the stops on this trip
-			/*Object.keys(tripCollection[trip].stop_sequence).forEach(function(stop) {
-
-				//pull out the important variables
-				var thisStopId = tripCollection[trip].stop_sequence[stop].stop_id;
-				var thisDirection = tripCollection[trip].stop_sequence[stop].direction;
-				var thisHeadsign = tripCollection[trip].stop_sequence[stop].stop_headsign;
-				var thisTrainTime = tripCollection[trip].stop_sequence[stop].departure_time;
-
-				//and build the station object
-				var thisStation = { id: null, name: '', desc: '', seqId: stop };
-
-				
-				//if the station has a parent use the parent station info
-				if(typeof tripCollection[trip].stop_sequence[stop].parent_station !== 'undefined') {
-
-					thisStation.id = tripCollection[trip].stop_sequence[stop].parent_station.stop_id;
-					thisStation.name = tripCollection[trip].stop_sequence[stop].parent_station.stop_name;
-
-				} else {	//if there is no parent station use the station info itself
-
-					thisStation.id = tripCollection[trip].stop_sequence[stop].stop_id;
-					thisStation.name = tripCollection[trip].stop_sequence[stop].stop_name;
-				}
-				
-				thisStation.desc = tripCollection[trip].stop_sequence[stop].stop_desc;
-
-
-				//add the the values to the model
-				if(trainlines[thisLine].service[serviceDirection].headsign == '') {
-					trainlines[thisLine].service[serviceDirection].headsign = thisHeadsign;
-				}
-				
-				if(trainlines[thisLine].service[serviceDirection].direction == '') {
-					trainlines[thisLine].service[serviceDirection].direction = thisDirection;
-				}
-				
-				trainlines[thisLine].addAStation(serviceDirection, thisStation);
-				trainlines[thisLine].addADepartureTime(serviceDirection, thisTripId, thisStopId, thisTrainTime);
-
-				//monitor the findings
-				console.log(
-								' thisLine: ' + thisLine +
-								' serviceDirection: ' + serviceDirection +
-								' thisTripId: ' + thisTripId +
-								' thisStopId: ' + thisStopId +
-								' thisDirection: ' + thisDirection +
-								' thisHeadsign: ' + thisHeadsign +
-								' thisTrainTime: ' + thisTrainTime +
-								' thisStationId: ' + thisStation.id +
-								' thisStationName: ' + thisStation.name +
-								' thisStationDesc: ' + thisStation.desc
-							);
-				
-				//output for later evaluation
-				TEMP_line_Log.write(' thisLine: ' + thisLine +
-									' serviceDirection: ' + serviceDirection +
-									' thisTripId: ' + thisTripId +
-									' thisStopId: ' + thisStopId +
-									' thisDirection: ' + thisDirection +
-									' thisHeadsign: ' + thisHeadsign +
-									' thisTrainTime: ' + thisTrainTime +
-									' thisStationId: ' + thisStation.id +
-									' thisStationName: ' + thisStation.name +
-									' thisStationDesc: ' + thisStation.desc +
-									'\n');
-
-			});
-
-		});*/
-
-
 
 		//write out the files
-		Red_LineJSON.write(JSON.stringify(trainlines[90],'','\t'));
-		Blue_LineJSON.write(JSON.stringify(trainlines[100],'','\t'));
-		Yellow_LineJSON.write(JSON.stringify(trainlines[190],'','\t'));
-		Green_LineJSON.write(JSON.stringify(trainlines[200],'','\t'));
-		Orange_LineJSON.write(JSON.stringify(trainlines[290],'','\t'));
+		Red_LineJSON.write(JSON.stringify(trainlines[90]));
+		Blue_LineJSON.write(JSON.stringify(trainlines[100]));
+		Yellow_LineJSON.write(JSON.stringify(trainlines[190]));
+		Green_LineJSON.write(JSON.stringify(trainlines[200]));
+		Orange_LineJSON.write(JSON.stringify(trainlines[290]));
 
 		//finish the timer
 		stopTimer();

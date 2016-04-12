@@ -1,3 +1,7 @@
+//required files
+var fs = require('fs');
+var path = require('path');
+
 //used to build trainline JSON file
 var TrainLine = function() {
 	//this.route_long_name = '';		//from routes.txt
@@ -98,7 +102,15 @@ TrainLine.prototype.buildStationSequence = function(lngstTrips) {
 TrainLine.prototype.buildTimeTables = function(allTrips) {
 	//define local
 	var local = this;
+	var filePath = path.join(__dirname, '../../assets/tests/write_time_table' + local.route_id + '.json');
+	var TEMP_timetable_log = fs.createWriteStream(filePath);
 	
+	//check for errors
+	TEMP_timetable_log.on('error', function(err) {
+	  console.log("ERROR:" + err);
+	  //file.read();
+	});
+
 	//build in both directions
 	Object.keys(this.service).forEach(function(direction) {
 
@@ -107,8 +119,6 @@ TrainLine.prototype.buildTimeTables = function(allTrips) {
 
 		//loop through all trips
 		Object.keys(allTrips).forEach(function(trip) {
-
-			console.log('Adding trip ' + trip);
 
 			//only work with the current route
 			if(allTrips[trip].route_id == local.route_id) {
@@ -134,11 +144,11 @@ TrainLine.prototype.buildTimeTables = function(allTrips) {
 						}
 
 						//loop through local stop sequence array until the matching station id is found or the whole array is checked
-						while(!firstStationFound && currentLocalstopSequencePosition < local.service[direction].stopSequence.length) {
+						var bailOut = false;
+						while(!firstStationFound && !bailOut) {
 
 							if(allTripsStopId == local.service[direction].stopSequence[currentLocalstopSequencePosition].id) {
 
-								console.log('found the first station');
 								//throw the flag
 								firstStationFound = true;
 								
@@ -155,12 +165,16 @@ TrainLine.prototype.buildTimeTables = function(allTrips) {
 
 							}
 
+							if(currentLocalstopSequencePosition >= local.service[direction].stopSequence.length) {
+								bailOut = true;
+								currentLocalstopSequencePosition = 0;
+							}
 						}
 
 						//if a match was found add the departure times
 						if(firstStationFound) {
 
-							console.log('Adding stop: ' + stop + ' with ' + allTrips[trip].stop_sequence[stop].departure_time + ' to ' + (tripsOnThisLine - 1) + ' ' + currentLocalstopSequencePosition);
+							console.log('Adding stop: ' + stop + ' with ' + allTrips[trip].stop_sequence[stop].departure_time + ' to ' + (tripsOnThisLine - 1) + ' ' + currentLocalstopSequencePosition + ' from trip ' + trip + ' and direction ' + direction + ' first station found?: ' + firstStationFound + ' routeid: ' + allTrips[trip].route_id );
 							//add to the model
 							local.service[direction].timeTable[tripsOnThisLine - 1][currentLocalstopSequencePosition] = allTrips[trip].stop_sequence[stop].departure_time;
 
@@ -170,7 +184,18 @@ TrainLine.prototype.buildTimeTables = function(allTrips) {
 
 							//otherwise throw an error
 							console.log('an error occured with the timetable');
+							console.log('Adding stop: ' + stop + ' with ' + allTrips[trip].stop_sequence[stop].departure_time + ' to ' + (tripsOnThisLine - 1) + ' ' + currentLocalstopSequencePosition + ' from trip ' + trip + ' and direction ' + direction + ' first station found?: ' + firstStationFound + ' routeid: ' + allTrips[trip].route_id );
+
 						}
+
+						//log the progress for further evaluation
+						TEMP_timetable_log.write(
+										' direction: ' + direction +
+										' trip: ' + trip +
+										' departureTime: ' + allTrips[trip].stop_sequence[stop].departure_time +
+										' trip#: ' + (tripsOnThisLine - 1) +
+										' Position: ' + currentLocalstopSequencePosition +
+										'\n');
 
 						//incriment the counter
 						currentLocalstopSequencePosition++;
