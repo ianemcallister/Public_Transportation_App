@@ -513,13 +513,12 @@ module.exports = {
 		var TrainLine = require(path.join(__dirname, 'models/atrainline.js'));
 
 		//define target files
-		var Red_LineJSON = fs.createWriteStream(path.join(__dirname, '../assets/JSON/90_Red_Line.json'));
-		var Blue_LineJSON = fs.createWriteStream(path.join(__dirname, '../assets/JSON/100_Blue_Line.json'));
-		var Yellow_LineJSON = fs.createWriteStream(path.join(__dirname, '../assets/JSON/190_Yellow_Line.json'));
-		var Green_LineJSON = fs.createWriteStream(path.join(__dirname, '../assets/JSON/200_Green_Line.json'));
-		var Orange_LineJSON = fs.createWriteStream(path.join(__dirname, '../assets/JSON/290_Orange_Line.json'));
-		var TEMP_line_Log = fs.createWriteStream(path.join(__dirname, '../assets/tests/line_log.json'));
-
+		var Red_LineJSON = fs.createWriteStream(path.join(__dirname, '../../client/assets/JSON/90_Red_Line.json'));
+		var Blue_LineJSON = fs.createWriteStream(path.join(__dirname, '../../client/assets/JSON/100_Blue_Line.json'));
+		var Yellow_LineJSON = fs.createWriteStream(path.join(__dirname, '../../client/assets/JSON/190_Yellow_Line.json'));
+		var Green_LineJSON = fs.createWriteStream(path.join(__dirname, '../../client/assets/JSON/200_Green_Line.json'));
+		var Orange_LineJSON = fs.createWriteStream(path.join(__dirname, '../../client/assets/JSON/290_Orange_Line.json'));
+		
 		//start the timer
 		startTimer();
 

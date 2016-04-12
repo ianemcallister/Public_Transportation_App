@@ -14,7 +14,7 @@ function trainsSchedulesService($http) {
 		_getATrainSchedule:_getATrainSchedule,
 
 		getAllTrainSchedules: getAllTrainSchedules,		//getters
-
+		getTrainLineNames: getTrainLineNames,
 														//setters
 
 		alertMe: alertMe,								//random
@@ -24,6 +24,7 @@ function trainsSchedulesService($http) {
 	};
 
 	function _get(url) {
+    	console.log(url);
     	return fetch(url);
   	}
 
@@ -38,14 +39,6 @@ function trainsSchedulesService($http) {
 		_getJSON(url)
 	    .then(function(response) {
 	      console.log(response);
-	      //return Promise.all(response.results.map(getJSON));
-	    })
-	    .then(function(arrayOfPlanetData) {
-	      //console.log(arrayOfPlanetData);
-	      /*arrayOfPlanetData.forEach(function(planet) {
-	        //console.log(planet);
-	        createPlanetThumb(planet);
-	      });*/
 	    })
 	    .catch(function(error) {
 	      console.log(error);
@@ -57,20 +50,39 @@ function trainsSchedulesService($http) {
 		alert('testing');
 	}
 
+	function getTrainLineNames() {
+		//declare local variables
+		var path = '../../assets/JSON/';
+		var file = 'train_lines.JSON';
+
+		return _getJSON(path + file)
+		.then(function(response) {
+			//return response;
+			return response;
+		})
+		.catch(function(error) {
+			console.log('Error: ' + error);
+		});
+	}
+
 	function getAllTrainSchedules() {
 		
-		var path = '../../assets/JSON/';
-		var allFiles = [
-			'90_Red_Line.JSON',
-			'100_Blue_Line.JSON',
-			'190_Yellow_Line.JSON',
-			'200_Green_Line.JSON',
-			'290_Orange_Line.JSON'	
-		];
+		_getJSON('../../assets/JSON/max-train-lines.json')
+		.then(function(response) {
+			console.log(response.results);
+			return Promise.all(response.results);//.map(_getJSON));
+		})
+		.then(function(arrayOfTrainLines) {
 
-		allFiles.forEach(function(file) {
-			_getATrainSchedule(path + file);
-		});
+			arrayOfTrainLines.forEach(function(line) {
+				console.log(line);
+			});
+
+		})
+		.catch(function(error) {
+			console.log('Error: ' + error);
+		})
+		
 	}
 
 	function download() {

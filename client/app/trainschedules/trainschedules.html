@@ -11,7 +11,7 @@
               ng-model='tempLine'
               ng-blur='validLineSelected()'>
       <datalist id='linePicker'>
-        <option ng-repeat='line in trainLines' value='{{ line }}'>{{ line }}</option>
+        <option ng-repeat='line in trainLineNames track by $index' value='{{ line }}'>{{ line }}</option>
       </datalist>
     </label>
   </div>
@@ -21,4 +21,4 @@
   <select-train-schedule selected-line='selectedLine'></select-train-schedule>
 </div>
 
-<div ng-click='download()' class='btn btn-success'>Click Me To Download</div>
+<!--<div ng-click='download()' class='btn btn-success'>Click Me To Download</div>-->

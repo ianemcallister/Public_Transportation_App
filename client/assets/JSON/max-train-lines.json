@@ -1,0 +1,10 @@
+{
+	"query": "Max-train-line",
+	"results": [
+		"90_Red_Line.JSON",
+		"100_Blue_Line.JSON",
+		"190_Yellow_Line.JSON",
+		"200_Green_Line.JSON",
+		"290_Orange_Line.JSON"
+	]
+}

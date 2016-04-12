@@ -1,33 +1,5 @@
 'use strict';
 
-/*(function(){
-
-class TrainschedulesComponent {
-  //private fields
-
-  //public properties
-
-  //ctor*/
-  /*@ngInject*/
-  /*constructor() {
-    this.message = 'Hello';
-  }
-
-  //public functions
-  trainList() {
-  	this.red = true;
-  	this.blue = true;
-  	this.yellow = true;
-  	this.green = true;
-  	this.orange = true;
-  }
-
-  //private functions
-
-}*/
-
-
-
 angular
 	.module('transitApp')
   	.component('trainschedules', {
@@ -39,31 +11,31 @@ TrainschedulesComponent.$injector = ['$scope', 'trainsSchedulesService'];
 
 function TrainschedulesComponent($scope, trainsSchedulesService) {
 
-	//local variables
-	
+	//declare local variables
+	$scope.trainLineNames;
+	$scope.selectedLine;
+	$scope.activeTrainSchedule;
+
 	//view model variables
-	//TODO: update this via a service instead
-	$scope.trainLines = [
-		'MAX Red Line',
-		'MAX Blue Line',
-		'MAX Yellow Line',
-		'MAX Green Line',
-		'MAX Orange Line',
-	];
+	trainsSchedulesService.getTrainLineNames()
+	.then(function(response) {
+		$scope.trainLineNames = response;
+		$scope.$apply();
+	})
+	.catch(function(error) {
+		console.log(error);
+	});
+
 	//local methods
 	//view model methods
 	$scope.validLineSelected = function() {
 		$scope.selectedLine = $scope.tempLine;
+		getTrainSchedule();
 	}
-	//actions
+	
+	//ACTIONS
+	//When the page loads, download all the train schedules
 	trainsSchedulesService.getAllTrainSchedules();
-	
-	
 
-	$scope.download = function() {
-		trainsSchedulesService.download();
-	}
 }
 
-/*
-})();*/

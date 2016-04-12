@@ -64,13 +64,12 @@ function handleError(res, statusCode) {
 export function returnTrains(req, res) {
   //declare local variables
   
-  fileGrabber.alertMe();
   var allTrainLines = fileGrabber.getAllTrainlines();
 
-  console.log('got to return trains')
+  //build the promise to return
   return new Promise(function(resolve, reject) { 
     
-
+    //return the train schedules that were aquired
     resolve(allTrainLines); 
   })
   .then(respondWithResult(res))
