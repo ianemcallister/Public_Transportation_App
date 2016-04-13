@@ -12,7 +12,7 @@ angular.module('transitApp')
         scope.$watch('vm.selectedLine', function(newVal, oldVal) {
           if(newVal) {
             console.log('line selected');
-            onLineSelction(vm.selectedLine);
+            //onLineSelction(vm.selectedLine);
           }
         }, true);
       },

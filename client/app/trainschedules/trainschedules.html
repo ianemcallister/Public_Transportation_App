@@ -9,9 +9,9 @@
               name='lineSelector'
               class='col-xs-12 col-sm-12 col-md-12 col-lg-12'
               ng-model='tempLine'
-              ng-blur='validLineSelected()'>
+              ng-change='selectingATrainLine()'>
       <datalist id='linePicker'>
-        <option ng-repeat='line in trainLineNames track by $index' value='{{ line }}'>{{ line }}</option>
+        <option ng-repeat='line in trainLineNames' value='{{ line.long_name }}'>{{ line.short_name }}</option>
       </datalist>
     </label>
   </div>

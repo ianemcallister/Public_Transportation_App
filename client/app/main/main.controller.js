@@ -4,7 +4,7 @@
 
 class MainController {
 
-  constructor($http, $scope, socket) {
+  constructor($http, $scope, socket/*, swController*/) {
     this.$http = $http;
     this.socket = socket;
     this.awesomeThings = [];
@@ -32,6 +32,35 @@ class MainController {
     this.$http.delete('/api/things/' + thing._id);
   }
 }
+
+if ('serviceWorker' in navigator) {
+  console.log('good for service workers');
+} else {
+  console.log("this browser does NOT support service worker");
+}
+
+/*navigator.serviceWorker.register('/sw.js')
+.then(function(reg) {
+  var serviceWorker;
+
+  if (!navigator.serviceWorker.controller) {
+    return;
+  }
+
+  if (reg.waiting) {
+    indexController._updateReady(reg.waiting);
+    return;
+  }
+
+  if (reg.installing) {
+    indexController._trackInstalling(reg.installing);
+    return;
+  }
+
+})
+.catch(function(error) {
+  console.log('ServiceWorker registration failed: ', error);
+});*/
 
 angular.module('transitApp')
   .component('main', {

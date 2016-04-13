@@ -17,10 +17,8 @@ function trainsSchedulesService($http) {
 		getTrainLineNames: getTrainLineNames,
 														//setters
 
-		alertMe: alertMe,								//random
-
 		download: download,								//external
-		downloadJSON: downloadJSON
+		//downloadJSON: downloadJSON
 	};
 
 	function _get(url) {
@@ -46,10 +44,6 @@ function trainsSchedulesService($http) {
 
 	}
 
-	function alertMe() {
-		alert('testing');
-	}
-
 	function getTrainLineNames() {
 		//declare local variables
 		var path = '../../assets/JSON/';
@@ -66,23 +60,35 @@ function trainsSchedulesService($http) {
 	}
 
 	function getAllTrainSchedules() {
-		
-		_getJSON('../../assets/JSON/max-train-lines.json')
-		.then(function(response) {
-			console.log(response.results);
-			return Promise.all(response.results);//.map(_getJSON));
-		})
-		.then(function(arrayOfTrainLines) {
+		//declare local variable
+		var listofTrains = {};
 
-			arrayOfTrainLines.forEach(function(line) {
-				console.log(line);
-			});
+		//wrap all trains in a promise
+		var schedulePromise = new Promise(function(resolve, reject) {
+			
+			_getJSON('../../assets/JSON/max-train-lines.json')
+			.then(function(response) {
+				//fetch all the train lines in parallel
+				return Promise.all(response.results.map(_getJSON));
+			})
+			.then(function(arrayOfTrainLines) {
 
-		})
-		.catch(function(error) {
-			console.log('Error: ' + error);
-		})
+				arrayOfTrainLines.forEach(function(trainLine) {
+					
+					var lineShortName = trainLine.route_id;
+					listofTrains[lineShortName] = trainLine;
+				});
+
+				resolve(listofTrains);
+
+			})
+			.catch(function(error) {
+				console.log('Error: ' + error);
+			})
+
+		});
 		
+		return schedulePromise;
 	}
 
 	function download() {
@@ -98,10 +104,6 @@ function trainsSchedulesService($http) {
 			console.log(error);
 		})
 
-	}
-
-	function downloadJSON() {
-		return 
 	}
 
 	return allTrainScheduleServices;
