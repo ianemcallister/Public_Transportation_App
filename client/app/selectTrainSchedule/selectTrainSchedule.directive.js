@@ -30,6 +30,7 @@ angular.module('transitApp')
       vm.lineWasSelected = false;
       vm.stationsOnLine;
       vm.tripTimes;
+      vm.firstDepartureTimes = [];
       vm.directionButtons = { 
         1: new DynamicElement(['col-xs-5', 'col-sm-5', 'btn', {'btn-success': false}, {'btn-default': true}, {'disabled': true}, 'btn-block' ]), 
         2: new DynamicElement(['col-xs-5', 'col-sm-5', 'btn', {'btn-success': true}, {'btn-default': false}, {'disabled': false}, 'btn-block']) 
@@ -43,6 +44,16 @@ angular.module('transitApp')
 
       function unixTimeToDateTime(unixTime) {
         return new Date(parseInt(unixTime)); 
+      }
+
+      function dateTimeToMomentTime(dateTime) {
+        var a = moment(dateTime);
+
+      }
+
+      function unixTimeToMomentTime(unixTime) {
+        var time = moment(unixTime);
+        return time.format('LT');
       }
 
       function findClosestDepartureTime(currentTime) {
@@ -129,6 +140,22 @@ angular.module('transitApp')
         });
       }
 
+      function getFirstDepartureTimes() {
+        var noOfTrips = vm.timeTable.service[travelDirection].timeTable.length;
+      
+        for(var i = 0; i < noOfTrips; i++) {
+          
+          if(typeof vm.timeTable.service[travelDirection].timeTable[i][0] === 'number') {
+
+            vm.firstDepartureTimes.push(unixTimeToMomentTime(vm.timeTable.service[travelDirection].timeTable[i][0]));
+          }
+          
+        }
+
+        return vm.firstDepartureTimes[0];
+
+      }
+
       function onLineSelection(line) {
         //declare local variables
         var currentTime = new Date();
@@ -145,7 +172,6 @@ angular.module('transitApp')
         //TODO: make this 12hour clock
 
         //when the user selects a line, build the time table
-        console.log('You selected: ' + line + ' time: ' + vm.selectedTime);
         
         //lets see what the info looks like
         console.log(vm.timeTable);
@@ -156,8 +182,13 @@ angular.module('transitApp')
         //set the headsign
         vm.directionHeadsign = getHeadsigns(travelDirection);
 
-        //set the times
+        //set trip departuer times
         getLineTimes();
+
+        //get each trip's first departure time
+        vm.selectedTime = getFirstDepartureTimes();
+
+        console.log('You selected: ' + line + ' time: ' + vm.selectedTime);
 
         //vm.stationsOnLine['times'] = vm.timeTable.service[travelDirection].timeTable[10];
         //vm.tripTimes = vm.timeTable.service[travelDirection].timeTable[10];

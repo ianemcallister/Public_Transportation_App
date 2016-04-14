@@ -23,6 +23,7 @@
 		</div>
 		
 		<!--Select a departure time-->
+		<!--
 		<div class='row' id="lineDirection">
 			<label for="departureTime">Leaves at:
 		      <input  type='datatime-local'
@@ -36,13 +37,28 @@
 		        <option ng-repeat='time in vm.times' value='{{ time }}'>{{ time }}</option>
 		      </datalist>
 		    </label>
-		</div>
+		</div>-->
 	    <!--The Table-->
 		<div class="row">
 			<table class="table table-striped">
 				<tr>
-					<th>STATION</th>
-					<th>DEPARTURE</th>
+					<th id='stationHeader'>STATION</th>
+					<th id='departureHeader'>
+						<label for="departureTime">
+					      <input  type='datatime-local'
+					      		  step='60'
+					      		  id='departTimeInput'
+					      		  list='selectTimes'
+					              name='departureTime'
+					              ng-model='vm.selectedTime'
+					              class='col-xs-12 col-sm-12 col-md-12 col-lg-12'
+					              placeholder="Departs At:" 
+					              >
+					      <datalist id='selectTimes'>
+					        <option ng-repeat='time in vm.firstDepartureTimes track by $index' value='{{ time }}'>{{ time }}</option>
+					      </datalist>
+					    </label>
+					</th>
 				</tr>
 				<tr ng-repeat='station in vm.stationsOnLine'>
 					<td>
