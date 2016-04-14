@@ -22,7 +22,6 @@ function trainsSchedulesService($http) {
 	};
 
 	function _get(url) {
-    	console.log(url);
     	return fetch(url);
   	}
 
@@ -36,7 +35,7 @@ function trainsSchedulesService($http) {
 
 		_getJSON(url)
 	    .then(function(response) {
-	      console.log(response);
+	      
 	    })
 	    .catch(function(error) {
 	      console.log(error);

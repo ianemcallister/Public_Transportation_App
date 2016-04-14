@@ -6,110 +6,127 @@ angular.module('transitApp')
       templateUrl: 'app/selectTrainSchedule/selectTrainSchedule.html',
       restrict: 'EA',
       scope: {
-        selectedLine: '='
+        selectedLine: '=',
+        timeTable: '='
       },
-      link: function (scope, element, attrs) {
-        scope.$watch('vm.selectedLine', function(newVal, oldVal) {
-          if(newVal) {
-            console.log('line selected');
-            //onLineSelction(vm.selectedLine);
-          }
-        }, true);
-      },
+      link: function (scope, element, attrs) {},
       controller: selectTrainScheduleController,
  	  controllerAs: 'vm',
 	  bindToController: true
     };
 
-    selectTrainScheduleController.$injector = ['$scope', '$window', '$document'];
+    selectTrainScheduleController.$injector = ['$scope', '$window', '$document', '$moment'];
 
-    function selectTrainScheduleController($scope, $window, $document) {
+    function selectTrainScheduleController($scope, $window, $document, $moment) {
     	var vm = this;
 
       //local variables
-      var allTrainSchedules;
       var currentLine;
+      var travelDirection = 0;  //default to 0
 
       //view model variables
-      vm.lineSchedule = {
-        stations: [
-        'Cleveland Ave MAX Station',
-        'Ruby Junction/E 197th Ave MAX Station',
-        'E 122nd Ave MAX Station'/*,
-        'Gateway/NE 99th Ave Transit Center',
-        'Hollywood/NE 42nd Ave Transit Center',
-        'Rose Quarter Transit Center',
-        'Pioneer Square North MAX Station',
-        'Providence Park MAX Station',
-        'Washington Park MAX Station'*/
-        ],
-        stop1: [
-        '4:01am',
-        '4:08am',
-        '4:20am'/*,
-        '4:26am',
-        '4:33am',
-        '4:41am',
-        '4:51am',
-        '4:55am',
-        '5:02am'*/
-        ]
-      };
-      vm.times = [
-        '4:01am',
-        '4:08am',
-        '4:20am',
-        '4:26am',
-        '4:33am',
-        '4:41am',
-        '4:51am',
-        '4:55am',
-        '5:02am'
-      ];
-      vm.stationsOnLine = [
-        { heading: 'Cleveland Ave MAX Station', time: '4:01am' },
-        { heading: 'Ruby Junction/E 197th Ave MAX Station', time: '4:08am' },
-        { heading: 'E 122nd Ave MAX Station', time: '4:20am' },
-        { heading: 'Gateway/NE 99th Ave Transit Center', time: '4:26am' }
-      ]
-      vm.horizontalView = true;
       vm.selectedTime;
-      vm.travelDirection = 'eastbound';
+      vm.horizontalView = false;
+      vm.stationsOnLine;
+      vm.tripTimes;
 
       //local function
+      function dateTimeToUnixTime(dateTime) {
+        return Date.parse(dateTime);
+      }
+
+      function unixTimeToDateTime(unixTime) {
+        return new Date(parseInt(unixTime)); 
+      }
+
+      function findClosestDepartureTime(currentTime) {
+        //declare local variables
+        /*
+        var trip = 0;
+        var ttTime;
+        var foundDeparture = false;
+
+        while (!foundDeparture) {
+
+          //if initial departure on the trip is undefined or null, move to the next trip
+          if( typeof vm.timeTable.service[travelDirection].timeTable[trip][0] !== 'undefined' &&
+              typeof vm.timeTable.service[travelDirection].timeTable[trip][0] === 'number') {
+              
+                //with a valid trip set the first trip time
+                ttTime = vm.timeTable.service[travelDirection].timeTable[trip][0];
+
+                //log where we're at
+                console.log('current: ' + currentTime + ' ttTime: ' + ttTime);
+
+                //then check the current time against the inital trip time
+                if(currentTime < ttTime) {
+
+                  //if the current time is before the timetable time check the next trip
+                  trip++;
+
+                } else {
+                  
+                  //if it's not then return the departure time
+                  var dateTime = unixTimeToDateTime(ttTime);
+                  var departMoment = $moment(dateTime);
+
+                  departMoment.format('h:mm a');
+                  console.log('the depart moment is: ' + departMoment);
+                  console.log(departMoment);
+                  return dateTime.toTimeString();
+                }
+
+          } else {
+            
+            trip++;
+          }
+
+        }*/
+        
+        //currentTime = currentTime.toTimeString();
+      }
+
       function onResize(width) {
         //show view based on size
-        if(width <= 845) vm.horizontalView = true;
-        if(width > 845) vm.horizontalView = false;
+        //if(width <= 845) vm.horizontalView = true;
+        //if(width > 845) vm.horizontalView = false;
       }
 
-      function loadScheduleModel() {
-        //load the JSON from the service
-        allTrainSchedules = {
-          'MAX Red Line': {
-            'eastbound': {
-                'stopHeadings': [],
-              trips: [
-                [,,,,,,,,,,,'3:35am','3:38am','3:50am','4:00am'],
-                [,,,,,,,,,,,'4:10am','4:12am','4:21am','4:30am']
-              ]
-            },
-            'westbound': {}
-          },
-          'MAX Blue Line': {},
-          'MAX Yellow Line': {},
-          'MAX Green Line': {},
-          'MAX Orange Line': {}
-        };
+      function onSelection(line) {
+        //declare local variables
+        var currentTime = new Date();
+        var departureTimeFound = false;
+        var i = 0;
+        
+        //get the current time
+        currentTime.getTime();
+        
+        //which initial departure time is the current time closest to?
+        //convert the current time to unix time for comparison
+        //vm.selectedTime = findClosestDepartureTime(dateTimeToUnixTime(currentTime));
 
-      }
+        //TODO: make this 12hour clock
 
-      function onLineSelction(selectedLine) {
-        console.log('chose a line');
-        //build an array from the selected line selected
-        currentLine = allTrainSchedules[selectedLine].headings;
-        //default to the earliest time
-        currentTrip = allTrainSchedules[selectedLine].trips[0];
+        //when the user selects a line, build the time table
+        console.log('You selected: ' + line + ' time: ' + vm.selectedTime);
+        
+        //lets see what the info looks like
+        console.log(vm.timeTable);
+
+        //set stations
+        vm.stationsOnLine = vm.timeTable.service[travelDirection].stopSequence;
+
+        //set the times
+        var i = 0;
+        vm.stationsOnLine.forEach(function(station) {
+          //add times
+          station['time'] = unixTimeToDateTime(vm.timeTable.service[travelDirection].timeTable[10][i]);
+          i++;
+        });
+
+        //vm.stationsOnLine['times'] = vm.timeTable.service[travelDirection].timeTable[10];
+        //vm.tripTimes = vm.timeTable.service[travelDirection].timeTable[10];
+        
       }
 
       //view model functions
@@ -128,9 +145,16 @@ angular.module('transitApp')
         //set the table based on the screen size
         onResize($window.innerWidth);
         //load json
-        loadScheduleModel();
+        //loadScheduleModel();
       });
+
+      $scope.$watch('vm.selectedLine', function(newVal, oldVal) {
+        if(newVal) {
+          console.log('line selected');
+          onSelection(newVal);
+        }
+      }, true);
       
     }
 
-  });
+});

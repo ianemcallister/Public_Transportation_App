@@ -28,8 +28,14 @@ function TrainschedulesComponent($scope, trainsSchedulesService) {
 		//check if tempLine is a valid train line
 		if(typeof lineNameHash[$scope.tempLine] !== 'undefined') {
 
+			//find the train shortname from the hash
+			var selectedTrain = lineNameHash[$scope.tempLine];
+
+			//save the active train schedule to be used by the directive
+			$scope.activeTrainSchedule = $scope.allTrainSchedules[selectedTrain];
+
 			//if so set the selectedline
-			$scope.selectedLine = $scope.tempLine
+			$scope.selectedLine = $scope.tempLine;
 		}
 
 	}
