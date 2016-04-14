@@ -1,43 +1,63 @@
 
 <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
 	
-	<h3>The {{vm.selectedLine}}</h3>
-	<div class="row">
-		<div class="col-xs-5 col-sm-5 btn btn-primary">West Bound</div>
-		<div class="col-xs-5 col-sm-5 pull-right btn btn-primary">East Bound</div>
-	</div>
-	
-	<!--For horizontal view select a departure time-->
-	<label for="departureTime">Leaves at:
-      <input  type='datatime-local'
-      		  step='60'
-      		  list='selectTimes'
-              name='departureTime'
-              ng-model='vm.selectedTime'
-              class='col-xs-12 col-sm-12 col-md-12 col-lg-12'
-              >
-      <datalist id='selectTimes'>
-        <option ng-repeat='time in vm.times' value='{{ time }}'>{{ time }}</option>
-      </datalist>
-    </label>
-    <!--The Table-->
-	<div class="table-responsive">
-		<table class="table table-striped">
-			<tr>
-				<th>STATION</th>
-				<th>DEPARTURE</th>
-			</tr>
-			<tr ng-repeat='station in vm.stationsOnLine'>
-				<td>
-					<strong>{{station.name}}</strong> <br>
-					{{ station.desc }}
-				</td>
-				<td>{{station.time | date: 'hh:mm a' }} </td>
-			</tr>
-		</table>
-	</div>
-	
+	<!--if a line has been selected show the options-->
+	<div ng-if='vm.lineWasSelected'>
+		<div class="row heading">
+			<h3>The {{vm.selectedLine}}</h3>
+			Towards {{ vm.directionHeadsign.current }}
+		</div>
+		
 
+		<div class="row">
+			<button type='button'
+					ng-class='vm.directionButtons[1].classes'
+					ng-click='changeDirectionTo(0)'>
+						To {{ vm.directionHeadsign.current }}
+			</button> 
+			<button type='button'
+					ng-class='vm.directionButtons[2].classes' 
+					ng-click='changeDirectionTo(1)'>
+						To {{ vm.directionHeadsign.opposing }}
+			</button> 
+		</div>
+		
+		<!--Select a departure time-->
+		<div class='row' id="lineDirection">
+			<label for="departureTime">Leaves at:
+		      <input  type='datatime-local'
+		      		  step='60'
+		      		  list='selectTimes'
+		              name='departureTime'
+		              ng-model='vm.selectedTime'
+		              class='col-xs-12 col-sm-12 col-md-12 col-lg-12'
+		              >
+		      <datalist id='selectTimes'>
+		        <option ng-repeat='time in vm.times' value='{{ time }}'>{{ time }}</option>
+		      </datalist>
+		    </label>
+		</div>
+	    <!--The Table-->
+		<div class="row">
+			<table class="table table-striped">
+				<tr>
+					<th>STATION</th>
+					<th>DEPARTURE</th>
+				</tr>
+				<tr ng-repeat='station in vm.stationsOnLine'>
+					<td>
+						<strong>{{station.name}}</strong> <br>
+						{{ station.desc }}
+					</td>
+					<td>{{station.time | date: 'hh:mm a' }} </td>
+				</tr>
+			</table>
+		</div>
+	</div>
+	<!--if no line was selected show a mesage-->
+	<div ng-if='!vm.lineWasSelected'>
+		<h4 class='directionsMessage'>Please Select A Train Line...</h4>
+	</div>
 	
 </div>
 

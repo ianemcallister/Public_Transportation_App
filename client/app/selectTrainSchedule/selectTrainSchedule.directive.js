@@ -15,20 +15,26 @@ angular.module('transitApp')
 	  bindToController: true
     };
 
-    selectTrainScheduleController.$injector = ['$scope', '$window', '$document', '$moment'];
+    selectTrainScheduleController.$injector = ['$scope', '$window', '$document', '$moment', 'dynamicElement'];
 
-    function selectTrainScheduleController($scope, $window, $document, $moment) {
+    function selectTrainScheduleController($scope, $window, $document, $moment, dynamicElement) {
     	var vm = this;
 
       //local variables
       var currentLine;
       var travelDirection = 0;  //default to 0
+      var DynamicElement = dynamicElement;
 
       //view model variables
       vm.selectedTime;
-      vm.horizontalView = false;
+      vm.lineWasSelected = false;
       vm.stationsOnLine;
       vm.tripTimes;
+      vm.directionButtons = { 
+        1: new DynamicElement(['col-xs-5', 'col-sm-5', 'btn', {'btn-success': false}, {'btn-default': true}, {'disabled': true}, 'btn-block' ]), 
+        2: new DynamicElement(['col-xs-5', 'col-sm-5', 'btn', {'btn-success': true}, {'btn-default': false}, {'disabled': false}, 'btn-block']) 
+      };
+      vm.directionHeadsign = { current: '', opposing: ''};
 
       //local function
       function dateTimeToUnixTime(dateTime) {
@@ -92,7 +98,38 @@ angular.module('transitApp')
         //if(width > 845) vm.horizontalView = false;
       }
 
-      function onSelection(line) {
+      function flipDirectionButtons() {
+        vm.directionButtons[1].flipActiveBtn();
+        vm.directionButtons[2].flipActiveBtn();
+      }
+
+      function getStopSequence(currentTravelDirection) {
+        return vm.timeTable.service[currentTravelDirection].stopSequence;
+      }
+
+      function getHeadsigns(currentTravelDirection) {
+        //declare local
+        var opposingDirection = Math.abs(travelDirection - 1);
+
+        return { 
+          current: vm.timeTable.service[travelDirection].headsign, 
+          opposing: vm.timeTable.service[opposingDirection].headsign
+        };
+
+      }
+
+      function getLineTimes(currentTravelDirection) {
+        //declare local variable
+        var i = 0;
+        //run through all 
+        vm.stationsOnLine.forEach(function(station) {
+          //add times
+          station['time'] = unixTimeToDateTime(vm.timeTable.service[travelDirection].timeTable[10][i]);
+          i++;
+        });
+      }
+
+      function onLineSelection(line) {
         //declare local variables
         var currentTime = new Date();
         var departureTimeFound = false;
@@ -114,25 +151,45 @@ angular.module('transitApp')
         console.log(vm.timeTable);
 
         //set stations
-        vm.stationsOnLine = vm.timeTable.service[travelDirection].stopSequence;
+        vm.stationsOnLine = getStopSequence(travelDirection);
+
+        //set the headsign
+        vm.directionHeadsign = getHeadsigns(travelDirection);
 
         //set the times
-        var i = 0;
-        vm.stationsOnLine.forEach(function(station) {
-          //add times
-          station['time'] = unixTimeToDateTime(vm.timeTable.service[travelDirection].timeTable[10][i]);
-          i++;
-        });
+        getLineTimes();
 
         //vm.stationsOnLine['times'] = vm.timeTable.service[travelDirection].timeTable[10];
         //vm.tripTimes = vm.timeTable.service[travelDirection].timeTable[10];
         
       }
 
+      function onDirectionChange(newDirection) {
+
+        //set stations
+        vm.stationsOnLine = getStopSequence(newDirection);
+
+        //set the headsign
+        vm.directionHeadsign = getHeadsigns(newDirection);
+
+        //get the new travel times
+        getLineTimes();
+
+        //flip the buttons
+        flipDirectionButtons();
+      }
+
       //view model functions
       $scope.timeSelected = function() {
         //when a time is selected grab the proper array
         currentTrip = allTrainSchedules[selectedLine].trips[0];
+      }
+
+      $scope.changeDirectionTo = function(value) {
+        //reset travel direction
+        travelDirection = value;
+
+        onDirectionChange(travelDirection);
       }
 
       //watchers
@@ -150,8 +207,9 @@ angular.module('transitApp')
 
       $scope.$watch('vm.selectedLine', function(newVal, oldVal) {
         if(newVal) {
-          console.log('line selected');
-          onSelection(newVal);
+          vm.lineWasSelected = true;
+          
+          onLineSelection(newVal);
         }
       }, true);
       
