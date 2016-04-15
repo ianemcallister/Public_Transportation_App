@@ -23,8 +23,8 @@ function tripResultsController($scope) {
   var vm = this;
   
   //declare local variables
-  vm.tripsAvailable = true;
-  vm.endpointsDefined = true;
+  vm.tripsAvailable = false;
+  vm.endpointsDefined = false;
 
   //declare viewmodel variables
   $scope.helpfulMessage = 'Please Select Starting and Ending Stations...';

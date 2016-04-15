@@ -1,30 +1,60 @@
 //used to trip planner
+var TripStation = require('./tripStation');
+var TripSegment = require('./tripSegment');
+var Trip = require('./routeTrip');
+
 var TripPlanner = function() {
-	this.departure = {
-		id: 0,
-		name: '',
-		time: 0
-	};
-	this.arrival = {
-		id: 0,
-		name: '',
-		time: 0
-	};
+	//declare the local variables
+	this.template = new Trip;
 	this.allTripOptions = {};
 }
 
 //SETTERS
-TripPlanner.prototype._setId = function(endpoint, id) { this[endpoint].id = id; };
-TripPlanner.prototype._setName = function(endpoint, name) { this[endpoint].name = name; };
-TripPlanner.prototype._setTime = function(endpoint, time) { this[endpoint].time = time; };
+TripPlanner.prototype._setTemplateEndpointStation = function(endpoint, id) {
+	this.template.endpoint[endpoint].station.setId(id);
+};
+
+TripPlanner.prototype._setTemplateEndpointTime = function(endpoint, unixTime) { 
+	this.template.endpoint[endpoint].time = unixTime;
+};
 
 //GETTERS
-TripPlanner.prototype._getId = function(endpoint) { return this[endpoint].id; };
-TripPlanner.prototype._getName = function(endpoint) { return this[endpoint].name; };
-TripPlanner.prototype._getTime = function(endpoint) { return this[endpoint].time; };
+TripPlanner.prototype.getBookendStations = function() {
+	return { 	start: this.template.getEndpointStation('departure'), 
+				end: this.template.getEndpointStation('arrival') };
+};
 
-//
-TripPlanner.prototype.buildTripOtpions = function() {
+//BUILD METHODS
+TripPlanner.prototype._addATripSummary = function(aStation) {
+
+};
+
+TripPlanner.prototype._addATripDepartureStation = function(aStation) {
+
+};
+
+TripPlanner.prototype._addATripArrivalStation = function(aStation) {
+
+};
+
+TripPlanner.prototype._addASegment = function(aStation) {
+
+};
+
+TripPlanner.prototype._addATrip = function(aNewTrip) {
+	//declare the local variable
+	var i = 0;
+
+	//count the number of keys
+	Object.keys(this.allTripOptions).forEach(function(trip) { i++; });
+
+	//add the new trip
+	this.allTripOptions[i] = aNewTrip;
+};
+
+TripPlanner.prototype._getAllTrips = function(aStation) { return this.allTripOptions; };
+
+TripPlanner.prototype._buildTripOtpions = function() {
 	//declare local variables
 	this.allTripOptions = {
 		0: {
@@ -37,18 +67,50 @@ TripPlanner.prototype.buildTripOtpions = function() {
 
 }
 
+TripPlanner.prototype._findFewestStops = function() {
+	//define a new trip
+	var fewestStopsTrip = new Trip;
+	var bookendStations = this.getBookendStations();
+
+	//define bookends
+	fewestStopsTrip.setEndpointStation('departure', bookendStations.start );
+	fewestStopsTrip.setEndpointStation('arrival', bookendStations.end );
+
+	//construct the trip
+	fewestStopsTrip.addSegments(/*This is will be an object returned from a function*/);
+
+	//build the summary
+	fewestStopsTrip.writeSummary();
+
+	//add the new trip to the list of trips
+	this._addATrip(fewestStopsTrip);
+};
+
+TripPlanner.prototype._findShortestTime = function() {}
+TripPlanner.prototype._findFewestTransfeeres = function() {}
+
 //EXTERNAL METHODS
 TripPlanner.prototype.calculateTrip = function(start, end) {
-	
-	//assign the passed in variables for calulation
-	this._setId('departure', start);
-	this._setId('arrival', end);
+	console.log('got here');
 
-	//build the trip options
-	this.buildTripOtpions();
+	//designate the departure and arrival stations
+	this._setTemplateEndpointStation('departure', start);
+	this._setTemplateEndpointStation('arrival', end);
+
+	//check for the route with the fewestStops
+	this._findFewestStops();
+
+	//check for the route with the shortestTime
+	this._findShortestTime();
+
+	//check for the route with the fewestTransfeers
+	this._findFewestTransfeeres();
+
 	
-	//return the findings
-	return this.allTripOptions;
+	//return all the route options to the user
+	return this._getAllTrips();
 };
+
+TripPlanner.prototype.message = function() { console.log('testing'); }
 
 module.exports = TripPlanner;
