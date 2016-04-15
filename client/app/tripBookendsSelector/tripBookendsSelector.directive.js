@@ -14,15 +14,16 @@ angular.module('transitApp')
 	    bindToController: true
     };
 
-    tripBookendsSelectorController.$injector = ['$scope', 'dynamicElement']
+    tripBookendsSelectorController.$injector = ['$scope', 'dynamicElement', 'trainsSchedulesService']
 
-    function tripBookendsSelectorController($scope, dynamicElement) {
+    function tripBookendsSelectorController($scope, dynamicElement, trainsSchedulesService) {
     	var vm = this;
 
       //local variables
       var oldStationValues = { start: '', end: '' };
       var stationsHash = {};
       var DynamicElement = dynamicElement;
+      var APIInterface = trainsSchedulesService;
 
       //view model variables
       $scope.tripStations = { 
@@ -196,6 +197,9 @@ angular.module('transitApp')
         //declare local variables
         console.log('submitting bookends');
 
+        APIInterface.getARidePlan(
+          $scope.tripStations.start.name,
+          $scope.tripStations.end.name);
       }
 
       //watchers
