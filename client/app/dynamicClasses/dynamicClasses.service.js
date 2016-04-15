@@ -12,7 +12,9 @@ function dynamicElement() {
 		//declare local variables
 		this.defaultClasses = defaultClasses;
 		this.classes = {};
-		this.clickable = true;
+		this.styles = {};
+		this.message = '';
+		this.clickable = false;
 
 		//run the constructor
 		this._constructor();
@@ -43,6 +45,10 @@ function dynamicElement() {
 	DynamicElement.prototype.updateClass = function(targetClass, newValue) {
 		this.classes[targetClass] = newValue;
 	};
+
+	DynamicElement.prototype.updateStyle = function(targetStyle, newValue) {
+		this.styles[targetStyle] = newValue;
+	};
 	
 	DynamicElement.prototype.flipClass = function(targetClass) {
 		this.classes[targetClass] = !this.classes[targetClass];
@@ -53,10 +59,19 @@ function dynamicElement() {
 	};
 
 	DynamicElement.prototype.flipActiveBtn = function() {
-		console.log(this);
 		this.flipClass('btn-success');
 		this.flipClass('btn-default');
 		this.flipClass('disabled');
+	};
+
+	DynamicElement.prototype.successfulInput = function() {
+		this.updateClass('has-success', true);
+		this.updateStyle('color', 'green');
+	};
+
+	DynamicElement.prototype.defaultInput = function() {
+		this.updateClass('has-success', false);
+		this.updateStyle('color', '#555555');
 	};
 
 	return DynamicElement;

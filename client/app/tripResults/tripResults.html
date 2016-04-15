@@ -1,0 +1,11 @@
+<div>
+	<!--If endpoints are selected show route options-->
+	<div ng-if='vm.endpointsDefined'>
+		
+	</div>
+
+	<!--If endpoints have not been selected show a helpful message-->
+	<div ng-if='!vm.endpointsDefined'>
+		<h4 class='directionsMessage'>{{ helpfulMessage }}</h4>
+	</div>
+</div>
