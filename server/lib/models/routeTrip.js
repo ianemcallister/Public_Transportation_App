@@ -12,7 +12,7 @@ var Trip = function() {
 			time: 0
 		}
 	};
-	this.segment = {};
+	this.segments = [];
 	this.summary = {
 		duration: 0,
 		noOfStops: 0,
@@ -43,6 +43,8 @@ Trip.prototype.setEndpointTime = function(endpoint, unixTime) {
 
 Trip.prototype.addSegments = function(tripSteps) {
 
+	this.segments = tripSteps;
+
 };
 
 Trip.prototype.writeSummary = function() {
@@ -50,9 +52,9 @@ Trip.prototype.writeSummary = function() {
 	this.setSummaryAttribute('start', this.getEndpointAttribute('departure', 'name'));
 	this.setSummaryAttribute('finish', this.getEndpointAttribute('arrival', 'name'));
 
-	//set the duration
+	//TODO: set the duration
 
-	//set the noOfStops
+	//TODO: set the noOfStops
 };
 
 module.exports = Trip;

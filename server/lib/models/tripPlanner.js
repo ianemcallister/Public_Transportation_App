@@ -2,6 +2,7 @@
 var TripStation = require('./tripStation');
 var TripSegment = require('./tripSegment');
 var Trip = require('./routeTrip');
+var JourneyCalculator = require('../../scripts/calculateJourney');
 
 var TripPlanner = function() {
 	//declare the local variables
@@ -77,7 +78,26 @@ TripPlanner.prototype._findFewestStops = function() {
 	fewestStopsTrip.setEndpointStation('arrival', bookendStations.end );
 
 	//construct the trip
-	fewestStopsTrip.addSegments(/*This is will be an object returned from a function*/);
+	fewestStopsTrip.addSegments(
+		JourneyCalculator.findFewestStops(47821, 8372)/*[
+		 This is will be an object returned from a function
+		{
+			type: { ride: false, transfeer: false },
+			line: {},
+			transfeerTo: {},
+			noOfStops: 0,
+			duration: 0,
+			endpoints: { board: {}, disembark: {} }
+		},
+		{
+			type: { ride: false, transfeer: false },
+			line: {},
+			transfeerTo: {},
+			noOfStops: 0,
+			duration: 0,
+			endpoints: { board: {}, disembark: {} }
+		}
+	]*/);
 
 	//build the summary
 	fewestStopsTrip.writeSummary();
