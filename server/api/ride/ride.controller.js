@@ -11,6 +11,7 @@
 
 import _ from 'lodash';
 import Ride from './ride.model';
+import TripPlanner from './tripPlanner.model';
 
 function respondWithResult(res, statusCode) {
   statusCode = statusCode || 200;
@@ -60,34 +61,22 @@ function handleError(res, statusCode) {
 }
 
 export function fewestStops(req, res) {
-  
-
   //declare the local variable
   var start = req.params.start;
   var end = req.params.end;
-  var path = {
-    stations: [start, end],
-    noOfStations: 2,
-    duration: 20
-  };
-
-  console.log('received start: ' + start + ' stop: ' + end);
 
   //build and return the promise
-  return new Promise(function(resolve, reject) {
+  return new Promise(function(resolve,reject) { 
+    //build the trip 
+    var tripOptions = TripPlanner.calculateTrip(start, end);
 
+    setTimeout(function() {
+      resolve(tripOptions);
+    }, 1000);
+     
   })
-  .then(function(result) {
-
-    //for the time being just return the standard path
-    resolve(path);
-    
-
-  })
-  .catch(function(error) {
-    console.log('Error: ' + error);
-  });
-
+  .then(respondWithResult(res))
+  .catch(handleError(res));
 }
 
 // Gets a list of Rides

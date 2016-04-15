@@ -91,7 +91,6 @@ function trainsSchedulesService($http) {
 
 	function getARidePlan(startingStation, endingStation, type) {
 		
-		console.log('getting a ride: ' + startingStation + ' ' + endingStation + ' meth: ' + method);
 		//declare and define local variable
 		var rideOptions = {};
 		var method = 'GET';
@@ -101,22 +100,18 @@ function trainsSchedulesService($http) {
 		//construct the url
 		var url = rootUrl + type + '/' +  startingStation + '/' + endingStation;
 
-		console.log(url);
-		//define the promise
-		var rideOptionsPromise = new Promise(function(resolve, reject) {
-
-			$http({method: method, url: url})
-			.then(function(results) {
-				console.log(results);
+		//build and return the promise
+		return new Promise(function(resolve, reject) { 
+			fetch(url)
+			.then(function(responseObj) {
+				//return the response
+				resolve(responseObj.json());
 			})
 			.catch(function(error) {
-				console.log('Error on Download: ' + error)
+				console.log('An Error Occured: ' + error);
 			});
-
 		});
 
-		//return the promsie
-		return rideOptionsPromise; 
 	}
 
 	function download() {

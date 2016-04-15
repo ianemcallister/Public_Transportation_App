@@ -1,10 +1,16 @@
-
+<!--Collect the start and ending stations from the user-->
 <header class="hero-unit" id="banner">
 	<h2>Plan Your Trip</h2>
-	<trip-bookends-selector endpoints-defined='endpointsDefined'> </trip-bookends-selector>
+	<trip-bookends-selector 
+				endpoints-defined='endpointsDefined' 
+				trip-options='tripOptions'>
+	</trip-bookends-selector>
 </header>
 
+<!--The trip options will be displayed here-->
 <div class="container">
-  <trip-results endpoints-defined='endpointsDefined'></trip-results>
+  <trip-results 
+  				endpoints-defined='endpointsDefined' 
+				trip-options='tripOptions'>
+  </trip-results>
 </div>
-

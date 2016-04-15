@@ -6,7 +6,8 @@ angular.module('transitApp')
       templateUrl: 'app/tripResults/tripResults.html',
       restrict: 'EA',
       scope: {
-      	endpointsDefined: "="
+      	endpointsDefined: "=",
+        tripOptions: '='
       },
       link: function (scope, element, attrs) {
       },
@@ -19,21 +20,35 @@ angular.module('transitApp')
 tripResultsController.$injector = ['$scope'];
 
 function tripResultsController($scope) {
-var vm = this;
-//declare local variables
+  var vm = this;
+  
+  //declare local variables
+  vm.tripsAvailable = true;
+  vm.endpointsDefined = true;
 
+  //declare viewmodel variables
+  $scope.helpfulMessage = 'Please Select Starting and Ending Stations...';
 
-//declare viewmodel variables
-$scope.helpfulMessage = 'Please Select Starting and Ending Stations...';
+  //watchers
+  $scope.$watch('vm.endpointsDefined', function(newVal, oldVal) {
+  	if(newVal) {
+  	  //update the helpful message
+      $scope.helpfulMessage = 'Loading the trips now';
+  	}
+  });
 
-//watchers
-$scope.$watch('vm.endpointsDefined', function(newVal, oldVal) {
-	if(newVal) {
-	  //
-	}
-}, true);
+  $scope.$watch('vm.tripOptions', function(newVal, oldVal) {
+    
+    //when the trip is available show the results
+    if(typeof vm.tripOptions === 'object') {
+      vm.tripsAvailable = true;
+      console.log('vm.tripOptions is an object');
+      console.log('vm.tripsAvailable is ' + vm.tripsAvailable);
+    }
 
-//actions
-console.log(vm.endpointsDefined);
+  });
+
+  //actions
+  console.log('were the endpoints defined?: ' + vm.endpointsDefined);
 
 }

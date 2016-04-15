@@ -6,8 +6,7 @@ var controller = require('./ride.controller');
 var router = express.Router();
 
 router.get('/', controller.index);
-router.get('/fewestStops/:start/:end', controller.fewestStops);	//?start=:start&end=:end
-router.get('/:id', controller.show);
+router.get('/fewestStops/:start/:end', controller.fewestStops);	
 router.post('/', controller.create);
 router.put('/:id', controller.update);
 router.patch('/:id', controller.update);

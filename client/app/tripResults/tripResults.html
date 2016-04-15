@@ -1,11 +1,51 @@
 <div>
 	<!--If endpoints are selected show route options-->
 	<div ng-if='vm.endpointsDefined'>
-		
+		<!--If we have results how them-->
+		<div ng-if='vm.tripsAvailable'>
+			<!--Show the user all their beautiful trip options-->
+			<div class="container trip">
+				<div class="row" id='tripHeader'>
+					<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+						<h4><span id='duration'>17 min</span> 
+						(<span id='stops'>6</span> stops) </h4>
+						<strong>
+							<span id='departure'>PSU</span> to 
+							<span id='arrival'>Beaverton</span> 
+						</strong>
+					</div>
+				</div>
+				<div class="row endpoint" id='departureStation'>
+					<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+						<strong><span id='deptName'>PSU</span></strong>
+						<span id='deptId'>( station 3921 )</span> <br>
+						<span id='deptDesc'><i>Right around the corner from someone</i></span>
+					</div>
+				</div>
+				<div class="row" id="tripStep">
+					<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+						<div id="colorbox"></div>
+						<span id='instruction'>Take the Red Line <span>3</span> stops.</span>
+					</div>
+				</div>
+				<div class="row endpoint" id='arrivalStation'>
+					<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+						<strong><span id='deptName'>Beaverton</span></strong>
+						<span id='deptId'>( station 9821 )</span> <br>
+						<span id='deptDesc'><i>Make a left at te stoplight</i></span>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!--If no results yet, show a helpful loading animation-->
+		<div ng-if='!vm.tripsAvailable'>
+			<h4 class='directionsMessage'>{{ helpfulMessage }}</h4>
+		</div>
 	</div>
 
 	<!--If endpoints have not been selected show a helpful message-->
 	<div ng-if='!vm.endpointsDefined'>
 		<h4 class='directionsMessage'>{{ helpfulMessage }}</h4>
 	</div>
+
 </div>

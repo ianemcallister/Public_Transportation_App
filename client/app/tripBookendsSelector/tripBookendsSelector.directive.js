@@ -6,6 +6,10 @@ angular.module('transitApp')
     return {
       templateUrl: 'app/tripBookendsSelector/tripBookendsSelector.html',
       restrict: 'EA',
+      scope: {
+        endpointsDefined: '=',
+        tripOptions: '='
+      },
       link: function (scope, element, attrs) {
       	//console.log(scope, element, attrs);
       },
@@ -195,16 +199,30 @@ angular.module('transitApp')
 
       $scope.submitBookends = function() {
         //declare local variables
-        console.log('submitting bookends');
+        var departFrom = $scope.tripStations.start.id || 3214;
+        var arriveAt = $scope.tripStations.end.id || 9232;
 
-        APIInterface.getARidePlan(
-          $scope.tripStations.start.name,
-          $scope.tripStations.end.name);
+        //throw the endpointsDefined flag
+        vm.endpointsDefined = true;
+
+        //contact the API
+        APIInterface.getARidePlan(departFrom, arriveAt)
+        .then(function(result) {
+          
+          //when the response comes back, pass it to the page controller
+          vm.tripOptions = result;
+          $scope.$apply();
+
+          //print it for later analysis
+          console.log(result);
+        })
+        .catch(function(error) {
+          console.log("Error: " + error);
+        })
+
       }
 
-      //watchers
-      
-      //ACTIONS
+      //WATCHERS
       $scope.$watch('tripStations.start.valid', function(newVal, oldVal) {
         
         if(newVal) {
@@ -229,11 +247,13 @@ angular.module('transitApp')
 
       });
 
+      //ACTIONS
       //set the defulat message
       updateSubmissionBtn($scope.tripStations);
 
       //track the stations being used
       buildStationsHash();
 
+      console.log('tripOptions= ' + vm.tripOptions);
     }
   });
