@@ -33,34 +33,22 @@ class MainController {
   }
 }
 
-if ('serviceWorker' in navigator) {
-  console.log('good for service workers');
-} else {
-  console.log("this browser does NOT support service worker");
-}
+if(navigator.serviceWorker) console.log('service workers are valid in this browser.');
+else console.log('Your browser doesn\'t support service workers.');
 
-/*navigator.serviceWorker.register('/sw.js')
-.then(function(reg) {
-  var serviceWorker;
+navigator.serviceWorker.register('app/sw/index.js').then(function() {
+  console.log('Service Worker registration worked!');
+  
 
-  if (!navigator.serviceWorker.controller) {
-    return;
-  }
+/*  fetch('../../assets/JSON/max-train-lines.json')
+  .then(function(result) {
+    console.log('got the json');
+    console.log(result);
+  });*/
 
-  if (reg.waiting) {
-    indexController._updateReady(reg.waiting);
-    return;
-  }
-
-  if (reg.installing) {
-    indexController._trackInstalling(reg.installing);
-    return;
-  }
-
-})
-.catch(function(error) {
-  console.log('ServiceWorker registration failed: ', error);
-});*/
+}).catch(function(error) {
+  console.log('Service Worker registration failed! ' + error);
+});
 
 angular.module('transitApp')
   .component('main', {
