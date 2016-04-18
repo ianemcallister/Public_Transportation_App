@@ -4,30 +4,28 @@ This is the second project as part of the Senior Web Developer Nano Degree throu
 
 It is a transporation app for the Portland Oregon MAX train system.  Users can view train timetables and search routes by entering a starting station and ending station.
 
-*Offline Capable:* This project uses service workers to provide offline functionality to users.  They are able to pull up timetables for each of the lines as long as the timetable has been cached for later use.
+**Offline Capable**: This project uses service workers to provide offline functionality to users.  They are able to pull up timetables for each of the lines as long as the timetable has been cached for later use.
 
 ## Features
 
 TODO: add this later
 
 ## Instructions
+
 1. **Clone the repository**
+	`git clone <git@github.com:ianemcallister/Public_Transportation_App.git>`
 
-	`git clone <git@github.com:ianemcallister/Public_Transportation_App.git>
-
-2. ** Install the dependencies**
-	
+2. **Install the dependencies**
 	To install the required dependencies call `npm install` from the root directory.
 
-3. ** Load Serverside Resources
-
+3. **Load Serverside Resources**
 	This project utilizies a serverside component to download the GTFS.zip file from [Trimet.org](https://developer.trimet.org/GTFS.shtml), parse the csv files, then save JSON files to be used by the application.
 
 	* To download and unzip the GTFS.zip navigate to the server file, `cd server` from the root director and run `node scripts/download`
 
 	* After downloading build the required JSON files from ther `server` directory by running `node scripts/build`
 
-4. **Launch the server and run the client site
+4. **Launch the server and run the client site**
 
 	After you have build the required JSON files from the root director (you may need to `cd ..`), run `gulp serve`.
 
