@@ -26,18 +26,21 @@ angular
   	.state('tripSchedule', {
   			url: '/train-schedules',
   			templateUrl: 'views/trainschedule.html',
-  			controller: 'TripplannerCtrl as planner'
+  			controller: 'TrainscheduleCtrl as schedule'
   		})
   	.state('tripPlanner.journey', {
   			url: '/journey/:start_station/:end_station/:wkday/:time',
-  			templateUrl: 'views/journey.html'
+  			templateUrl: 'views/journey.html',
+  			controller: 'TripplannerCtrl as planner'
   		})  	
   	.state('tripSchedule.stops', {
   			url: '/stops/:short_name/:long_name',
-  			templateUrl: 'views/stops.html'
+  			templateUrl: 'views/stops.html',
+  			controller: 'TrainscheduleCtrl as schedule'
   		})
   	.state('tripSchedule.route', {
   			url: '/route/:short_name/:long_name/:wkday/:direction/:time',
-  			templateUrl: 'views/route.html'
+  			templateUrl: 'views/route.html',
+  			controller: 'TrainscheduleCtrl as schedule'
   		});
   }]);

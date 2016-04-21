@@ -8,10 +8,11 @@
  * Controller of the transitApp
  */
 angular.module('transitApp')
-  .controller('TripplannerCtrl', function () {
-    this.awesomeThings = [
-      'HTML5 Boilerplate',
-      'AngularJS',
-      'Karma'
-    ];
-  });
+  .controller('TripplannerCtrl', ['$stateParams', function ($stateParams) {
+    
+  	//declare local variables
+    var vm = this;
+
+    //log the params for reference
+    console.log($stateParams);
+  }]);
