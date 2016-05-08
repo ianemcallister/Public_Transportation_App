@@ -1,5 +1,6 @@
 import PostsView from './views/Posts';
 import ToastsView from './views/Toasts';
+import LandingView from './views/LandingOptions';
 import idb from 'idb';
 
 function openDatabase() {
@@ -21,6 +22,7 @@ export default function IndexController(container) {
   this._container = container;
   this._postsView = new PostsView(this._container);
   this._toastsView = new ToastsView(this._container);
+  this._landingView = new LandingView(this._container);
   this._lostConnectionToast = null;
   this._dbPromise = openDatabase();
   this._registerServiceWorker();
@@ -31,6 +33,11 @@ export default function IndexController(container) {
   setInterval(function() {
     indexController._cleanImageCache();
   }, 1000 * 60 * 5);
+
+  console.log(container);
+
+  //adding the select by line section
+  this._showCachedTrains();
 
   this._showCachedMessages().then(function() {
     indexController._openSocket();
@@ -71,6 +78,27 @@ IndexController.prototype._registerServiceWorker = function() {
     refreshing = true;
   });
 };
+
+IndexController.prototype._showCachedTrains = function() {
+  var indexController = this;
+
+  var stopsJson = [
+    {id: 1, name: 'something'},
+    {id: 2, name: 'another'},
+    {id: 3, name: 'thatone'},
+  ];
+
+  var trainsJson = [
+    {short_name: 90, long_name: 'Red Line'},
+    {short_name: 100, long_name: 'Green Line'},
+    {short_name: 190, long_name: 'Blue Line'},
+    {short_name: 200, long_name: 'Yellow Line'},
+    {short_name: 290, long_name: 'Orange Line'}
+  ];
+
+  indexController._landingView.addStops(stopsJson);
+  indexController._landingView.addTrainsList(trainsJson); 
+}
 
 IndexController.prototype._showCachedMessages = function() {
   var indexController = this;

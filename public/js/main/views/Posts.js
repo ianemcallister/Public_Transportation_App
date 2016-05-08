@@ -9,7 +9,7 @@ export default function Posts(container) {
   var posts = this;
 
   this._container = container;
-  this._scroller = container.querySelector('.posts');
+  //this._scroller = container.querySelector('.posts');
   this._lastTimeUpdate = 0;
   this._newPostAlert = container.querySelector('.posts-alert');
   this._scrollUpdatePending = false;
@@ -24,14 +24,14 @@ export default function Posts(container) {
   }, 1000 * 30);
 
   // listen to scrolling
-  this._scroller.addEventListener('scroll', function(event) {
+  /*this._scroller.addEventListener('scroll', function(event) {
     if (posts._scrollUpdatePending) return;
     posts._scrollUpdatePending = true;
     requestAnimationFrame(function() {
       posts._onScroll();
       posts._scrollUpdatePending = false;
     });
-  });
+  });*/
 }
 
 // update all the <time> elements, unless we've 
@@ -53,15 +53,16 @@ Posts.prototype._timesUpdate = function() {
 
 // called as the scroll position changes
 Posts.prototype._onScroll = function() {
-  if (this._scroller.scrollTop < 60) {
+  /*if (this._scroller.scrollTop < 60) {
     this._newPostAlert.classList.remove('active');
-  }
+  }*/
 };
 
 // processes an array of objects representing messages,
 // creates html for them, and adds them to the page
 Posts.prototype.addPosts = function(messages) {
   // create html for new posts
+  /*
   var oldLatestPost = this._scroller.querySelector('.post');
   var oldLatestPostOldPosition = oldLatestPost && oldLatestPost.getBoundingClientRect();
   var htmlString = messages.map(function(message) {
@@ -70,6 +71,7 @@ Posts.prototype.addPosts = function(messages) {
 
   // add to the dom
   var nodes = parseHTML(htmlString);
+
   this._scroller.insertBefore(nodes, this._scroller.firstChild);
   
   // remove really old posts to avoid too much content
@@ -86,7 +88,7 @@ Posts.prototype.addPosts = function(messages) {
     this._newPostAlert.classList.add('active');
   }
 
-  this._timesUpdate();
+  this._timesUpdate();*/
 };
 
 // get the date of the latest post, or null if there are no posts

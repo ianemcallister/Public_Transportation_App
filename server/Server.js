@@ -11,6 +11,7 @@ import Throttle from 'throttle';
 import random from 'lodash/number/random';
 import indexTemplate from './templates/index';
 import postsTemplate from './templates/posts';
+import landingTemplate from './templates/landingOptions';
 import postTemplate from './templates/post';
 import remoteExecutorTemplate from './templates/remote-executor';
 import idbTestTemplate from './templates/idb-test';
@@ -81,19 +82,32 @@ export default class Server {
     this._app.use('/sw.js.map', express.static('../public/sw.js.map', staticOptions));
     this._app.use('/manifest.json', express.static('../public/manifest.json', staticOptions));
 
-    this._app.get('/', (req, res) => {
+    /*this._app.get('/', (req, res) => {
       res.send(indexTemplate({
         scripts: '<script src="/js/main.js" defer></script>',
         content: postsTemplate({
           content: this._messages.map(item => postTemplate(item)).join('')
         })
       }));
+    });*/
+    this._app.get('/', (req, res) => {
+      res.send(indexTemplate({
+        scripts: '<script src="/js/main.js" defer></script>',
+        content: landingTemplate()
+      }));
     });
+
+    /*this._app.get('/skeleton', (req, res) => {
+      res.send(indexTemplate({
+        scripts: '<script src="/js/main.js" defer></script>',
+        content: postsTemplate()
+      }));
+    });*/
 
     this._app.get('/skeleton', (req, res) => {
       res.send(indexTemplate({
         scripts: '<script src="/js/main.js" defer></script>',
-        content: postsTemplate()
+        content: landingTemplate()
       }));
     });
 
@@ -124,6 +138,11 @@ export default class Server {
 
     this._app.get('/idb-test/', (req, res) => {
       res.send(idbTestTemplate());
+    });
+
+    //adding my own server routes
+    this._app.get('/sched/:short_name/:long_name/:wkday/:direction/:time', (req, res) => {
+      res.send('<strong>Hello World</strong>');
     });
 
     generateReady.then(_ => {
