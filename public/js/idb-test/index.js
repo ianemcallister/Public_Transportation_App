@@ -2,6 +2,48 @@ import idb from 'idb';
 
 console.log('opening idb');
 
+var dbPromise = idb.open('transit-db', 2, function(upgradeDb) {
+  switch(upgradeDb.oldVersion) {
+    case 0:
+      upgradeDb.createObjectStore('system-graph', {keyPath: 'stnId'});
+      upgradeDb.createObjectStore('arrivals', {keyPath: 'time'});
+      upgradeDb.createObjectStore('stops', {keyPath: 'trainId'});
+    case 1:
+      upgradeDb.createObjectStore('trains', {keyPath: 'short_name'});
+  }
+  
+});
+
+dbPromise.then(function(db) {
+  var tx = db.transaction('trains', 'readwrite');
+  var systemGraphStore = tx.objectStore('trains');
+
+  systemGraphStore.put({
+    short_name: 90, long_name: 'Red Line' 
+  });
+
+  systemGraphStore.put({
+    short_name: 100, long_name: 'Green Line' 
+  });
+
+  systemGraphStore.put({
+    short_name: 190, long_name: 'Blue Line' 
+  });
+
+  systemGraphStore.put({
+    short_name: 200, long_name: 'Yellow Line' 
+  });
+
+  systemGraphStore.put({
+    short_name: 290, long_name: 'Orange Line' 
+  });
+
+  return tx.complete;
+}).then(function() {
+  console.log('stations added');
+});
+
+/*
 var dbPromise = idb.open('test-db', 4, function(upgradeDb) {
   var keyValStore = upgradeDb.createObjectStore('keyval');
   keyValStore.put("world", "hello");
@@ -38,3 +80,4 @@ dbPromise.then(function(db) {
 }).then(function() {
   console.log('Added favorite Animal: cat to keyval');
 });
+*/

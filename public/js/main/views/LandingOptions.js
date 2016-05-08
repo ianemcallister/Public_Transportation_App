@@ -33,7 +33,7 @@ LandingOptions.prototype.addTrainsList = function(trains) {
 };
 
 LandingOptions.prototype.addStops = function(stops) {
-	console.log('adding Stops', stops);
+	//console.log('adding Stops', stops);
 };
 
 LandingOptions.prototype.alertMe = function(object) {

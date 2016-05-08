@@ -18,6 +18,20 @@ function openDatabase() {
   });
 }
 
+function getTrains() {
+  console.log('getting trains');
+
+  if (!navigator.serviceWorker) {
+    return Promise.resolve();
+  }
+
+  return idb.open('transit-db', 2, function(upgradeDb) {
+    var store = upgradeDb.createObjectStore('trains', {
+      keyPath: 'short_name'
+    });
+  });
+}
+
 export default function IndexController(container) {
   this._container = container;
   this._postsView = new PostsView(this._container);
@@ -25,6 +39,7 @@ export default function IndexController(container) {
   this._landingView = new LandingView(this._container);
   this._lostConnectionToast = null;
   this._dbPromise = openDatabase();
+  this._trainListPromise = getTrains();
   this._registerServiceWorker();
   this._cleanImageCache();
 
@@ -88,16 +103,29 @@ IndexController.prototype._showCachedTrains = function() {
     {id: 3, name: 'thatone'},
   ];
 
-  var trainsJson = [
+  /*var trainsJson = [
     {short_name: 90, long_name: 'Red Line'},
     {short_name: 100, long_name: 'Green Line'},
     {short_name: 190, long_name: 'Blue Line'},
     {short_name: 200, long_name: 'Yellow Line'},
     {short_name: 290, long_name: 'Orange Line'}
-  ];
+  ];*/
+  //use the db promise
+  this._trainListPromise.then(function(db) {
+    //if no db notify the user and bounce
+    if(!db) { console.log('no db found'); return; }
+    //get the correct object store
+    var index = db.transaction('trains').objectStore('trains');
+    //return the promise
+    return index.getAll();
+  })
+  .then(function(trains) {
+    //build the list
+    indexController._landingView.addTrainsList(trains); 
+  });
 
   indexController._landingView.addStops(stopsJson);
-  indexController._landingView.addTrainsList(trainsJson); 
+  
 }
 
 IndexController.prototype._showCachedMessages = function() {
