@@ -54,6 +54,8 @@ export default function IndexController(container) {
   //adding the select by line section
   this._showCachedTrains();
 
+  this._showCachedStops();
+
   this._showCachedMessages().then(function() {
     indexController._openSocket();
   });
@@ -97,19 +99,6 @@ IndexController.prototype._registerServiceWorker = function() {
 IndexController.prototype._showCachedTrains = function() {
   var indexController = this;
 
-  var stopsJson = [
-    {id: 1, name: 'something'},
-    {id: 2, name: 'another'},
-    {id: 3, name: 'thatone'},
-  ];
-
-  /*var trainsJson = [
-    {short_name: 90, long_name: 'Red Line'},
-    {short_name: 100, long_name: 'Green Line'},
-    {short_name: 190, long_name: 'Blue Line'},
-    {short_name: 200, long_name: 'Yellow Line'},
-    {short_name: 290, long_name: 'Orange Line'}
-  ];*/
   //use the db promise
   this._trainListPromise.then(function(db) {
     //if no db notify the user and bounce
@@ -123,9 +112,19 @@ IndexController.prototype._showCachedTrains = function() {
     //build the list
     indexController._landingView.addTrainsList(trains); 
   });
-
-  indexController._landingView.addStops(stopsJson);
   
+}
+
+IndexController.prototype._showCachedStops = function() {
+  var indexController = this;
+  
+  var stopsJson = [
+    {id: 1, name: 'something'},
+    {id: 2, name: 'another'},
+    {id: 3, name: 'thatone'},
+  ];
+
+  indexController._landingView.addStopsList(stopsJson);
 }
 
 IndexController.prototype._showCachedMessages = function() {

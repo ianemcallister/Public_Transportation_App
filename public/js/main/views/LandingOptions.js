@@ -1,4 +1,5 @@
 import bookendsTemplate from './../../../../templates/bookends.hbs';
+import stopsTemplate from './../../../../templates/stops.hbs';
 import lineTemplate from './../../../../templates/lines.hbs';
 import parseHTML from './../../utils/parseHTML';
 
@@ -18,6 +19,20 @@ export default function LandingOptions(container) {
 	console.log(this._container);
 }
 
+LandingOptions.prototype.addStopsList = function(stops) {
+	//build the options from the model
+	var htmlString = stops.map(function(stop) {
+		return stopsTemplate(stop);
+	}).join('');
+
+	var nodes = parseHTML("Arrival: <input list='arrivalStops'><datalist id='arrivalStops'>"
+		+ htmlString + "</datalist> Departures: <input list='departureStops'><datalist id='departureStops'>"
+		+ htmlString + "</datalist>"
+	);
+
+	this._navFilter.appendChild(nodes, this._navFilter.firstChild);
+};
+
 LandingOptions.prototype.addTrainsList = function(trains) {
 
 	//build the options from the model
@@ -26,14 +41,12 @@ LandingOptions.prototype.addTrainsList = function(trains) {
 	}).join('');
 
 	//Add input and parse as nodes
-	var nodes = parseHTML("Train Line: <input list='trainLines'><datalist id='trainLines'>" + htmlString + "</datalist>");
+	var nodes = parseHTML("Train Line: <input list='trainLines'><datalist id='trainLines'>" 
+		+ htmlString + "</datalist>"
+	);
 
 	//append to the DOM
 	this._schedFilter.appendChild(nodes, this._schedSelector.firstChild);
-};
-
-LandingOptions.prototype.addStops = function(stops) {
-	//console.log('adding Stops', stops);
 };
 
 LandingOptions.prototype.alertMe = function(object) {
