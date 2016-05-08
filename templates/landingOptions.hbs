@@ -1,13 +1,22 @@
 <h1>Where Would You Like To Go?</h1>
 
 <div class="nav">
-	<h3 id='navHeader'>Select A Route</h3>
-		<div class="navFilter"></div>
+	<h3 id='navHeader'>Find A Route</h3>
+		<div class="navFilter">
+			Arrival: <input list='arrivalStops' id='arrivalStopsInput'>
+				<datalist id='arrivalStops'></datalist> 
+			Departures: <input list='departureStops'>
+				<datalist id='departureStops'></datalist>
+		</div>
 		<div class="navDisplay"></div>
 </div>
 
 <div class="sched">
 	<h3 id='schedHeader'>Select A Train</h3>
-		<div class="schedFilter"></div>
+		<div class="schedFilter">
+			Train Line: <input list='trainLines' id='trainLinesInput'>
+				<datalist id='trainLines'></datalist> 
+			<button id='trainLinesBtn'>Submit</button>
+		</div>
 		<div class="schedDisplay"></div>
 </div>

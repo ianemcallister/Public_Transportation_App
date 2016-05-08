@@ -19,7 +19,6 @@ function openDatabase() {
 }
 
 function getTrains() {
-  console.log('getting trains');
 
   if (!navigator.serviceWorker) {
     return Promise.resolve();

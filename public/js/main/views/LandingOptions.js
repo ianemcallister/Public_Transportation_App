@@ -2,21 +2,46 @@ import bookendsTemplate from './../../../../templates/bookends.hbs';
 import stopsTemplate from './../../../../templates/stops.hbs';
 import lineTemplate from './../../../../templates/lines.hbs';
 import parseHTML from './../../utils/parseHTML';
+import $ from 'jquery';
 
 export default function LandingOptions(container) {
 	var landing = this;
 
 	//declare and initialize variables
-	this._container = container;
-	this._bookendsSelector = container.querySelector('.nav');
-	this._navFilter = container.querySelector('.navFilter');
-	this._navDisplay = container.querySelector('.navDisplay');
-	this._schedSelector = container.querySelector('.sched');
-	this._schedFilter = container.querySelector('.schedFilter');
-	this._schedDisplay = container.querySelector('.schedDisplay');
+	landing._container = container;
+	landing._bookendsSelector = container.querySelector('.nav');
+	landing._navFilter = container.querySelector('.navFilter');
+	landing._navDisplay = container.querySelector('.navDisplay');
+	landing._schedSelector = container.querySelector('.sched');
+	landing._schedFilter = container.querySelector('.schedFilter');
+	landing._trainLines = container.querySelector('#trainLines');
+	landing._schedDisplay = container.querySelector('.schedDisplay');
+
+	landing._trainLinesList = {};
 
 	//test the container
-	console.log(this._container);
+	console.log(landing._container);
+
+	$(document).ready(function() {
+		
+		//add watchers
+		$('#schedHeader').click(function() {
+			console.log(landing);
+		});
+
+		$('#trainLinesInput').on('change keyup click',function(event) {
+			//check for a valid input
+			
+			console.log('changed input', $('#trainLinesInput').val());
+		});
+
+		$('#trainLinesBtn').click(function() {
+			console.log(this);
+			//console.log($('#trainLinesInput'));
+		});
+
+	});
+	
 }
 
 LandingOptions.prototype.addStopsList = function(stops) {
@@ -25,15 +50,22 @@ LandingOptions.prototype.addStopsList = function(stops) {
 		return stopsTemplate(stop);
 	}).join('');
 
-	var nodes = parseHTML("Arrival: <input list='arrivalStops'><datalist id='arrivalStops'>"
-		+ htmlString + "</datalist> Departures: <input list='departureStops'><datalist id='departureStops'>"
-		+ htmlString + "</datalist>"
-	);
+	//var nodes = parseHTML(htmlString + "" + htmlString + "" );
 
-	this._navFilter.appendChild(nodes, this._navFilter.firstChild);
+	//this._navFilter.appendChild(nodes, this._navFilter.firstChild);
 };
 
 LandingOptions.prototype.addTrainsList = function(trains) {
+	var landing = this;
+
+	//save the trains for later
+	trains.forEach(function(train) {
+		var longName = train['long_name'];
+		var key = longName.replace(" ", "_");
+		
+		landing._trainLinesList[key] = train['short_name'];
+	});
+	console.log(landing._trainLinesList);
 
 	//build the options from the model
 	var htmlString = trains.map(function(train) {
@@ -41,14 +73,8 @@ LandingOptions.prototype.addTrainsList = function(trains) {
 	}).join('');
 
 	//Add input and parse as nodes
-	var nodes = parseHTML("Train Line: <input list='trainLines'><datalist id='trainLines'>" 
-		+ htmlString + "</datalist>"
-	);
+	var nodes = parseHTML(htmlString);
 
 	//append to the DOM
-	this._schedFilter.appendChild(nodes, this._schedSelector.firstChild);
+	this._trainLines.appendChild(nodes, this._trainLines.firstChild);
 };
-
-LandingOptions.prototype.alertMe = function(object) {
-	console.log(object, " was clicked");
-}
