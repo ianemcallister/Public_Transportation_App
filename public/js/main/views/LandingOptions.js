@@ -1,6 +1,7 @@
 import bookendsTemplate from './../../../../templates/bookends.hbs';
 import stopsTemplate from './../../../../templates/stops.hbs';
 import lineTemplate from './../../../../templates/lines.hbs';
+import timeTableTemplate from './../../../../templates/timeTable.hbs';
 import parseHTML from './../../utils/parseHTML';
 import $ from 'jquery';
 
@@ -31,8 +32,11 @@ export default function LandingOptions(container) {
 
 		$('#trainLinesInput').on('change keyup click',function(event) {
 			//check for a valid input
+			var checkable = ($('#trainLinesInput').val()).replace(" ", "_");
 			
-			console.log('changed input', $('#trainLinesInput').val());
+			if(typeof landing._trainLinesList[checkable] !== "undefined") 
+				landing.addTimeTable(landing._trainLinesList[checkable]);
+			else return;
 		});
 
 		$('#trainLinesBtn').click(function() {
@@ -77,4 +81,35 @@ LandingOptions.prototype.addTrainsList = function(trains) {
 
 	//append to the DOM
 	this._trainLines.appendChild(nodes, this._trainLines.firstChild);
+};
+
+LandingOptions.prototype.addTimeTable = function(trainLine) {
+	var landing = this;
+
+	console.log('this is the ' + trainLine);
+
+	//check if nodes were there before then clear anything out that was there
+	if(landing._schedDisplay.hasChildNodes()) {
+		var myNode = landing._schedDisplay;
+		while (myNode.firstChild) {
+		    myNode.removeChild(myNode.firstChild);
+		}
+	}
+
+	//colect the context from the appropriate model
+	var tempContext = [
+		{stationId: 123, stationName: "PDX", arrival: 14733},
+		{stationId: 329, stationName: "Grisham", arrival: 14753}
+	];
+
+	//build the selected timetable
+	var htmlString = tempContext.map(function(stop) {
+		return timeTableTemplate(stop);
+	}).join('');
+
+	//parse the html into nodes
+	var nodes = parseHTML(htmlString);
+
+	//append the nodes to the DOM
+	this._schedDisplay.appendChild(nodes, this._schedDisplay);
 };
