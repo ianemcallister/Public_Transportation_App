@@ -1,0 +1,80 @@
+{
+	"directions": {
+		"0": "westbound",
+		"1": "eastbound"
+	},
+	"sequence": {
+		"0": {
+			"stop_name": "Portland Int'l Airport MAX Station",
+			"stop_id": 10579,
+			"parent_station": "",
+			"arrivals": {
+				"297": 1234
+			}
+		},
+		"1": {
+			"stop_name": "Gateway/NE 99th Ave Transit Center",
+			"stop_id": 8370,
+			"parent_station": "",
+			"arrivals": {
+				"297": 1234
+			}
+		},
+		"2": {
+			"stop_name": "Hollywood/NE 42nd Ave Transit Center",
+			"stop_id": 8373,
+			"parent_station": "",
+			"arrivals": {
+				"297": 1234
+			}
+		},
+		"3": {
+			"stop_name": "Rose Quarter Transit Center",
+			"stop_id": 8377,
+			"parent_station": "",
+			"arrivals": {
+				"297": 1234
+			}
+		},
+		"4": {
+			"stop_name": "Pioneer Square North MAX Station",
+			"stop_id": 8383,
+			"parent_station": "",
+			"arrivals": {
+				"297": 1234
+			}
+		},
+		"5": {
+			"stop_name": "Providence Park MAX Station",
+			"stop_id": 9757,
+			"parent_station": "",
+			"arrivals": {
+				"297": 1234
+			}
+		},
+		"6": {
+			"stop_name": "Washington Park MAX Station",
+			"stop_id": 10121,
+			"parent_station": "",
+			"arrivals": {
+				"297": 1234
+			}
+		},
+		"7": {
+			"stop_name": "Sunset Transit Center",
+			"stop_id": 9624,
+			"parent_station": "",
+			"arrivals": {
+				"297": 1234
+			}
+		},
+		"8": {
+			"stop_name": "Beaverton Transit Center",
+			"stop_id": 9818,
+			"parent_station": "",
+			"arrivals": {
+				"297": 1234
+			}
+		}
+	}
+}
