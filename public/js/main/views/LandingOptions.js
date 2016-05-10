@@ -1,4 +1,6 @@
 import trainDataService from './../trainData.service';
+import validationService from './../validation.service';
+import stateService from './../state.service';
 import bookendsTemplate from './../../../../templates/bookends.hbs';
 import stopsTemplate from './../../../../templates/stops.hbs';
 import lineTemplate from './../../../../templates/lines.hbs';
@@ -12,10 +14,16 @@ export default function LandingOptions(container) {
 	
 	landing._trainByName = {};
 	landing._trainByNumber = {};
+	landing.state = {
+		nav: { start: '', end: '', time: 0, day: 0, dir: 0, active:false},
+		sched: { line: 0, day: 0, time: 0, dir: 0, active:false, directions:{} }
+	};
 
 	//declare and initialize variables
 	landing._container = container;
 	landing.TrainDataService = new trainDataService();
+	landing.ValidationService = new validationService();
+	landing.StateService = new stateService();
 	landing._bookendsSelector = container.querySelector('.nav');
 	landing._navFilter = container.querySelector('.navFilter');
 	landing._navDisplay = container.querySelector('.navDisplay');
@@ -61,11 +69,21 @@ LandingOptions.prototype._startWatching = function() {
 			var currentTime = timeNow.time;
 			var currentDay = timeNow.wkday;
 
+			//set the state variables
+			landing.state.sched.active = true;
+			landing.state.sched.line = landing._trainByName[checkable];
+			landing.state.sched.day = currentDay
+			landing.state.sched.time = currentTime
+			landing.state.sched.dir = 0
+
+			//log for reference
+			console.log(landing.state.sched);
+
 			//build the filter
-			landing._showSchedFilter(currentTime, currentDay, "Eastbound");
+			landing._showSchedFilter(landing.state.sched);
 
 			//build the timetable
-			landing._addTimeTable(landing._trainByName[checkable], currentTime, currentDay, "Eastbound");
+			landing._addTimeTable(landing.state.sched);
 
 		} else return;
 
@@ -74,14 +92,23 @@ LandingOptions.prototype._startWatching = function() {
 };
 
 LandingOptions.prototype._currentTime = function() {
-	var weekDays = {0: "Sunday", 1: "Monday", 2:"Tuesday", 3:"Wednesday", 4:"Thursday", 5:"Friday", 6: "Saturday"};
 	var dateTime = new Date();
 	var dayOfWeek = dateTime.getDay();
-	var wkDay = weekDays[dayOfWeek];
 	var hours = dateTime.getHours();
 	var minutes = dateTime.getMinutes();
 
-	return {wkday: wkDay, time: (hours * 60) + minutes};
+	return {wkday: dayOfWeek, time: (hours * 60) + minutes};
+};
+
+LandingOptions.prototype._formatDay = function(wkday) {
+	var weekDays = {0: "Sunday", 1: "Monday", 2:"Tuesday", 3:"Wednesday", 4:"Thursday", 5:"Friday", 6: "Saturday"};
+	return weekDays[wkday];
+};
+
+LandingOptions.prototype._findDay = function(dayOfWeek) {
+	var weekDays = {"Sunday":0 , "Monday":1, "Tuesday":2, "Wednesday":3, "Thursday":4, "Friday":5, "Saturday":6};
+	return weekDays[dayOfWeek];
+
 };
 
 LandingOptions.prototype._formatTime = function(minutes) {
@@ -100,6 +127,11 @@ LandingOptions.prototype._formatTime = function(minutes) {
 	else timeString = hours + ":" + mins + " " + A;
 
 	return timeString
+};
+
+LandingOptions.prototype._formatDir = function(currentDir) {
+	var directions = { 0: "Northbound", 1: "Eastbound", 2: "Southbound", 3:"Westbound", 4:"Clockwise", 5:"Counter-Clockwise" };
+	return directions[currentDir];
 };
 
 LandingOptions.prototype.addStopsList = function(stops) {
@@ -145,25 +177,49 @@ LandingOptions.prototype._addTrainsList = function() {
 	
 };
 
-LandingOptions.prototype._showSchedFilter = function(currentTime, currentDay, currentDir) {
+LandingOptions.prototype._showSchedFilter = function(stateValues) {
 	var landing = this;
 	var schedFilter = landing._schedFilter;
-	var friendlyTime = landing._formatTime(currentTime);
-	var context = {direction: currentDir, wkday: currentDay, time: friendlyTime};
+	var friendlyTime = landing._formatTime(stateValues.time);
+	var friendlyDay = landing._formatDay(stateValues.day);
+	var friendlyDir = landing._formatDir(stateValues.dir);
+	var context = {direction: friendlyDir, wkday: friendlyDay, time: friendlyTime};
 
 	var htmlString = schedFilterTemplate(context);
 
 	var nodes = parseHTML(htmlString);
 
 	schedFilter.appendChild(nodes, schedFilter);
+
+	//add watchers
+	$('#directionInput').on('change keyup',function(event) {
+		var checkable = ($('#directionInput').val());
+		console.log('changed direction', checkable);
+		//landing._addTimeTable()
+	});
+
+	$('#wkdayInput').on('change keyup',function(event) {
+		var checkable = ($('#wkdayInput').val()); 
+		
+		if(landing.ValidationService.isWkday(checkable)) {
+			landing.state.sched.day = landing._findDay(checkable);
+			landing._addTimeTable(landing.state.sched);
+		}
+
+	});
+
+	$('#timeInput').on('change keyup',function(event) { 
+		var checkable = ($('#timeInput').val());
+		console.log('changed time', checkable);
+	});
 };
 
-LandingOptions.prototype._addTimeTable = function(trainLine, currentTime, currentDay, currentDir) {
+LandingOptions.prototype._addTimeTable = function(stateValues) {
 	var landing = this;
-	var lineId = trainLine + "_" + landing._trainByNumber[trainLine];
+	var lineId = stateValues.line + "_" + landing._trainByNumber[stateValues.line];
 	var direction = 0;
 	var timeTable = this._schedDisplay;
-	var lineTitle = landing._trainByNumber[trainLine].replace("_", " ");
+	var lineTitle = landing._trainByNumber[stateValues.line].replace("_", " ");
 
 	//check if nodes were there before then clear anything out that was there
 	if(timeTable.hasChildNodes()) {
@@ -179,15 +235,16 @@ LandingOptions.prototype._addTimeTable = function(trainLine, currentTime, curren
 
 		//build the selected timetable
 		var header = "<h4>"+ lineTitle + "</h4>\
-		<span>" + currentDir + " - " + currentDay + "</span><br>\
+		<span>" + landing._formatDir(stateValues.dir) + 
+		" - " + landing._formatDay(stateValues.day) + "</span><br>\
 		<strong>Station</strong><strong>Arrives</strong>";
 
 		var htmlString = stops.map(function(stop) {
 			var friendlyStop = { stop_name: stop.stop_name, time: '' };
 			var totalMinutes = 0;
 
-			if(stop.arrivals[currentTime]) {
-				totalMinutes = currentTime;
+			if(stop.arrivals[stateValues.time]) {
+				totalMinutes = stateValues.time;
 			} else {
 				totalMinutes = 10;
 			}
