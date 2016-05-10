@@ -24,10 +24,11 @@ function getTrains() {
     return Promise.resolve();
   }
 
-  return idb.open('transit-db', 2, function(upgradeDb) {
-    var store = upgradeDb.createObjectStore('trains', {
+  return idb.open('transit-db', 4, function(upgradeDb) {
+    /*var store = upgradeDb.createObjectStore('trains', {
       keyPath: 'short_name'
-    });
+    });*/
+    var store = upgradeDb.transaction.objectStore('trains');
   });
 }
 
@@ -96,7 +97,7 @@ IndexController.prototype._registerServiceWorker = function() {
 };
 
 IndexController.prototype._showCachedTrains = function() {
-  var indexController = this;
+  /*var indexController = this;
 
   //use the db promise
   this._trainListPromise.then(function(db) {
@@ -110,7 +111,7 @@ IndexController.prototype._showCachedTrains = function() {
   .then(function(trains) {
     //build the list
     indexController._landingView.addTrainsList(trains); 
-  });
+  });*/
   
 }
 

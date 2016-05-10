@@ -1,3 +1,4 @@
+import trainDataService from './../trainData.service';
 import bookendsTemplate from './../../../../templates/bookends.hbs';
 import stopsTemplate from './../../../../templates/stops.hbs';
 import lineTemplate from './../../../../templates/lines.hbs';
@@ -7,9 +8,12 @@ import $ from 'jquery';
 
 export default function LandingOptions(container) {
 	var landing = this;
+	
+	landing._trainLinesList = {};
 
 	//declare and initialize variables
 	landing._container = container;
+	landing.TrainDataService = new trainDataService();
 	landing._bookendsSelector = container.querySelector('.nav');
 	landing._navFilter = container.querySelector('.navFilter');
 	landing._navDisplay = container.querySelector('.navDisplay');
@@ -18,35 +22,44 @@ export default function LandingOptions(container) {
 	landing._trainLines = container.querySelector('#trainLines');
 	landing._schedDisplay = container.querySelector('.schedDisplay');
 
-	landing._trainLinesList = {};
-
 	//test the container
 	console.log(landing._container);
 
-	$(document).ready(function() {
-		
-		//add watchers
-		$('#schedHeader').click(function() {
-			console.log(landing);
-		});
-
-		$('#trainLinesInput').on('change keyup click',function(event) {
-			//check for a valid input
-			var checkable = ($('#trainLinesInput').val()).replace(" ", "_");
-			
-			if(typeof landing._trainLinesList[checkable] !== "undefined") 
-				landing.addTimeTable(landing._trainLinesList[checkable]);
-			else return;
-		});
-
-		$('#trainLinesBtn').click(function() {
-			console.log(this);
-			//console.log($('#trainLinesInput'));
-		});
-
-	});
+	landing._initializePage();
 	
 }
+
+LandingOptions.prototype._initializePage = function() {
+	var landing = this;
+
+	//addTrainsList
+	landing._addTrainsList();
+
+	//when page is ready
+	$(document).ready(function() {	
+		//add watchers
+		landing._startWatching()
+	});
+};
+
+LandingOptions.prototype._startWatching = function() {
+	var landing = this;
+
+	$('#schedHeader').click(function() {
+		console.log(landing);
+	});
+
+	$('#trainLinesInput').on('change keyup click',function(event) {
+		//check for a valid input
+		var checkable = ($('#trainLinesInput').val()).replace(" ", "_");
+		
+		if(typeof landing._trainLinesList[checkable] !== "undefined") 
+			landing.addTimeTable(landing._trainLinesList[checkable]);
+		else return;
+	});
+
+}
+
 
 LandingOptions.prototype.addStopsList = function(stops) {
 	//build the options from the model
@@ -59,28 +72,41 @@ LandingOptions.prototype.addStopsList = function(stops) {
 	//this._navFilter.appendChild(nodes, this._navFilter.firstChild);
 };
 
-LandingOptions.prototype.addTrainsList = function(trains) {
+LandingOptions.prototype._addTrainsList = function() {
 	var landing = this;
+	var trainLinesInput = landing._trainLines;
 
-	//save the trains for later
-	trains.forEach(function(train) {
-		var longName = train['long_name'];
-		var key = longName.replace(" ", "_");
+	//TODO: try the cache first
+	//TODO: if no luck with the cash get from the server
+
+	landing.TrainDataService.getCachedDbPromise('transit-db', 4, 'trains')
+	.then(function(db) {
+		var store = db.transaction('trains').objectStore('trains');
+		return store.getAll();
+	})
+	.then(function(trains) {
 		
-		landing._trainLinesList[key] = train['short_name'];
+		//save the trains for later
+		trains.forEach(function(train) {
+			var longName = train['long_name'];
+			var key = longName.replace(" ", "_");
+			
+			landing._trainLinesList[key] = train['short_name'];
+		});
+
+		//build the options from the model
+		var htmlString = trains.map(function(train) {
+			return lineTemplate(train);
+		}).join('');
+
+		//Add input and parse as nodes
+		var nodes = parseHTML(htmlString);
+
+		//append to the DOM
+		trainLinesInput.appendChild(nodes, trainLinesInput.firstChild);
+
 	});
-	console.log(landing._trainLinesList);
-
-	//build the options from the model
-	var htmlString = trains.map(function(train) {
-		return lineTemplate(train);
-	}).join('');
-
-	//Add input and parse as nodes
-	var nodes = parseHTML(htmlString);
-
-	//append to the DOM
-	this._trainLines.appendChild(nodes, this._trainLines.firstChild);
+	
 };
 
 LandingOptions.prototype.addTimeTable = function(trainLine) {
