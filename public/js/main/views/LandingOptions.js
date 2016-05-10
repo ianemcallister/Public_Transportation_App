@@ -9,7 +9,8 @@ import $ from 'jquery';
 export default function LandingOptions(container) {
 	var landing = this;
 	
-	landing._trainLinesList = {};
+	landing._trainByName = {};
+	landing._trainByNumber = {};
 
 	//declare and initialize variables
 	landing._container = container;
@@ -53,8 +54,8 @@ LandingOptions.prototype._startWatching = function() {
 		//check for a valid input
 		var checkable = ($('#trainLinesInput').val()).replace(" ", "_");
 		
-		if(typeof landing._trainLinesList[checkable] !== "undefined") 
-			landing.addTimeTable(landing._trainLinesList[checkable]);
+		if(typeof landing._trainByName[checkable] !== "undefined") 
+			landing.addTimeTable(landing._trainByName[checkable]);
 		else return;
 	});
 
@@ -76,22 +77,17 @@ LandingOptions.prototype._addTrainsList = function() {
 	var landing = this;
 	var trainLinesInput = landing._trainLines;
 
-	//TODO: try the cache first
-	//TODO: if no luck with the cash get from the server
-
-	landing.TrainDataService.getCachedDbPromise('transit-db', 4, 'trains')
-	.then(function(db) {
-		var store = db.transaction('trains').objectStore('trains');
-		return store.getAll();
-	})
+	landing.TrainDataService.getAllTrainsList()
 	.then(function(trains) {
 		
 		//save the trains for later
 		trains.forEach(function(train) {
 			var longName = train['long_name'];
+			var shortName = train['short_name'];
 			var key = longName.replace(" ", "_");
 			
-			landing._trainLinesList[key] = train['short_name'];
+			landing._trainByName[key] = train['short_name'];
+			landing._trainByNumber[shortName] = key;
 		});
 
 		//build the options from the model
@@ -111,31 +107,33 @@ LandingOptions.prototype._addTrainsList = function() {
 
 LandingOptions.prototype.addTimeTable = function(trainLine) {
 	var landing = this;
-
-	console.log('this is the ' + trainLine);
-
+	var lineId = trainLine + "_" + landing._trainByNumber[trainLine];
+	var direction = 0;
+	var timeTable = this._schedDisplay;
+	
 	//check if nodes were there before then clear anything out that was there
-	if(landing._schedDisplay.hasChildNodes()) {
-		var myNode = landing._schedDisplay;
+	if(timeTable.hasChildNodes()) {
+		var myNode = timeTable;
 		while (myNode.firstChild) {
 		    myNode.removeChild(myNode.firstChild);
 		}
 	}
 
-	//colect the context from the appropriate model
-	var tempContext = [
-		{stationId: 123, stationName: "PDX", arrival: 14733},
-		{stationId: 329, stationName: "Grisham", arrival: 14753}
-	];
+	//reach out to the db
+	landing.TrainDataService.getLineTimeTable(lineId, direction)
+	.then(function(stops) {
+		
+		//build the selected timetable
+		var htmlString = stops.map(function(stop) {
+			return timeTableTemplate(stop);
+		}).join('');
 
-	//build the selected timetable
-	var htmlString = tempContext.map(function(stop) {
-		return timeTableTemplate(stop);
-	}).join('');
+		//parse the html into nodes
+		var nodes = parseHTML(htmlString);
 
-	//parse the html into nodes
-	var nodes = parseHTML(htmlString);
+		//append the nodes to the DOM
+		timeTable.appendChild(nodes, timeTable);
 
-	//append the nodes to the DOM
-	this._schedDisplay.appendChild(nodes, this._schedDisplay);
+	});
+
 };
