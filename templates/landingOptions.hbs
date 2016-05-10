@@ -3,10 +3,10 @@
 <div class="nav">
 	<h3 id='navHeader'>Find A Route</h3>
 		<div class="navFilter">
-			Arrival: <input list='arrivalStops' id='arrivalStopsInput'>
-				<datalist id='arrivalStops'></datalist> 
-			Departures: <input list='departureStops'>
+			<input list='departureStops' placeholder='Departes from...'>
 				<datalist id='departureStops'></datalist>
+			<input list='arrivalStops' id='arrivalStopsInput' placeholder="Arrives at...">
+				<datalist id='arrivalStops'></datalist> 
 		</div>
 		<div class="navDisplay"></div>
 </div>
@@ -14,9 +14,8 @@
 <div class="sched">
 	<h3 id='schedHeader'>Select A Train</h3>
 		<div class="schedFilter">
-			Train Line: <input list='trainLines' id='trainLinesInput'>
+			<input list='trainLines' id='trainLinesInput' placeholder="Red Line">
 				<datalist id='trainLines'></datalist> 
-			<!--<button id='trainLinesBtn'>Submit</button>-->
 		</div>
 		<div class="schedDisplay"></div>
 </div>

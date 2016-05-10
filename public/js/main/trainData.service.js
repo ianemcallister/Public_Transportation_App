@@ -51,9 +51,6 @@ TrainDataService.prototype.getLineTimeTable = function(lineId, direction) {
 	var dataService = this;
 	var heading = "dir" + direction;
 
-	//build the proper line number
-	console.log(lineId, direction);
-
 	//return a promise for async work
 	return new Promise(function(resolve, reject) {
 		dataService._getCachedDbPromise('transit-db', 4, lineId)
