@@ -14,6 +14,7 @@ export default function LandingOptions(container) {
 	
 	landing._trainByName = {};
 	landing._trainByNumber = {};
+	landing._trainDirections = {};
 	landing.state = {
 		nav: { start: '', end: '', time: 0, day: 0, dir: 0, active:false},
 		sched: { line: 0, day: 0, time: 0, dir: 0, active:false, directions:{} }
@@ -111,7 +112,7 @@ LandingOptions.prototype._findDay = function(dayOfWeek) {
 
 };
 
-LandingOptions.prototype._formatTime = function(minutes) {
+LandingOptions.prototype._minToHHmmA = function(minutes, format) {
 	var hours = Math.floor(minutes/60);
 	var mins = minutes % 60;
 	var A = 'am';
@@ -123,11 +124,29 @@ LandingOptions.prototype._formatTime = function(minutes) {
 		A = 'pm';
 	}
 
-	if(mins < 10) timeString = hours + ":0" + mins + " " + A;
-	else timeString = hours + ":" + mins + " " + A;
+	if(format == "HH:mm a") {
+		if(mins < 10) timeString = hours + ":0" + mins + " " + A;
+		else timeString = hours + ":" + mins + " " + A;
+	}
+
+	if(format == "HH:mm:ss.SSS") {
+		if(hours < 10) timeString = "0" + hours;
+		if(minutes >= 720) timeString = parseInt(hours) + 12;
+		else timeString = hours;
+		timeString += ":";
+		if(mins < 10) timeString = timeString + "0" + mins;
+		else timeString = timeString + mins + ":00.000";
+	}
 
 	return timeString
 };
+
+LandingOptions.prototype._hhMMaToMin = function(time) {	
+	var hhMM = time.split(':');
+	var totalMins = parseInt(hhMM[0] * 60) + parseInt(hhMM[1]);
+
+	return totalMins;
+}
 
 LandingOptions.prototype._formatDir = function(currentDir) {
 	var directions = { 0: "Northbound", 1: "Eastbound", 2: "Southbound", 3:"Westbound", 4:"Clockwise", 5:"Counter-Clockwise" };
@@ -152,7 +171,7 @@ LandingOptions.prototype._addTrainsList = function() {
 	landing.TrainDataService.getAllTrainsList()
 	.then(function(trains) {
 		
-		//save the trains for later
+		//save the train details for later
 		trains.forEach(function(train) {
 			var longName = train['long_name'];
 			var shortName = train['short_name'];
@@ -160,7 +179,17 @@ LandingOptions.prototype._addTrainsList = function() {
 			
 			landing._trainByName[key] = train['short_name'];
 			landing._trainByNumber[shortName] = key;
+
+			if(typeof train['directions'] !== "undefined") {
+				var bothDirs = train['directions'];
+				
+				landing._trainDirections[key] = {};
+				landing._trainDirections[key][bothDirs['0']] = 0;
+				landing._trainDirections[key][bothDirs['1']] = 1;
+			}
 		});
+
+		console.log(landing._trainDirections);
 
 		//build the options from the model
 		var htmlString = trains.map(function(train) {
@@ -180,7 +209,7 @@ LandingOptions.prototype._addTrainsList = function() {
 LandingOptions.prototype._showSchedFilter = function(stateValues) {
 	var landing = this;
 	var schedFilter = landing._schedFilter;
-	var friendlyTime = landing._formatTime(stateValues.time);
+	var friendlyTime = landing._minToHHmmA(stateValues.time, "HH:mm:ss.SSS");
 	var friendlyDay = landing._formatDay(stateValues.day);
 	var friendlyDir = landing._formatDir(stateValues.dir);
 	var context = {direction: friendlyDir, wkday: friendlyDay, time: friendlyTime};
@@ -195,9 +224,10 @@ LandingOptions.prototype._showSchedFilter = function(stateValues) {
 	$('#directionInput').on('change keyup',function(event) {
 		var allDirections = {"Northbound":0, "Eastbound":1, "Southbound":2, "Westbound":3, "Clockwise":4, "Counter-Clockwise":5 };
 		var checkable = ($('#directionInput').val());
-		
+
 		if(landing.ValidationService.isOpnDir(checkable)) {
 			landing.state.sched.dir = allDirections[checkable];
+			console.log(landing.state.sched);
 			landing._addTimeTable(landing.state.sched);
 		}
 
@@ -215,14 +245,17 @@ LandingOptions.prototype._showSchedFilter = function(stateValues) {
 
 	$('#timeInput').on('change keyup',function(event) { 
 		var checkable = ($('#timeInput').val());
-		console.log('changed time', checkable);
+		if(isNaN(checkable)) {
+			landing.state.sched.time = landing._hhMMaToMin(checkable);
+			landing._addTimeTable(landing.state.sched);
+		}
 	});
 };
 
 LandingOptions.prototype._addTimeTable = function(stateValues) {
 	var landing = this;
 	var lineId = stateValues.line + "_" + landing._trainByNumber[stateValues.line];
-	var direction = 0;
+	var direction = stateValues.dir;
 	var timeTable = this._schedDisplay;
 	var lineTitle = landing._trainByNumber[stateValues.line].replace("_", " ");
 
@@ -254,7 +287,7 @@ LandingOptions.prototype._addTimeTable = function(stateValues) {
 				totalMinutes = 10;
 			}
 
-			friendlyStop.time = landing._formatTime(totalMinutes);
+			friendlyStop.time = landing._minToHHmmA(totalMinutes, "HH:mm a");
 
 			return timeTableTemplate(friendlyStop);
 		}).join('');
