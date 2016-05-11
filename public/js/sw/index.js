@@ -12,9 +12,9 @@ self.addEventListener('install', function(event) {
         '/skeleton',
         'js/main.js',
         'css/main.css',
-        'imgs/icon.png'
-        //'https://fonts.gstatic.com/s/roboto/v15/2UX7WLTfW3W8TclTUvlFyQ.woff',
-        //'https://fonts.gstatic.com/s/roboto/v15/d-6IYplOFocCacKzxwXSOD8E0i7KZn-EPnyo3HZu7kw.woff'
+        'imgs/icon.png',
+        'https://fonts.gstatic.com/s/roboto/v15/2UX7WLTfW3W8TclTUvlFyQ.woff',
+        'https://fonts.gstatic.com/s/roboto/v15/d-6IYplOFocCacKzxwXSOD8E0i7KZn-EPnyo3HZu7kw.woff'
       ]);
     })
   );
@@ -52,6 +52,10 @@ self.addEventListener('fetch', function(event) {
        event.respondWith(serveAvatar(event.request));
        return;
     }
+    /*if (requestUrl.pathname.startsWith('/api/download/')) {
+      event.respondWith(serverModels(event.request));
+      return;
+    }*/
   }
 
   event.respondWith(
@@ -89,6 +93,11 @@ function servePhoto(request) {
       });
     });
   });
+}
+
+function serverModels(request) {
+  var storageUrl = request.url.replace(/-\d+px\.json$/, '');
+  console.log("intercepted"); 
 }
 
 self.addEventListener('message', function(event) {
