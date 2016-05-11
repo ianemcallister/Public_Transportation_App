@@ -1,8 +1,5 @@
 {
-	"directions": {
-		"0": "westbound",
-		"1": "eastbound"
-	},
+	"directions": { "0": "westbound","1": "eastbound" },
 	"sequence": {
 		"0": {
 			"stop_name": "Portland Int'l Airport MAX Station",

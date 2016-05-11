@@ -102,6 +102,11 @@ gulp.task('js:server', function () {
     .pipe(gulp.dest('build/server'));
 });
 
+gulp.task('json:server', function () {
+  return gulp.src('server/**/*.json')
+    .pipe(gulp.dest('build/server'));
+});
+
 gulp.task('templates:server', function () {
   return gulp.src('templates/*.hbs')
     .pipe(plugins.handlebars())
@@ -145,5 +150,5 @@ gulp.task('server', function() {
 });
 
 gulp.task('serve', function(callback) {
-  runSequence('clean', ['css', 'js:browser', 'templates:server', 'js:server', 'copy'], ['server', 'watch'], callback);
+  runSequence('clean', ['css', 'js:browser', 'templates:server', 'json:server', 'js:server', 'copy'], ['server', 'watch'], callback);
 });

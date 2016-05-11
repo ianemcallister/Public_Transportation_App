@@ -9,7 +9,7 @@ TrainDataService.prototype._get = function(url) {
 };
 
 TrainDataService.prototype._getJSON = function(url) {
-	return get(url).then(function(response) {
+	return this._get(url).then(function(response) {
 		return response.json();
 	});
 };
@@ -42,6 +42,14 @@ TrainDataService.prototype.getAllTrainsList = function() {
 			console.log("error: " + error);
 			//TODO: if no luck with the cash get from the server
 
+		});
+
+		dataService._getJSON('api/download/allTrains.json')
+		.then(function(response) {
+			console.log(response);
+		})
+		.catch(function(error) {
+			console.log('error: ' + error);
 		});
 		
 	});

@@ -193,9 +193,14 @@ LandingOptions.prototype._showSchedFilter = function(stateValues) {
 
 	//add watchers
 	$('#directionInput').on('change keyup',function(event) {
+		var allDirections = {"Northbound":0, "Eastbound":1, "Southbound":2, "Westbound":3, "Clockwise":4, "Counter-Clockwise":5 };
 		var checkable = ($('#directionInput').val());
-		console.log('changed direction', checkable);
-		//landing._addTimeTable()
+		
+		if(landing.ValidationService.isOpnDir(checkable)) {
+			landing.state.sched.dir = allDirections[checkable];
+			landing._addTimeTable(landing.state.sched);
+		}
+
 	});
 
 	$('#wkdayInput').on('change keyup',function(event) {

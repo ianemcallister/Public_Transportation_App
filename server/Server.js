@@ -145,6 +145,33 @@ export default class Server {
       res.send('<strong>Hello World</strong>');
     });
 
+    this._app.get('/api/download/:fileName', (req, res) => {
+      var fullPath = __dirname + '/assets/JSON/' + req.params.fileName
+      console.log(fullPath);
+      fs.exists(fullPath , function(exists) {
+        console.log("exists?: " + exists);
+        if(exists) {
+          console.log('found it');
+          fs.stat(fullPath, function(error, stats) {
+            console.log("error: " + error);
+            fs.open(fullPath, "r", function(error, fd) {
+              var buffer = new Buffer(stats.size);
+
+              fs.read(fd, buffer, 0, buffer.length, null, function(error, bytesRead, buffer) {
+                var data = buffer.toString('utf8', 0, buffer.length);
+
+                console.log(data);
+                fs.close(fd);
+              });
+            });
+          });
+        } else {
+          console.log('file doesn\'t exist');
+        }
+      });
+      res.send('{"testing": "test"}');
+    });
+
     generateReady.then(_ => {
       // generate initial messages
       let time = new Date();
