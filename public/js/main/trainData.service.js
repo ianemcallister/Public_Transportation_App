@@ -1,93 +1,104 @@
-import idb from 'idb';
 
-export default function TrainDataService() {
+class TrainDataService {
+	constructor() {
+
+		this._trainsByName = {};
+		this._trainsByNumber = {};
+		this._trainDirections = {};
+		this._schedByDbId = {};
+
+		//TODO: Pull this out later
+		this._trainByNumber = {
+			90: "Red_Line",
+			100: "Green_Line",
+			190: "Blue_Line",
+			200: "Yellow_Line",
+			290: "Orange_Line"
+		};
+
+		//TODO: Pull this out later
+		this._trainsByName = {
+			"Red_Line": 90,
+			"Green_Line": 100,
+			"Blue_Line": 190,
+			"Yellow_Line": 200,
+			"Orange_Line": 290
+		};
+
+		//TODO: Pull this out later
+		this._trainDirections = {
+			"Red_Line": {1:'Eastbound', 3:'Westbound'},
+			"Green_Line": {1:'Eastbound', 3:'Westbound'},
+			"Blue_Line": {1:'Eastbound', 3:'Westbound'},
+			"Yellow_Line": {1:'Eastbound', 3:'Westbound'},
+			"Orange_Line": {1:'Eastbound', 3:'Westbound'}
+		};
+
+		this._schedByDbId = {
+			"Red_Line": {name:"90_Red_Line", "Westbound":"dir0", "Eastbound":"dir1"} 
+		};
+	}
+
+	_get() {}
+	_getJSON() {}
+	_getCachedDbPromise() {}
+
+	getTrainNumberByName(name) {
+		return this._trainsByName[name];
+	}
+
+	getTrainNameByNumber(number) {
+		return this._trainsByNumber[number];
+	}
+
+	getTrainObjectByName(name) {
+		let newTrain = {};
+		newTrain[name] = this.getTrainNumberByName(name);
+		return newTrain;
+	}
+
+	getTrainObjectByNumber(number) {}
+
+	getTrainDirections(trainObject) {
+		let local = this;
+		let directions = {};
+		let currentline = '';
+
+		Object.keys(trainObject).forEach(function(key) {
+			directions[key] = local._trainDirections[key];
+			currentline = key;
+		})
+
+		return directions[currentline];
+	}
+
+	isValidTrainDirection(line, dir) {
+		
+		let short_name = '';
+		Object.keys(line).forEach(function(key){ short_name = key; })
+		
+		let allDirections = this._trainDirections[short_name];
+		let found = false;
+
+		Object.keys(allDirections).forEach(function(direction) {
+			if(allDirections[direction] == dir) found = true;
+		});
+
+		return found;
+	}
+
+	getDbLineId(line) {
+		console.log(line); 
+		return {"Red_Line": {name:"90_Red_Line", "Westbound":"dir0", "Eastbound":"dir1"}};
+	}
+	getAllTrainsList() {
+
+	}
+	getLineTimeTable() {}
+	
 
 }
 
-TrainDataService.prototype._get = function(url) {
-	return fetch(url);
-};
+let _trainDataService = new TrainDataService;
 
-TrainDataService.prototype._getJSON = function(url) {
-	return this._get(url).then(function(response) {
-		return response.json();
-	});
-};
-
-TrainDataService.prototype._cachedDbExists = function(db, version, store) {
-
-};
-
-TrainDataService.prototype._getCachedDbPromise = function(db, version, store) {
-	return idb.open(db, version, function(upgradeDb) {
-		var store = upgradeDb.transaction.objectStore(store);
-	});
-};
-
-TrainDataService.prototype.getAllTrainsList = function() {
-	var dataService = this;
-
-	//return a promise for async work
-	return new Promise(function(resolve, reject) {
-
-		dataService._getCachedDbPromise('transit-db', 4, 'trains')
-		.then(function(db) {
-			var store = db.transaction('trains').objectStore('trains');
-			return store.getAll();
-		})
-		.then(function(trains) {
-			resolve(trains);
-		})
-		.catch(function(error) {
-			console.log("error: " + error);
-			//TODO: if no luck with the cash get from the server
-
-		});
-
-		/*dataService._getJSON('api/download/allTrains.json')
-		.then(function(response) {
-			resolve(response);
-		})
-		.catch(function(error) {
-			console.log('error: ' + error);
-			//if the file can't be grabbed from the network, grab from idb
-			dataService._getCachedDbPromise('transit-db', 4, 'trains')
-			.then(function(db) {
-				var store = db.transaction('trains').objectStore('trains');
-				return store.getAll();
-			})
-			.then(function(trains) {
-				resolve(trains);
-			})
-			.catch(function(error) {
-				console.log("error: " + error);
-				//TODO: if no luck with the cash get from the server
-
-			});
-		});*/
-		
-	});
-};
-
-TrainDataService.prototype.getLineTimeTable = function(lineId, direction) {
-	var dataService = this;
-	var heading = "dir" + direction;
-
-	//return a promise for async work
-	return new Promise(function(resolve, reject) {
-		dataService._getCachedDbPromise('transit-db', 4, lineId)
-		.then(function(db) {
-			var tx = db.transaction(lineId);
-			var routeStore = tx.objectStore(lineId);
-			var sequence = routeStore.index(heading);
-
-			return sequence.getAll();
-		}).then(function(stops) {
-			//pass the stops back
-			resolve(stops);
-		}).catch(function(error) {
-			console.log("error: " + error);
-			reject();
-		})
-	});
-};
+export default _trainDataService;

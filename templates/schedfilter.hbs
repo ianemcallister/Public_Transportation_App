@@ -1,9 +1,15 @@
 <div>
+	 
 	<!--Direction Of Travel-->
-	<input type='text' list="direction" placeholder='{{direction}}' id="directionInput">
+	<input type='text' list="direction" placeholder='{{allDirections.default}}' id="directionInput">
 		<datalist name='direction' id='direction' >
-			<option value="Westbound"></option>
-			<option value="Eastbound"></option>
+			{{#if allDirections.Northbound}}<option value="Northbound"></option>{{/if}}
+			{{#if allDirections.Eastbound}}<option value="Eastbound"></option>{{/if}}
+			{{#if allDirections.Southbound}}<option value="Southbound"></option>{{/if}}
+			{{#if allDirections.Westbound}}<option value="Westbound"></option>{{/if}}
+			{{#if allDirections.Clockwise}}<option value="Clockwise"></option>{{/if}}
+			{{#if allDirections.Counter-Clockwise}}<option value="Counter-Clockwise"></option>{{/if}}
+			
 		</datalist>
 	<!--Day Of The Week-->
 	<input type='text' list="wkdays" placeholder='{{wkday}}' id="wkdayInput">

@@ -28,8 +28,8 @@ dbPromise.then(function(db) {
 
   systemGraphStore.put({
     short_name: 90, long_name: 'Red Line', directions: {
-      0: "westbound",
-      1: "eastbound"
+      3: "Westbound",
+      1: "Eastbound"
     } 
   });
 

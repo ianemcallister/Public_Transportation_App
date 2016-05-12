@@ -1,6 +1,7 @@
-import trainDataService from './../trainData.service';
+import trainDataService from './../old_trainData.service';
 import validationService from './../validation.service';
-import stateService from './../state.service';
+import TrainDataServ from './../trainData.service';
+import StateService from './../state.service';
 import bookendsTemplate from './../../../../templates/bookends.hbs';
 import stopsTemplate from './../../../../templates/stops.hbs';
 import lineTemplate from './../../../../templates/lines.hbs';
@@ -14,7 +15,14 @@ export default function LandingOptions(container) {
 	
 	landing._trainByName = {};
 	landing._trainByNumber = {};
-	landing._trainDirections = {};
+	landing._trainDirections = { validDirection: function(dir) {
+		if(typeof landing._trainByNumber !== 'undefined') {
+			var line = landing._trainByNumber[landing.state.sched.line];
+			var train = this[line];
+			if(typeof this[line][dir] !== 'undefined') return true;
+			else return false;
+		}
+	}};
 	landing.state = {
 		nav: { start: '', end: '', time: 0, day: 0, dir: 0, active:false},
 		sched: { line: 0, day: 0, time: 0, dir: 0, active:false, directions:{} }
@@ -22,9 +30,8 @@ export default function LandingOptions(container) {
 
 	//declare and initialize variables
 	landing._container = container;
-	landing.TrainDataService = new trainDataService();
+	landing.TrainDataService = new trainDataService;
 	landing.ValidationService = new validationService();
-	landing.StateService = new stateService();
 	landing._bookendsSelector = container.querySelector('.nav');
 	landing._navFilter = container.querySelector('.navFilter');
 	landing._navDisplay = container.querySelector('.navDisplay');
@@ -65,26 +72,10 @@ LandingOptions.prototype._startWatching = function() {
 		var checkable = ($('#trainLinesInput').val()).replace(" ", "_");
 		
 		if(typeof landing._trainByName[checkable] !== "undefined") {
-			//define the current time
-			var timeNow = landing._currentTime();
-			var currentTime = timeNow.time;
-			var currentDay = timeNow.wkday;
-
-			//set the state variables
-			landing.state.sched.active = true;
-			landing.state.sched.line = landing._trainByName[checkable];
-			landing.state.sched.day = currentDay
-			landing.state.sched.time = currentTime
-			landing.state.sched.dir = 0
-
-			//log for reference
-			console.log(landing.state.sched);
-
-			//build the filter
-			landing._showSchedFilter(landing.state.sched);
-
-			//build the timetable
-			landing._addTimeTable(landing.state.sched);
+			//save the selected line
+		
+			//build the new view
+			landing._buildSched(checkable);
 
 		} else return;
 
@@ -180,16 +171,19 @@ LandingOptions.prototype._addTrainsList = function() {
 			landing._trainByName[key] = train['short_name'];
 			landing._trainByNumber[shortName] = key;
 
+			landing._trainDirections[key] = {};
+
 			if(typeof train['directions'] !== "undefined") {
 				var bothDirs = train['directions'];
+				var i = 0;
 				
-				landing._trainDirections[key] = {};
-				landing._trainDirections[key][bothDirs['0']] = 0;
-				landing._trainDirections[key][bothDirs['1']] = 1;
+				Object.keys(bothDirs).forEach(function(direction) {
+					var heading = bothDirs[direction];
+					landing._trainDirections[key][heading] = i;
+					i++;
+				});
 			}
 		});
-
-		console.log(landing._trainDirections);
 
 		//build the options from the model
 		var htmlString = trains.map(function(train) {
@@ -202,17 +196,42 @@ LandingOptions.prototype._addTrainsList = function() {
 		//append to the DOM
 		trainLinesInput.appendChild(nodes, trainLinesInput.firstChild);
 
+	})
+	.catch(function(error) {
+		console.log("error: " + error);
 	});
 	
 };
 
+LandingOptions.prototype._buildSched = function(checkable) {
+	var landing = this;
+
+	StateService.initializeSched(checkable);
+	
+	/*Object.keys(landing.state.sched.directions).forEach(function(direction) {
+		if(landing.state.sched.directions[direction]) { 
+			landing.state.sched.directions['default'] = direction; return; 
+		}
+	})*/
+
+	//build the filter
+	landing._showSchedFilter(/*landing.state.sched*/);
+
+	//build the timetable
+	landing._addTimeTable(/*landing.state.sched*/);
+};
+
 LandingOptions.prototype._showSchedFilter = function(stateValues) {
 	var landing = this;
-	var schedFilter = landing._schedFilter;
+	/*var schedFilter = landing._schedFilter;
 	var friendlyTime = landing._minToHHmmA(stateValues.time, "HH:mm:ss.SSS");
 	var friendlyDay = landing._formatDay(stateValues.day);
 	var friendlyDir = landing._formatDir(stateValues.dir);
-	var context = {direction: friendlyDir, wkday: friendlyDay, time: friendlyTime};
+
+	var context = {
+		direction: friendlyDir, wkday: friendlyDay, time: friendlyTime,
+		allDirections: landing.state.sched.directions
+	};
 
 	var htmlString = schedFilterTemplate(context);
 
@@ -249,12 +268,18 @@ LandingOptions.prototype._showSchedFilter = function(stateValues) {
 			landing.state.sched.time = landing._hhMMaToMin(checkable);
 			landing._addTimeTable(landing.state.sched);
 		}
-	});
+	});*/
 };
 
 LandingOptions.prototype._addTimeTable = function(stateValues) {
 	var landing = this;
-	var lineId = stateValues.line + "_" + landing._trainByNumber[stateValues.line];
+	
+	var currentLine = StateService.getSchedLine();
+	var currentHeading = StateService.getSchedHeading();
+	var dbLineId = TrainDataServ.getDbLineId(currentLine);//stateValues.line + "_" + landing._trainByNumber[stateValues.line];
+	
+	console.log(dbLineId);
+
 	var direction = stateValues.dir;
 	var timeTable = this._schedDisplay;
 	var lineTitle = landing._trainByNumber[stateValues.line].replace("_", " ");
@@ -270,11 +295,11 @@ LandingOptions.prototype._addTimeTable = function(stateValues) {
 	//reach out to the db
 	landing.TrainDataService.getLineTimeTable(lineId, direction)
 	.then(function(stops) {
-
+		console.log("stateValues = ", stateValues);
 		//build the selected timetable
 		var header = "<h4>"+ lineTitle + "</h4>\
-		<span>" + landing._formatDir(stateValues.dir) + 
-		" - " + landing._formatDay(stateValues.day) + "</span><br>\
+		<span>" + stateValues.directions.default + "</span> - <span>" + 
+		landing._formatDay(stateValues.day) + "</span><br>\
 		<strong>Station</strong><strong>Arrives</strong>";
 
 		var htmlString = stops.map(function(stop) {
