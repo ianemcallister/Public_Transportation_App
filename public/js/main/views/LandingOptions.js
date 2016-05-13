@@ -1,5 +1,3 @@
-import trainDataService from './../old_trainData.service';
-import validationService from './../validation.service';
 import TrainDataServ from './../trainData.service';
 import StateService from './../state.service';
 import bookendsTemplate from './../../../../templates/bookends.hbs';
@@ -12,26 +10,9 @@ import $ from 'jquery';
 
 export default function LandingOptions(container) {
 	var landing = this;
-	
-	landing._trainByName = {};
-	landing._trainByNumber = {};
-	landing._trainDirections = { validDirection: function(dir) {
-		if(typeof landing._trainByNumber !== 'undefined') {
-			var line = landing._trainByNumber[landing.state.sched.line];
-			var train = this[line];
-			if(typeof this[line][dir] !== 'undefined') return true;
-			else return false;
-		}
-	}};
-	landing.state = {
-		nav: { start: '', end: '', time: 0, day: 0, dir: 0, active:false},
-		sched: { line: 0, day: 0, time: 0, dir: 0, active:false, directions:{} }
-	};
 
 	//declare and initialize variables
 	landing._container = container;
-	landing.TrainDataService = new trainDataService;
-	landing.ValidationService = new validationService();
 	landing._bookendsSelector = container.querySelector('.nav');
 	landing._navFilter = container.querySelector('.navFilter');
 	landing._navDisplay = container.querySelector('.navDisplay');
@@ -70,8 +51,8 @@ LandingOptions.prototype._startWatching = function() {
 	$('#trainLinesInput').on('change keyup click',function(event) {
 		//check for a valid input
 		var checkable = ($('#trainLinesInput').val()).replace(" ", "_");
-		
-		if(typeof landing._trainByName[checkable] !== "undefined") {
+		console.log(TrainDataServ.isValidTrainByName(checkable));
+		if(TrainDataServ.isValidTrainByName(checkable)) {
 			//save the selected line
 		
 			//build the new view
@@ -168,19 +149,23 @@ LandingOptions.prototype._addTrainsList = function() {
 	var landing = this;
 	var trainLinesInput = landing._trainLines;
 
-	landing.TrainDataService.getAllTrainsList()
+	TrainDataServ.getAllTrainsList()
 	.then(function(trains) {
-		
+
 		//save the train details for later
 		trains.forEach(function(train) {
 			var longName = train['long_name'];
 			var shortName = train['short_name'];
 			var key = longName.replace(" ", "_");
 			
-			landing._trainByName[key] = train['short_name'];
-			landing._trainByNumber[shortName] = key;
+			//console.log(train, longName, shortName, key);
+			TrainDataServ.addSchedTrain(key, shortName);
 
-			landing._trainDirections[key] = {};
+			//landing._trainByName[key] = train['short_name'];
+			//landing._trainByNumber[shortName] = key;
+			//console.log(key, train.directions);
+			TrainDataServ.addSchedLineDirs(key, train.directions);
+			/*landing._trainDirections[key] = {};
 
 			if(typeof train['directions'] !== "undefined") {
 				var bothDirs = train['directions'];
@@ -191,7 +176,7 @@ LandingOptions.prototype._addTrainsList = function() {
 					landing._trainDirections[key][heading] = i;
 					i++;
 				});
-			}
+			}*/
 		});
 
 		//build the options from the model
@@ -205,8 +190,7 @@ LandingOptions.prototype._addTrainsList = function() {
 		//append to the DOM
 		trainLinesInput.appendChild(nodes, trainLinesInput.firstChild);
 
-	})
-	.catch(function(error) {
+	}).catch(function(error) {
 		console.log("error: " + error);
 	});
 	
@@ -228,6 +212,9 @@ LandingOptions.prototype._buildSched = function(checkable) {
 
 	//build the timetable
 	landing._addTimeTable();
+
+	//mark as active
+	StateService.activeSection('_sched');
 };
 
 LandingOptions.prototype._showSchedFilter = function() {
@@ -245,13 +232,21 @@ LandingOptions.prototype._showSchedFilter = function() {
 		dirOptions: StateService.getHeadingOptions()
 	};
 
-	console.log(context);
+	//clean old nodes
+	if(StateService.sectionIsActive('_sched')) {
+		console.log(container.querySelector('#schedFilterOptions'));
+		let schedFilterOptions = container.querySelector('#schedFilterOptions');
+		landing._cleanNode(schedFilterOptions);
+	}
 	
 	var htmlString = schedFilterTemplate(context);
 
 	var nodes = parseHTML(htmlString);
 
 	schedFilter.appendChild(nodes, schedFilter);
+
+	//add 
+	
 
 	//add watchers
 	$('#directionInput').on('change keyup',function(event) {
@@ -266,30 +261,15 @@ LandingOptions.prototype._showSchedFilter = function() {
 			//rebuild the timetable
 			landing._addTimeTable();
 		}
-		
-		/*if(landing.ValidationService.isOpnDir(checkable)) {
-			landing.state.sched.dir = allDirections[checkable];
-			console.log(landing.state.sched);
-			landing._addTimeTable(landing.state.sched);
-		}*/
 
 	});
-
-	/*$('#wkdayInput').on('change keyup',function(event) {
-		var checkable = ($('#wkdayInput').val()); 
-		
-		if(landing.ValidationService.isWkday(checkable)) {
-			landing.state.sched.day = landing._findDay(checkable);
-			landing._addTimeTable(landing.state.sched);
-		}
-
-	});*/
 
 	$('#timeInput').on('change keyup',function(event) { 
 		var checkable = ($('#timeInput').val());
 		if(isNaN(checkable)) {
-			landing.state.sched.time = landing._hhMMaToMin(checkable);
-			landing._addTimeTable(landing.state.sched);
+			console.log(checkable);
+			//landing.state.sched.time = landing._hhMMaToMin(checkable);
+			//landing._addTimeTable(landing.state.sched);
 		}
 	});
 };
@@ -297,7 +277,6 @@ LandingOptions.prototype._showSchedFilter = function() {
 LandingOptions.prototype._addTimeTable = function() {
 	var landing = this;
 	
-	console.log('coming back in');
 	//view variable
 	var timeTable = this._schedDisplay;
 

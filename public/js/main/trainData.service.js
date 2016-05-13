@@ -1,5 +1,7 @@
 import idb from 'idb';
 
+const placeholder = {1: "Eastbound", 3: "Westbound"};
+
 class TrainDataService {
 	constructor() {
 
@@ -7,33 +9,6 @@ class TrainDataService {
 		this._trainsByNumber = {};
 		this._trainDirections = {};
 		this._schedByDbId = {};
-
-		//TODO: Pull this out later
-		this._trainByNumber = {
-			90: "Red_Line",
-			100: "Green_Line",
-			190: "Blue_Line",
-			200: "Yellow_Line",
-			290: "Orange_Line"
-		};
-
-		//TODO: Pull this out later
-		this._trainsByName = {
-			"Red_Line": 90,
-			"Green_Line": 100,
-			"Blue_Line": 190,
-			"Yellow_Line": 200,
-			"Orange_Line": 290
-		};
-
-		//TODO: Pull this out later
-		this._trainDirections = {
-			"Red_Line": {1:'Eastbound', 3:'Westbound'},
-			"Green_Line": {1:'Eastbound', 3:'Westbound'},
-			"Blue_Line": {1:'Eastbound', 3:'Westbound'},
-			"Yellow_Line": {1:'Eastbound', 3:'Westbound'},
-			"Orange_Line": {1:'Eastbound', 3:'Westbound'}
-		};
 
 		this._schedByDbId = {
 			"Red_Line": {name:"90_Red_Line", "Westbound":"dir0", "Eastbound":"dir1"} 
@@ -47,6 +22,19 @@ class TrainDataService {
 		return idb.open(db, version, function(upgradeDb) {
 			let store = upgradeDb.transaction.objectStore(store);
 		});
+	}
+
+	_setTrainList(list, key, short_name) {
+		if(list == '_trainsByNumber')
+			this[list][short_name] = key;
+		if(list == '_trainsByName')
+			this[list][key] = short_name;
+	}
+
+	_setTrainDirections(key, directions) {
+		if(typeof directions == 'undefined')
+			directions = placeholder;
+		this._trainDirections[key] = directions;
 	}
 
 	getTrainNumberByName(name) {
@@ -93,6 +81,12 @@ class TrainDataService {
 		return found;
 	}
 
+	isValidTrainByName(name) {
+		let local = this;
+		if(typeof local._trainsByName[name] !== 'undefined') return true;
+		else return false;
+	}
+
 	getDbLineId(line) {
 		return "90_Red_Line";
 	}
@@ -102,7 +96,21 @@ class TrainDataService {
 	}
 
 	getAllTrainsList() {
+		let ds = this;
 
+		//resolvturn a promise for async work
+		return new Promise(function(resolve, reject) {
+
+			ds._getCachedDbPromise('transit-db', 4, 'trains')
+			.then(function(db) {
+				let store = db.transaction('trains').objectStore('trains');
+				return store.getAll();
+			}).then(function(trains) {
+				resolve(trains);
+			}).catch(function(error) {
+				console.log("error: " + error);
+			})
+		});
 	}
 
 	getLineTimeTable(dbLineId, currentHeading) {
@@ -126,7 +134,18 @@ class TrainDataService {
 		});
 	}	
 	
+	addSchedTrain(key, short_name) {
+		
+		//add to both lists
+		this._setTrainList('_trainsByName', key, short_name);
+		this._setTrainList('_trainsByNumber', key, short_name);
+	}
 
+	addSchedLineDirs(key, directions) {
+		//add to the model
+		this._setTrainDirections(key, directions);
+		
+	}
 }
 
 let _trainDataService = new TrainDataService;

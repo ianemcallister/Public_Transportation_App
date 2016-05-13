@@ -155,7 +155,7 @@ class StateService {
 			if(allHeadings[dir] == newHeading)
 				foundNum = dir;
 		});
-		
+
 		let headingObject = {};
 		headingObject[newHeading] = foundNum;
 
@@ -217,7 +217,6 @@ class StateService {
 		let selected = this._getStateValues("_sched","inputs","heading", "selected");
 		let defaultHeading = this._getStateValues("_sched","inputs","heading", "default");
 		
-		console.log(selected, defaultHeading);
 		//check selected first, then default
 		if((Object.keys(selected).length) > 0) {
 			foundHeading = Object.keys(selected)[0];
@@ -241,7 +240,7 @@ class StateService {
 	initializeSched(short_name) {
 		let state = this;
 
-		state._setStateValues(true, "_sched", "active");
+		//state._setStateValues(true, "_sched", "active");
 		state._setStateValues(TrainDataService.getTrainObjectByName("Red_Line"), "_sched", "inputs", "line", "selected");
 		state._setStateValues(state._wkdayFromTime(state._currentTime().wkday), "_sched", "inputs", "wkday", "default");
 		state._setStateValues(state._currentTime().time, "_sched", "inputs", "time", "default");
@@ -250,6 +249,14 @@ class StateService {
 		state._setStateValues(state._setLineHeadingTemplateModal(), "_sched", "inputs", "heading", "templateModal");
 
 		console.log(this._sched);
+	}
+
+	activeSection(section) {
+		this._setStateValues(true, section, "active");
+	}
+
+	sectionIsActive(section) {
+		return this._getStateValues(section, 'active');
 	}
 
 	isValidDirection(query) {
