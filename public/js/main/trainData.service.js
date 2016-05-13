@@ -15,7 +15,7 @@ class TrainDataService {
 			"Red_Line": {name:"90_Red_Line", "Westbound":"dir0", "Eastbound":"dir1"} 
 		};
 
-		Backend.updateADbStore('api/download/90_Red_Line_Stops2.json', 'transit-db', '90_Red_line');
+		//Backend.updateADbStore('api/download/90_Red_Line_Stops2.json', 'transit-db', '90_Red_line');
 	}
 
 	_get() {}
@@ -104,7 +104,7 @@ class TrainDataService {
 		//resolvturn a promise for async work
 		return new Promise(function(resolve, reject) {
 
-			ds._getCachedDbPromise('transit-db', 4, 'trains')
+			ds._getCachedDbPromise('transit-db', 9, 'trains')
 			.then(function(db) {
 				let store = db.transaction('trains').objectStore('trains');
 				return store.getAll();
@@ -116,12 +116,35 @@ class TrainDataService {
 		});
 	}
 
-	getLineTimeTable(dbLineId, currentHeading) {
+	getLineTimeTable(dbLineId) {
 		let local = this;
 		
 		//return a promise for async work
 		return new Promise(function(resolve, reject) {
-			local._getCachedDbPromise('transit-db', 4, dbLineId)
+			Backend.readLineSequence(dbLineId)
+			.then(function(response) {
+				//console.log(response);
+
+				//build the proper format for the view
+				let returnObject = [];
+
+				Object.keys(response).forEach(function(stop) {
+					let stopName = '';
+					//identify stop name
+					if(response[stop].parent_station.stop_id !== null) 
+						stopName = response[stop].parent_station.stop_name;
+					else
+						stopName = response[stop].stop_name;
+
+					returnObject.push({
+						stop_name: stopName,
+						arrivals: response[stop].arrivals
+					});
+				});
+
+				resolve(returnObject);
+			});
+			/*local._getCachedDbPromise('transit-db', 9, dbLineId)
 			.then(function(db) {
 				let tx = db.transaction(dbLineId);
 				let routeStore = tx.objectStore(dbLineId);
@@ -133,7 +156,7 @@ class TrainDataService {
 			}).catch(function(error) {
 				console.log("error: " + error);
 				reject();
-			});
+			});*/
 		});
 	}	
 	

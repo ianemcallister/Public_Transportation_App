@@ -2,7 +2,8 @@ import idb from 'idb';
 
 class BackendService {
 	constructor() {
-		this.dbVersion = 4;
+		this.dbVersion = 9;
+		this.dbName = 'transit-db';
 	}
 
 	_get(url) {
@@ -18,29 +19,60 @@ class BackendService {
 	_getCachedDbPromise(db, version, store, processReq, keyPath) {
 		return idb.open(db, version, function(upgradeDb) {
 			//let store = upgradeDb.transaction.objectStore(store);
-			if(processReq == 'add')
-				upgradeDb.createObjectStore(store, {keyPath: keyPath});
-
+			if(processReq == 'create') upgradeDb.createObjectStore(store, {keyPath: keyPath});
+			//if(processReq == 'read') {}
+			//if(processReq == 'update') {}
+			if(processReq == 'delete') upgradeDb.deleteObjectStore(store);
 			//TODO ADD AN UPDATE PROCESS
 		});
 	}
 
-	_createDbContent() {}
-	_readDbContent() {}
-	_updateDbContent(db, store, newValues) {
-		//TODO PULL THIS OUT LATER
-		console.log(db, store, newValues);
-		
-		let dbPromise = this._getCachedDbPromise(db, this.dbVersion, store);
+	_createDbStore(store, keyPath) {
+		let version = this.dbVersion;
+		let dbName = this.dbName;
 
+		return this._getCachedDbPromise(dbName, version, store, "create", keyPath);
+	}
+
+	_openDbStore() {
+		let version = this.dbVersion;
+		let dbName = this.dbName;
+
+		return this._getCachedDbPromise(dbName, version);
+	}
+
+	_readDbStore() {}
+	
+	_updateDbStore(dbPromise, store, seqModel) {
+		//make additions to the store
 		dbPromise.then(function(db) {
 			let tx = db.transaction(store, 'readwrite');
-			let selectedstore = tx.objectStore(store);
+			let theStore = tx.objectStore(store);
 
+			Object.keys(seqModel).forEach(function(stop) {
+				
+				if(stop !== 'direction') {
+					
+					//build the model
+					let storeObject = {
+						seqId: stop,
+						stop_id: seqModel[stop].stop_id,
+						stop_name: seqModel[stop].stop_name,
+						arrivals: seqModel[stop].arrivals,
+						parent_station: seqModel[stop].parent_station
+					}
+					
+					//add it to the store
+					theStore.put(storeObject);
+				}
 
+			});
+
+			console.log(store + " updated");
 		});
 	}
-	_deleteDbContent() {}
+
+	_deleteDbStore() {}
 
 	//add a new store here
 
@@ -104,9 +136,16 @@ class BackendService {
 					//console.log(sequence);
 
 					//add a new store
-					let dbPromise = backend._getCachedDbPromise('transit-db', backend.dbVersion, sequence, "add", 'seqId');
-					
+					if(false) {
+						let dbPromise = backend._createDbStore(sequence, 'seqId');
+						backend._updateDbStore(dbPromise, sequence, bothSequences[sequence]);
+					}
+
 					//update an existing store
+					if(true) {
+						let dbPromise = backend._openDbStore();
+						backend._updateDbStore(dbPromise, sequence, bothSequences[sequence]);
+					}
 				});
 			}
 			
@@ -116,7 +155,24 @@ class BackendService {
 		});
 	}
 
+	readLineSequence(dbStoreId) {
+		let backend = this;
 
+		let dbPromise = backend._openDbStore();
+		return new Promise(function(resolve, reject) {
+			dbPromise.then(function(db) {
+				let tx = db.transaction(dbStoreId);
+				let store = tx.objectStore(dbStoreId);
+
+				return store.getAll();
+			}).then(function(stops) {
+				resolve(stops);
+			}).catch(function(error) {
+				console.log('error: ' + error);
+				reject();
+			});
+		})
+	}
 }
 
 let _backendService = new BackendService;

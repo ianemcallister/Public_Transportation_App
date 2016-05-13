@@ -26,7 +26,7 @@ export default function LandingOptions(container) {
 	console.log(landing._container);
 
 	//download content
-	
+
 	//build page
 	landing._initializePage();
 	
@@ -283,31 +283,42 @@ LandingOptions.prototype._addTimeTable = function() {
 	//model variables
 	var currentLine = StateService.getSchedLine();
 	var currentHeading = StateService.getSchedHeading();
-	var dbLineId = StateService.getDbLineId();//stateValues.line + "_" + landing._trainByNumber[stateValues.line];
+	var dbLineId = StateService.getDbLineId();
 	
 	//check if nodes were there before then clear anything out that was there
 	landing._cleanNode(timeTable);
 	
 	//reach out to the db
-	TrainDataServ.getLineTimeTable(dbLineId, currentHeading.ref)
+	TrainDataServ.getLineTimeTable(dbLineId)
 	.then(function(stops) {
 		
 		//build the selected timetable
 		var header = "<h4>"+ currentLine.safe + " (" 
 		+ currentHeading.safe + ")</h4>\
 		<strong>Station</strong><strong>Arrives</strong>";
+		
+		//placeholder for arrival time accross stations
+		let trainNumber = 0;
+		let i = 0;
+		var currentTime = StateService.getReferenceTime();
 
+		//build the template
 		var htmlString = stops.map(function(stop) {
+			//build context for template
 			var friendlyStop = { stop_name: stop.stop_name, time: '' };
-			var totalMinutes = 0;
 
-			if(stop.arrivals[10]) {
-				totalMinutes = stateValues.time;
-			} else {
-				totalMinutes = 10;
+			//on the first station
+			if(i < 1) {
+				//check for the closest arrival time to the current time
+				Object.keys(stop.arrivals).forEach(function(key) {
+					if(stop.arrivals[key] >= currentTime && stop.arrivals[key - 1] < currentTime) {
+						trainNumber = key;
+					}
+				});
 			}
-
-			friendlyStop.time = landing._minToHHmmA(totalMinutes, "HH:mm a");
+			i++;
+			
+			friendlyStop.time = landing._minToHHmmA(stop.arrivals[trainNumber], "HH:mm a");
 
 			return timeTableTemplate(friendlyStop);
 		}).join('');

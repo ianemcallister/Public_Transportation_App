@@ -24,7 +24,7 @@ function getTrains() {
     return Promise.resolve();
   }
 
-  return idb.open('transit-db', 4, function(upgradeDb) {
+  return idb.open('transit-db', 9, function(upgradeDb) {
     /*var store = upgradeDb.createObjectStore('trains', {
       keyPath: 'short_name'
     });*/

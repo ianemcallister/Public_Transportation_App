@@ -78,8 +78,8 @@ class StateService {
 				options: {}
 			},
 			time: {
-				default: {},
-				selected: {}
+				default: null,
+				selected: null
 			}
 		};
 	}
@@ -200,10 +200,11 @@ class StateService {
 	}
 
 	getDbLineId() {
+		let headingObject = this.getSchedHeading();
 		let lineObject = this._getStateValues("_sched","inputs","line", "selected");
 		let lineName = Object.keys(lineObject)[0];
 		let lineNumber = lineObject[lineName];
-		return lineNumber + "_" + lineName;
+		return lineNumber + "_" + lineName + '_' + headingObject.safe;
 	}
 
 	getSchedHeading() {
@@ -266,6 +267,12 @@ class StateService {
 		else return false;
 	}
 
+	getReferenceTime() {
+		let timeObject = this._getStateValues('_sched','inputs','time');;
+		
+		if(timeObject.selected == null) return timeObject.default;
+		else return timeObject.selected;
+	}
 	//TODO REMOVE THIS LATER
 	setNav(number) {
 		this._nav = number;

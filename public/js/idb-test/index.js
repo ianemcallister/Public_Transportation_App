@@ -2,7 +2,7 @@ import idb from 'idb';
 
 console.log('opening idb');
 
-var dbPromise = idb.open('transit-db', 4, function(upgradeDb) {
+var dbPromise = idb.open('transit-db', 9, function(upgradeDb) {
   switch(upgradeDb.oldVersion) {
     case 0:
       upgradeDb.createObjectStore('system-graph', {keyPath: 'stnId'});
@@ -17,10 +17,31 @@ var dbPromise = idb.open('transit-db', 4, function(upgradeDb) {
       redLineStore.createIndex('dir0', 'dir0');
     case 4:
       redLineStore = upgradeDb.transaction.objectStore('90_Red_Line');
-      redLineStore.createIndex('dir1', 'dir1');
+      //redLineStore.createIndex('dir1', 'dir1');
+    case 5:
+      //upgradeDb.createObjectStore('90_Red_Line_Eastbound', {keyPath: 'seqId'});
+    case 6:
+      //upgradeDb.deleteObjectStore('stops');
+      //upgradeDb.deleteObjectStore('arrivals');
+      //upgradeDb.deleteObjectStore('system-graph');
+    case 7:
+      //upgradeDb.deleteObjectStore('90_Red_Line_Eastbound');
+    case 8:
+      //upgradeDb.createObjectStore('90_Red_Line_Eastbound', {keyPath: 'seqId'});
+    case 9:
+      upgradeDb.createObjectStore('90_Red_Line_Westbound', {keyPath: 'seqId'});
   }
   
 });
+
+
+
+/*dbPromise.then(function(db) {
+  var tx = db.transaction('90_Red_Line_Eastbound', 'readwrite');
+  var store = tx.objectStore('90_Red_Line_Eastbound');
+
+
+});*/
 
 dbPromise.then(function(db) {
   var tx = db.transaction('trains', 'readwrite');
