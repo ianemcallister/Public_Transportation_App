@@ -1,18 +1,18 @@
 <div>
 	 
 	<!--Direction Of Travel-->
-	<input type='text' list="direction" placeholder='{{allDirections.default}}' id="directionInput">
+	<input type='text' list="direction" placeholder='{{direction.safe}}' id="directionInput">
 		<datalist name='direction' id='direction' >
-			{{#if allDirections.Northbound}}<option value="Northbound"></option>{{/if}}
-			{{#if allDirections.Eastbound}}<option value="Eastbound"></option>{{/if}}
-			{{#if allDirections.Southbound}}<option value="Southbound"></option>{{/if}}
-			{{#if allDirections.Westbound}}<option value="Westbound"></option>{{/if}}
-			{{#if allDirections.Clockwise}}<option value="Clockwise"></option>{{/if}}
-			{{#if allDirections.Counter-Clockwise}}<option value="Counter-Clockwise"></option>{{/if}}
+			{{#if dirOptions.Northbound}}<option value="Northbound"></option>{{/if}}
+			{{#if dirOptions.Eastbound}}<option value="Eastbound"></option>{{/if}}
+			{{#if dirOptions.Southbound}}<option value="Southbound"></option>{{/if}}
+			{{#if dirOptions.Westbound}}<option value="Westbound"></option>{{/if}}
+			{{#if dirOptions.Clockwise}}<option value="Clockwise"></option>{{/if}}
+			{{#if dirOptions.Counter-Clockwise}}<option value="Counter-Clockwise"></option>{{/if}}
 			
 		</datalist>
 	<!--Day Of The Week-->
-	<input type='text' list="wkdays" placeholder='{{wkday}}' id="wkdayInput">
+	<!--<input type='text' list="wkdays" placeholder='{{wkday}}' id="wkdayInput">
 		<datalist name='wkdays' id="wkdays" >
 			<option value="Monday"></option>
 			<option value="Tuesday"></option>
@@ -21,7 +21,7 @@
 			<option value="Friday"></option>
 			<option value="Saturday"></option>
 			<option value="Sunday"></option>
-		</datalist>
+		</datalist>-->
 	<!--Time-->
 	<input 	type="time" 
 			placeholder="{{time}}"

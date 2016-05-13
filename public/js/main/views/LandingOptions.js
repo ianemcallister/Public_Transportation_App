@@ -227,21 +227,26 @@ LandingOptions.prototype._buildSched = function(checkable) {
 	landing._showSchedFilter(/*landing.state.sched*/);
 
 	//build the timetable
-	landing._addTimeTable(/*landing.state.sched*/);
+	landing._addTimeTable();
 };
 
-LandingOptions.prototype._showSchedFilter = function(stateValues) {
-	var landing = this;
-	/*var schedFilter = landing._schedFilter;
-	var friendlyTime = landing._minToHHmmA(stateValues.time, "HH:mm:ss.SSS");
-	var friendlyDay = landing._formatDay(stateValues.day);
-	var friendlyDir = landing._formatDir(stateValues.dir);
+LandingOptions.prototype._showSchedFilter = function() {
+	let landing = this;
+	//view variable
+	let schedFilter = landing._schedFilter;
+
+	//model variables
+	let modelTime = StateService.getModelTime();
+	//var friendlyTime = landing._minToHHmmA(modelTime, "HH:mm:ss.SSS");
+	var friendlyDir = StateService.getSchedHeading();
 
 	var context = {
-		direction: friendlyDir, wkday: friendlyDay, time: friendlyTime,
-		allDirections: landing.state.sched.directions
+		direction: friendlyDir,
+		dirOptions: StateService.getHeadingOptions()
 	};
 
+	console.log(context);
+	
 	var htmlString = schedFilterTemplate(context);
 
 	var nodes = parseHTML(htmlString);
@@ -251,17 +256,26 @@ LandingOptions.prototype._showSchedFilter = function(stateValues) {
 	//add watchers
 	$('#directionInput').on('change keyup',function(event) {
 		var allDirections = {"Northbound":0, "Eastbound":1, "Southbound":2, "Westbound":3, "Clockwise":4, "Counter-Clockwise":5 };
-		var checkable = ($('#directionInput').val());
+		var inputValue = ($('#directionInput').val());
+		
+		if(StateService.isValidDirection(inputValue)) {
 
-		if(landing.ValidationService.isOpnDir(checkable)) {
+			//pass value to state, to be updated
+			StateService.setSchedHeading(inputValue);
+
+			//rebuild the timetable
+			landing._addTimeTable();
+		}
+		
+		/*if(landing.ValidationService.isOpnDir(checkable)) {
 			landing.state.sched.dir = allDirections[checkable];
 			console.log(landing.state.sched);
 			landing._addTimeTable(landing.state.sched);
-		}
+		}*/
 
 	});
 
-	$('#wkdayInput').on('change keyup',function(event) {
+	/*$('#wkdayInput').on('change keyup',function(event) {
 		var checkable = ($('#wkdayInput').val()); 
 		
 		if(landing.ValidationService.isWkday(checkable)) {
@@ -269,7 +283,7 @@ LandingOptions.prototype._showSchedFilter = function(stateValues) {
 			landing._addTimeTable(landing.state.sched);
 		}
 
-	});
+	});*/
 
 	$('#timeInput').on('change keyup',function(event) { 
 		var checkable = ($('#timeInput').val());
@@ -277,11 +291,13 @@ LandingOptions.prototype._showSchedFilter = function(stateValues) {
 			landing.state.sched.time = landing._hhMMaToMin(checkable);
 			landing._addTimeTable(landing.state.sched);
 		}
-	});*/
+	});
 };
 
-LandingOptions.prototype._addTimeTable = function(stateValues) {
+LandingOptions.prototype._addTimeTable = function() {
 	var landing = this;
+	
+	console.log('coming back in');
 	//view variable
 	var timeTable = this._schedDisplay;
 
@@ -290,9 +306,6 @@ LandingOptions.prototype._addTimeTable = function(stateValues) {
 	var currentHeading = StateService.getSchedHeading();
 	var dbLineId = StateService.getDbLineId();//stateValues.line + "_" + landing._trainByNumber[stateValues.line];
 	
-	//var direction = stateValues.dir;
-	//var lineTitle = landing._trainByNumber[stateValues.line].replace("_", " ");
-
 	//check if nodes were there before then clear anything out that was there
 	landing._cleanNode(timeTable);
 	

@@ -48,8 +48,8 @@ class StateService {
 				options: []
 			},
 			time: {
-				default: {},
-				selected: {}
+				default: null,
+				selected: null
 			},
 			importantEndpoint: {
 				default: {},
@@ -148,8 +148,34 @@ class StateService {
 		return templateModal;
 	}
 
-	set(area, property, value) {
-		this[area][property] = value;
+	setSchedHeading(newHeading) {
+		//find the heading number
+		let foundNum = null;
+		Object.keys(allHeadings).forEach(function(dir) {
+			if(allHeadings[dir] == newHeading)
+				foundNum = dir;
+		});
+		
+		let headingObject = {};
+		headingObject[newHeading] = foundNum;
+
+		this._setStateValues(headingObject, '_sched', 'inputs', 'heading', 'selected');
+	}
+
+	getHeadingOptions() {
+		return this._getStateValues('_sched', 'inputs', 'heading', 'templateModal');
+	}
+
+	getModelTime() {
+		//get values
+		let defaultTime = this._getStateValues('_sched', 'inputs', 'time', 'default');
+		let selectedTime = this._getStateValues('_sched', 'inputs', 'time', 'selected');
+		let foundTime = null;
+
+		if(typeof defaultTime == "number") foundTime = defaultTime;
+		if(typeof selectedTime == "number") foundTime = selectedTime;
+		
+		return foundTime;
 	}
 
 	getSchedLine() {
@@ -191,6 +217,7 @@ class StateService {
 		let selected = this._getStateValues("_sched","inputs","heading", "selected");
 		let defaultHeading = this._getStateValues("_sched","inputs","heading", "default");
 		
+		console.log(selected, defaultHeading);
 		//check selected first, then default
 		if((Object.keys(selected).length) > 0) {
 			foundHeading = Object.keys(selected)[0];
@@ -223,6 +250,13 @@ class StateService {
 		state._setStateValues(state._setLineHeadingTemplateModal(), "_sched", "inputs", "heading", "templateModal");
 
 		console.log(this._sched);
+	}
+
+	isValidDirection(query) {
+		let allDirections = this._getStateValues('_sched','inputs','heading','templateModal');
+		
+		if(allDirections[query]) return true;
+		else return false;
 	}
 
 	//TODO REMOVE THIS LATER
