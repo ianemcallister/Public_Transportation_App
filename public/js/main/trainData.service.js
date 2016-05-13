@@ -1,3 +1,4 @@
+import idb from 'idb';
 
 class TrainDataService {
 	constructor() {
@@ -41,7 +42,12 @@ class TrainDataService {
 
 	_get() {}
 	_getJSON() {}
-	_getCachedDbPromise() {}
+
+	_getCachedDbPromise(db, version, store) {
+		return idb.open(db, version, function(upgradeDb) {
+			let store = upgradeDb.transaction.objectStore(store);
+		});
+	}
 
 	getTrainNumberByName(name) {
 		return this._trainsByName[name];
@@ -88,13 +94,37 @@ class TrainDataService {
 	}
 
 	getDbLineId(line) {
-		console.log(line); 
-		return {"Red_Line": {name:"90_Red_Line", "Westbound":"dir0", "Eastbound":"dir1"}};
+		return "90_Red_Line";
 	}
+
+	getDbHeadingRef(line, heading) {
+		return this._schedByDbId[line][heading];
+	}
+
 	getAllTrainsList() {
 
 	}
-	getLineTimeTable() {}
+
+	getLineTimeTable(dbLineId, currentHeading) {
+		let local = this;
+		
+		//return a promise for async work
+		return new Promise(function(resolve, reject) {
+			local._getCachedDbPromise('transit-db', 4, dbLineId)
+			.then(function(db) {
+				let tx = db.transaction(dbLineId);
+				let routeStore = tx.objectStore(dbLineId);
+				let sequence = routeStore.index(currentHeading);
+
+				return sequence.getAll();
+			}).then(function(stops) {
+				resolve(stops);
+			}).catch(function(error) {
+				console.log("error: " + error);
+				reject();
+			});
+		});
+	}	
 	
 
 }

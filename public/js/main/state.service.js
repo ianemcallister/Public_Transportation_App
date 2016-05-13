@@ -155,21 +155,57 @@ class StateService {
 	getSchedLine() {
 		let selectedLine = "";
 		let trainObject = this._getStateValues("_sched","inputs","line", "selected");
-		
+		let modelObject = {};
+
+		//find the line name
 		Object.keys(trainObject).forEach(function(key) {
 			selectedLine = key;
 		});
 		
-		return selectedLine;
+		//distill it
+		let viewSafeName = selectedLine.replace("_"," ");
+
+		//add names to the model
+		modelObject["ref"] = selectedLine;
+		modelObject["safe"] = viewSafeName;
+
+		//return the model
+		return modelObject;
+	}
+
+	getDbLineId() {
+		let lineObject = this._getStateValues("_sched","inputs","line", "selected");
+		let lineName = Object.keys(lineObject)[0];
+		let lineNumber = lineObject[lineName];
+		return lineNumber + "_" + lineName;
 	}
 
 	getSchedHeading() {
-		//check selected first
-		let selected = this._getStateValues("_sched","inputs","line", "selected");
-		let defaultLine = this._getStateValues("_sched","inputs","line", "default");
-		console.log(selected, defaultLine);
-		//then default
+		//declare and initialize sought variable
+		let foundHeading = "";
+
+		let lineObject = this._getStateValues("_sched","inputs","line", "selected");
+		let lineName = Object.keys(lineObject)[0];
+		
+		//isoled selected and default headings
+		let selected = this._getStateValues("_sched","inputs","heading", "selected");
+		let defaultHeading = this._getStateValues("_sched","inputs","heading", "default");
+		
+		//check selected first, then default
+		if((Object.keys(selected).length) > 0) {
+			foundHeading = Object.keys(selected)[0];
+		}
+		else if((Object.keys(defaultHeading).length) > 0) {
+			foundHeading = Object.keys(defaultHeading)[0];
+		}
+		
+		//get the reference heading
+		let refHeading = TrainDataService.getDbHeadingRef(lineName, foundHeading);
+		
+		//return the findings
+		return {ref:refHeading, safe:foundHeading};
 	}
+
 	get(area, property) {
 		if(typeof property !== "undefined") return this[area][property];
 		else return  this[area];

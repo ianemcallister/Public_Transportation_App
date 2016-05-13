@@ -144,6 +144,15 @@ LandingOptions.prototype._formatDir = function(currentDir) {
 	return directions[currentDir];
 };
 
+LandingOptions.prototype._cleanNode = function(node) {
+	if(node.hasChildNodes()) {
+		var myNode = node;
+		while (myNode.firstChild) {
+		    myNode.removeChild(myNode.firstChild);
+		}
+	}
+}
+
 LandingOptions.prototype.addStopsList = function(stops) {
 	//build the options from the model
 	var htmlString = stops.map(function(stop) {
@@ -273,40 +282,34 @@ LandingOptions.prototype._showSchedFilter = function(stateValues) {
 
 LandingOptions.prototype._addTimeTable = function(stateValues) {
 	var landing = this;
-	
+	//view variable
+	var timeTable = this._schedDisplay;
+
+	//model variables
 	var currentLine = StateService.getSchedLine();
 	var currentHeading = StateService.getSchedHeading();
-	var dbLineId = TrainDataServ.getDbLineId(currentLine);//stateValues.line + "_" + landing._trainByNumber[stateValues.line];
+	var dbLineId = StateService.getDbLineId();//stateValues.line + "_" + landing._trainByNumber[stateValues.line];
 	
-	console.log(dbLineId);
-
-	var direction = stateValues.dir;
-	var timeTable = this._schedDisplay;
-	var lineTitle = landing._trainByNumber[stateValues.line].replace("_", " ");
+	//var direction = stateValues.dir;
+	//var lineTitle = landing._trainByNumber[stateValues.line].replace("_", " ");
 
 	//check if nodes were there before then clear anything out that was there
-	if(timeTable.hasChildNodes()) {
-		var myNode = timeTable;
-		while (myNode.firstChild) {
-		    myNode.removeChild(myNode.firstChild);
-		}
-	}
-
+	landing._cleanNode(timeTable);
+	
 	//reach out to the db
-	landing.TrainDataService.getLineTimeTable(lineId, direction)
+	TrainDataServ.getLineTimeTable(dbLineId, currentHeading.ref)
 	.then(function(stops) {
-		console.log("stateValues = ", stateValues);
+		
 		//build the selected timetable
-		var header = "<h4>"+ lineTitle + "</h4>\
-		<span>" + stateValues.directions.default + "</span> - <span>" + 
-		landing._formatDay(stateValues.day) + "</span><br>\
+		var header = "<h4>"+ currentLine.safe + " (" 
+		+ currentHeading.safe + ")</h4>\
 		<strong>Station</strong><strong>Arrives</strong>";
 
 		var htmlString = stops.map(function(stop) {
 			var friendlyStop = { stop_name: stop.stop_name, time: '' };
 			var totalMinutes = 0;
 
-			if(stop.arrivals[stateValues.time]) {
+			if(stop.arrivals[10]) {
 				totalMinutes = stateValues.time;
 			} else {
 				totalMinutes = 10;
