@@ -162,6 +162,10 @@ class StateService {
 		this._setStateValues(headingObject, '_sched', 'inputs', 'heading', 'selected');
 	}
 
+	setSchedTime(minutes) {
+		this._setStateValues(minutes,'_sched','inputs', 'time', 'selected');
+	}
+
 	getHeadingOptions() {
 		return this._getStateValues('_sched', 'inputs', 'heading', 'templateModal');
 	}
@@ -273,6 +277,7 @@ class StateService {
 		if(timeObject.selected == null) return timeObject.default;
 		else return timeObject.selected;
 	}
+
 	//TODO REMOVE THIS LATER
 	setNav(number) {
 		this._nav = number;

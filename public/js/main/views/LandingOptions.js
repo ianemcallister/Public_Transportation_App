@@ -266,10 +266,16 @@ LandingOptions.prototype._showSchedFilter = function() {
 
 	$('#timeInput').on('change keyup',function(event) { 
 		var checkable = ($('#timeInput').val());
+		
 		if(isNaN(checkable)) {
 			//TODO: MAKE TIME CHANGES UPDATE THE TEMPLATE
+			let totalMinutes = landing._hhMMaToMin(checkable);
+
+			console.log(totalMinutes);
+			StateService.setSchedTime(totalMinutes);
+
 			//landing.state.sched.time = landing._hhMMaToMin(checkable);
-			//landing._addTimeTable(landing.state.sched);
+			landing._addTimeTable();
 		}
 	});
 };
@@ -317,7 +323,7 @@ LandingOptions.prototype._addTimeTable = function() {
 				});
 			}
 			i++;
-			
+
 			friendlyStop.time = landing._minToHHmmA(stop.arrivals[trainNumber], "HH:mm a");
 
 			return timeTableTemplate(friendlyStop);
