@@ -1,12 +1,13 @@
 import TrainDataServ from './../trainData.service';
 import StateService from './../state.service';
+import parseHTML from './../../utils/parseHTML';
+import $ from 'jquery';
+
 import bookendsTemplate from './../../../../templates/bookends.hbs';
 import stopsTemplate from './../../../../templates/stops.hbs';
 import lineTemplate from './../../../../templates/lines.hbs';
 import schedFilterTemplate from './../../../../templates/schedfilter.hbs';
 import timeTableTemplate from './../../../../templates/timeTable.hbs';
-import parseHTML from './../../utils/parseHTML';
-import $ from 'jquery';
 
 export default function LandingOptions(container) {
 	var landing = this;
@@ -44,14 +45,10 @@ LandingOptions.prototype._initializePage = function() {
 LandingOptions.prototype._startWatching = function() {
 	var landing = this;
 
-	$('#schedHeader').click(function() {
-		console.log(landing);
-	});
-
 	$('#trainLinesInput').on('change keyup click',function(event) {
 		//check for a valid input
 		var checkable = ($('#trainLinesInput').val()).replace(" ", "_");
-		console.log(TrainDataServ.isValidTrainByName(checkable));
+		
 		if(TrainDataServ.isValidTrainByName(checkable)) {
 			//save the selected line
 		
@@ -267,7 +264,7 @@ LandingOptions.prototype._showSchedFilter = function() {
 	$('#timeInput').on('change keyup',function(event) { 
 		var checkable = ($('#timeInput').val());
 		if(isNaN(checkable)) {
-			console.log(checkable);
+			//TODO: MAKE TIME CHANGES UPDATE THE TEMPLATE
 			//landing.state.sched.time = landing._hhMMaToMin(checkable);
 			//landing._addTimeTable(landing.state.sched);
 		}
