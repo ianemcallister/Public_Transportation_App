@@ -25,6 +25,9 @@ export default function LandingOptions(container) {
 	//test the container
 	console.log(landing._container);
 
+	//download content
+	
+	//build page
 	landing._initializePage();
 	
 }

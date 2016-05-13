@@ -1,3 +1,4 @@
+import Backend from './backend.service'
 import idb from 'idb';
 
 const placeholder = {1: "Eastbound", 3: "Westbound"};
@@ -13,6 +14,8 @@ class TrainDataService {
 		this._schedByDbId = {
 			"Red_Line": {name:"90_Red_Line", "Westbound":"dir0", "Eastbound":"dir1"} 
 		};
+
+		Backend.updateADbStore('api/download/90_Red_Line_Stops2.json', 'transit-db', '90_Red_line');
 	}
 
 	_get() {}
