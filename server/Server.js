@@ -166,7 +166,7 @@ export default class Server {
             });
           });
         } else {
-          res.send({"error": 'file doesn\'t exist'});
+          res.send({"error": 'file ' + req.params.fileName + ' doesn\'t exist'});
         }
       });
     });

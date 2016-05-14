@@ -1,0 +1,35 @@
+{
+	"docType": 2,
+	"line": {
+		"short_name": 190,
+		"long_name": "Yellow Line",
+		"directions": {
+			"0": "Northbound",
+			"2": "Southbound"
+		}
+	},
+	"sequence1": {
+		"direction": "Northbound",
+		"0": {
+			"stop_id": null,
+			"stop_name": "",
+			"arrivals": [],
+			"parent_station": {
+				"stop_id": null,
+				"stop_name": ""
+			}
+		}
+	},
+	"sequence2": {
+		"direction": "Southbound",
+		"0": {
+			"stop_id": null,
+			"stop_name": "",
+			"arrivals": [],
+			"parent_station": {
+				"stop_id": null,
+				"stop_name": ""
+			}
+		}			
+	}
+}

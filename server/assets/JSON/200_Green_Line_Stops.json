@@ -1,0 +1,35 @@
+{
+	"docType": 2,
+	"line": {
+		"short_name": 200,
+		"long_name": "Green Line",
+		"directions": {
+			"1": "Eastbound",
+			"3": "Westbound"
+		}
+	},
+	"sequence1": {
+		"direction": "Eastbound",
+		"0": {
+			"stop_id": null,
+			"stop_name": "",
+			"arrivals": [],
+			"parent_station": {
+				"stop_id": null,
+				"stop_name": ""
+			}
+		}
+	},
+	"sequence2": {
+		"direction": "Westbound",
+		"0": {
+			"stop_id": null,
+			"stop_name": "",
+			"arrivals": [],
+			"parent_station": {
+				"stop_id": null,
+				"stop_name": ""
+			}
+		}			
+	}
+}

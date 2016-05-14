@@ -48,6 +48,14 @@ class BackendService {
 
 	_readDbStore() {}
 	
+	_parseSchedulesList(list) {
+		let backend = this;
+
+		list.forEach(function(file) {
+			backend.downloadResourceFiles(file);
+		});
+	}
+
 	_updateDbStore(store, seqModel) {
 		let backend = this;
 		let dbPromise = backend._getCachedDbPromise();
@@ -228,11 +236,20 @@ class BackendService {
 
 		this._getJSON(url)
 		.then(function(response) {
-			
+			console.log(response);
 			//if this is a schedule file, unpack it.  Otherwise it's a list of files, map and unpack them
-			if(typeof response.line !== 'undefined') backend._seperateSchedFile(response);
-			if(typeof response[0].short_name !== 'undefined') backend._saveListOfTrains(response);
-			//else.....
+			switch(parseInt(response.docType)) {
+				case 0: //this is the list of all trains
+					backend._saveListOfTrains(response.data)
+					break;
+				case 1: //this is the list of all train schedules
+					backend._parseSchedulesList(response.data);
+					break;
+				case 2: //this is a train schedule
+					//backend._seperateSchedFile(response);
+					break;
+			}
+
 		});
 	}
 

@@ -60,7 +60,7 @@ IndexController.prototype._testconnection = function() {
     StateService.foundInternetConnection();
     //if there is a service worker, then download resources for idb
     Backend.downloadResourceFiles('api/download/allTrains.json');
-    //Backend.downloadResourceFiles('api/download/schedules.json');
+    Backend.downloadResourceFiles('api/download/schedules.json');
   }).catch(function(e) {
     //update the state
     StateService.noInternetConnection();
