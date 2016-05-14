@@ -1,6 +1,6 @@
 import Backend from './backend.service'
 
-const placeholder = {1: "Eastbound", 3: "Westbound"};
+//const placeholder = {1: "Eastbound", 3: "Westbound"};
 
 class TrainDataService {
 	constructor() {
@@ -8,16 +8,8 @@ class TrainDataService {
 		this._trainsByName = {};
 		this._trainsByNumber = {};
 		this._trainDirections = {};
-		this._schedByDbId = {};
+		this._schedByDbId = {}; //example: {"Red_Line": {name:"90_Red_Line", "Westbound":"dir0", "Eastbound":"dir1"} };
 
-		this._schedByDbId = {
-			"Red_Line": {name:"90_Red_Line", "Westbound":"dir0", "Eastbound":"dir1"} 
-		};
-		//download resource files
-		//Backend.downloadResourceFiles('api/download/alTrains.json');
-		//Backend.downloadResourceFiles('api/download/schedules.json');
-
-		//Backend.updateADbStore('api/download/schedules.json');
 	}
 
 	_setTrainList(list, key, short_name) {
@@ -28,9 +20,34 @@ class TrainDataService {
 	}
 
 	_setTrainDirections(key, directions) {
-		if(typeof directions == 'undefined')
-			directions = placeholder;
+		/*if(typeof directions == 'undefined')
+			directions = placeholder;*/
 		this._trainDirections[key] = directions;
+	}
+
+	_setSchedByDbId(list) {
+		let ds = this;
+
+		Object.keys(list).forEach(function(key) {
+			let long_name = (list[key].long_name).replace(" ", "_");
+			let short_name = list[key].short_name;
+			let dbId = short_name + "_" + long_name;
+			let dir0 = '';
+			let dir1 = '';
+			let i = 0;
+
+			//save values
+			ds._schedByDbId[long_name] = { name: dbId }
+
+			//add directions
+			Object.keys(list[key].directions).forEach(function(dir) {
+				let direction = list[key].directions[dir];
+				ds._schedByDbId[long_name][direction] = 'dir' + i;
+				i++;
+			});
+
+		});
+		
 	}
 
 	getTrainNumberByName(name) {
@@ -88,6 +105,7 @@ class TrainDataService {
 	}
 
 	getDbHeadingRef(line, heading) {
+		
 		return this._schedByDbId[line][heading];
 	}
 
@@ -99,7 +117,7 @@ class TrainDataService {
 
 			Backend.getSchedTrainsList()
 			.then(function(response) {
-				console.log(response);
+				
 				resolve(response);
 			})
 			.catch(function(error) {
@@ -109,7 +127,21 @@ class TrainDataService {
 		});
 	}
 
+	getTrainHeading(line) {
+		let ds = this;
+		let returnValue = ''; 
+		let i = 0;
+
+		Object.keys(this._trainDirections[line]).forEach(function(key) {
+			if(i < 1) returnValue = ds._trainDirections[line][key];
+			i++;
+		});
+
+		return returnValue;
+	}
+
 	getLineTimeTable(dbLineId) {
+		
 		let local = this;
 		
 		//return a promise for async work
@@ -142,6 +174,10 @@ class TrainDataService {
 
 	}	
 	
+	addSchedByDbId(trainsList) {
+		this._setSchedByDbId(trainsList);
+	}
+
 	addSchedTrain(key, short_name) {
 		
 		//add to both lists

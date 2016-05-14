@@ -179,15 +179,10 @@ LandingOptions.prototype._addTrainsList = function() {
 };
 
 LandingOptions.prototype._buildSched = function(checkable) {
-	var landing = this;
+	let landing = this;
+	let heading = TrainDataServ.getTrainHeading(checkable);
 
-	StateService.initializeSched(checkable);
-	
-	/*Object.keys(landing.state.sched.directions).forEach(function(direction) {
-		if(landing.state.sched.directions[direction]) { 
-			landing.state.sched.directions['default'] = direction; return; 
-		}
-	})*/
+	StateService.initializeSched(checkable, heading);
 
 	//build the filter
 	landing._showSchedFilter();
@@ -250,13 +245,12 @@ LandingOptions.prototype._showSchedFilter = function() {
 		var checkable = ($('#timeInput').val());
 		
 		if(isNaN(checkable)) {
-			//TODO: MAKE TIME CHANGES UPDATE THE TEMPLATE
+			
 			let totalMinutes = landing._hhMMaToMin(checkable);
 
 			console.log(totalMinutes);
 			StateService.setSchedTime(totalMinutes);
 
-			//landing.state.sched.time = landing._hhMMaToMin(checkable);
 			landing._addTimeTable();
 		}
 	});
@@ -275,7 +269,7 @@ LandingOptions.prototype._addTimeTable = function() {
 	
 	//check if nodes were there before then clear anything out that was there
 	landing._cleanNode(timeTable);
-	
+
 	//reach out to the db
 	TrainDataServ.getLineTimeTable(dbLineId)
 	.then(function(stops) {

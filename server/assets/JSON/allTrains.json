@@ -2,6 +2,6 @@
 	{"short_name":90, "long_name":"Red Line", "directions":{ "3":"Westbound", "1":"Eastbound"}},
 	{"short_name":100, "long_name":"Green Line", "directions":{ "3":"Westbound", "1":"Eastbound"}},
 	{"short_name":190, "long_name":"Blue Line", "directions":{ "3":"Westbound", "1":"Eastbound"}},
-	{"short_name":200, "long_name":"Yellow Line", "directions":{ "3":"Northbound", "1":"Southbound"}},
-	{"short_name":290, "long_name":"Orange Line", "directions":{ "3":"Northbound", "1":"Southbound"}}
+	{"short_name":200, "long_name":"Yellow Line", "directions":{ "0":"Northbound", "2":"Southbound"}},
+	{"short_name":290, "long_name":"Orange Line", "directions":{ "0":"Northbound", "2":"Southbound"}}
 ]

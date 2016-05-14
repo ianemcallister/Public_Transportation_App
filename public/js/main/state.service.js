@@ -151,6 +151,7 @@ class StateService {
 
 	setSchedHeading(newHeading) {
 		//find the heading number
+		
 		let foundNum = null;
 		Object.keys(allHeadings).forEach(function(dir) {
 			if(allHeadings[dir] == newHeading)
@@ -161,6 +162,21 @@ class StateService {
 		headingObject[newHeading] = foundNum;
 
 		this._setStateValues(headingObject, '_sched', 'inputs', 'heading', 'selected');
+	}
+
+	_returnSchedHeading(newHeading) {
+		//find the heading number
+		
+		let foundNum = null;
+		Object.keys(allHeadings).forEach(function(dir) {
+			if(allHeadings[dir] == newHeading)
+				foundNum = dir;
+		});
+
+		let headingObject = {};
+		headingObject[newHeading] = foundNum;
+
+		return(headingObject);
 	}
 
 	setSchedTime(minutes) {
@@ -209,6 +225,7 @@ class StateService {
 		let lineObject = this._getStateValues("_sched","inputs","line", "selected");
 		let lineName = Object.keys(lineObject)[0];
 		let lineNumber = lineObject[lineName];
+		
 		return lineNumber + "_" + lineName + '_' + headingObject.safe;
 	}
 
@@ -243,14 +260,14 @@ class StateService {
 		else return  this[area];
 	}
 
-	initializeSched(short_name) {
+	initializeSched(short_name, heading) {
 		let state = this;
-
+		console.log()
 		//state._setStateValues(true, "_sched", "active");
-		state._setStateValues(TrainDataService.getTrainObjectByName("Red_Line"), "_sched", "inputs", "line", "selected");
+		state._setStateValues(TrainDataService.getTrainObjectByName(short_name), "_sched", "inputs", "line", "selected");
 		state._setStateValues(state._wkdayFromTime(state._currentTime().wkday), "_sched", "inputs", "wkday", "default");
 		state._setStateValues(state._currentTime().time, "_sched", "inputs", "time", "default");
-		state._setStateValues({"Westbound": 3}, "_sched", "inputs", "heading", "default");
+		state._setStateValues(state._returnSchedHeading(heading), "_sched", "inputs", "heading", "default");
 		state._setStateValues(state._setLineHeadingOptions(), "_sched", "inputs", "heading", "options");
 		state._setStateValues(state._setLineHeadingTemplateModal(), "_sched", "inputs", "heading", "templateModal");
 

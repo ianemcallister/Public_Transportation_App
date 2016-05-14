@@ -70,7 +70,7 @@ class BackendService {
 					}
 					
 					//add it to the store
-					console.log(storeObject);
+					
 					theStore.put(storeObject);
 				}
 
@@ -94,6 +94,7 @@ class BackendService {
 			return tx.complete
 		}).then(function() {
 			console.log('trains added to idb');
+			TrainDataService.addSchedByDbId(list);
 		}).catch(function(e) {
 			console.log("error: " + e);
 		});
@@ -206,6 +207,7 @@ class BackendService {
 		let backend = this;
 
 		let dbPromise = backend._openDbStore();
+		
 		return new Promise(function(resolve, reject) {
 			dbPromise.then(function(db) {
 				let tx = db.transaction(dbStoreId);
@@ -226,7 +228,7 @@ class BackendService {
 
 		this._getJSON(url)
 		.then(function(response) {
-			console.log(response);
+			
 			//if this is a schedule file, unpack it.  Otherwise it's a list of files, map and unpack them
 			if(typeof response.line !== 'undefined') backend._seperateSchedFile(response);
 			if(typeof response[0].short_name !== 'undefined') backend._saveListOfTrains(response);
