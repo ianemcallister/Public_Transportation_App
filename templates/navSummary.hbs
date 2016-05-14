@@ -1,0 +1,29 @@
+<div>
+	<!--Summary Header: Contains Duration, # of stops, Departure & Arrival Stations-->
+	<div class="navSummaryHeader">
+		<div class="row" id='tripHeader'>
+			<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+				<h4><span id='duration'>{{tripDuration}}</span> 
+				(<span id='stops'>{{totalStops}}</span> stops) </h4>
+				<strong>
+					<span id='departure'>{{departureStn.name}}</span> to 
+					<span id='arrival'>{{arrivalStn.name}}</span> 
+				</strong>
+			</div>
+		</div>
+	</div>
+	
+	<!--Navigation Steps: step by step instructions from beginning to end-->
+	<div class="navSteps">Steps</div>
+
+	<!--Summary Footer: Lists the Arrival Station and description -->
+	<div class="navSummaryFooter">
+		<div class="row endpoint" id='arrivalStation'>
+			<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+				<strong><span id='deptName'>{{arrivalStn.name}}</span></strong>
+				<span id='deptId'>( {{arrivalStn.ID}} )</span> <br>
+				<span id='deptDesc'><i>{{arrivalStn.desc}}</i></span>
+			</div>
+		</div>		
+	</div>
+</div>

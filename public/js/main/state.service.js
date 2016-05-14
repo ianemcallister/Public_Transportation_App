@@ -272,7 +272,7 @@ class StateService {
 		state._setStateValues(state._setLineHeadingOptions(), "_sched", "inputs", "heading", "options");
 		state._setStateValues(state._setLineHeadingTemplateModal(), "_sched", "inputs", "heading", "templateModal");
 
-		//console.log(this._sched);
+		console.log(this._sched);
 	}
 
 	activeSection(section) {

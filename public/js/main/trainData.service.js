@@ -260,6 +260,23 @@ class TrainDataService {
 
 		return solution
 	}
+
+	requestRoute(dptInput, arrvInput) {
+		return new Promise((res, rej) => {
+			res({
+				tripDuration: "17min",
+				totalStops: 6,
+				departureStn: {
+					name: "Beaverton"
+				},
+				arrivalStn: {
+					name: "Gresham",
+					ID: "Station 9231",
+					desc: "Turn left at the stoplight"
+				}
+			});
+		});
+	}
 }
 
 let _trainDataService = new TrainDataService;

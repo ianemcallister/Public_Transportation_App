@@ -6,7 +6,7 @@ export default function IndexController(container) {
   this._container = container;
   this._landingView = new LandingView(this._container);
   this._registerServiceWorker();
-  this._testconnection()
+  this._testconnection();
 }
 
 IndexController.prototype._registerServiceWorker = function() {

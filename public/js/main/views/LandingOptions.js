@@ -9,6 +9,7 @@ import lineTemplate from './../../../../templates/lines.hbs';
 import schedFilterTemplate from './../../../../templates/schedfilter.hbs';
 import timeTableTemplate from './../../../../templates/timeTable.hbs';
 import navSection from './../../../../templates/navSection.hbs';
+import navSummary from './../../../../templates/navSummary.hbs';
 
 export default function LandingOptions(container) {
 	var landing = this;
@@ -17,7 +18,6 @@ export default function LandingOptions(container) {
 	landing._container = container;
 	landing._bookendsSelector = container.querySelector('.nav');
 	landing._navFilter = container.querySelector('.navFilter');
-	landing._navDisplay = container.querySelector('.navDisplay');
 	landing._schedSelector = container.querySelector('.sched');
 	landing._schedFilter = container.querySelector('.schedFilter');
 	landing._trainLines = container.querySelector('#trainLines');
@@ -314,6 +314,22 @@ LandingOptions.prototype._addTimeTable = function() {
 
 };
 
+LandingOptions.prototype._buildNavSummary = function(context) {
+	let landing = this;
+	let navSumDisplay = landing._navDisplay;
+
+	//if there was a summary there before, delete it.
+	landing._cleanNode(navSumDisplay);
+	
+	//build the summary
+	let htmlString = navSummary(context);
+	let nodes = parseHTML(htmlString);
+
+	//append the nodes to the dom
+	navSumDisplay.appendChild(nodes, navSumDisplay);
+
+};
+
 LandingOptions.prototype.buildNavView = function() {
 	let landing = this;
 
@@ -323,4 +339,39 @@ LandingOptions.prototype.buildNavView = function() {
 
 	//append the nodes to the dom
 	landing._bookendsSelector.appendChild(nodes, landing._bookendsSelector);
+
+	//define elements
+	landing._dptInput = landing._container.querySelector('#departureStopsInput');
+	landing._arrvInput = landing._container.querySelector('#arrivalStopsInput');
+	landing._navDisplay = landing._container.querySelector('.navDisplay');
+
+	//define input variables
+	let dptInput = {};
+	let arrvInput = {};
+
+	//add watchers
+	$('#departureStopsInput').on('change keyup',function(event) { 
+		console.log('dep updated');
+	});
+
+	$('#arrivalStopsInput').on('change keyup',function(event) { 
+		console.log('arriv updated');
+	});
+
+	$('#navSubmission').on('click',function(event) { 
+		console.log('submission clicked');
+		
+		//request the route
+		TrainDataServ.requestRoute(dptInput, arrvInput)
+		.then(function(response) {
+
+			//build the route summary, passing in the context
+			landing._buildNavSummary(response);
+
+		}).catch(e => {
+			console.log("error: " + e);
+		});
+
+	});
+
 }
