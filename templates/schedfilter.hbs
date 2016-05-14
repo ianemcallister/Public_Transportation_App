@@ -1,6 +1,11 @@
 <div id='schedFilterOptions'>
 	<!--Direction Of Travel-->
-	<input type='text' list="direction" placeholder='{{direction.safe}}' id="directionInput">
+	<label for="directionInput">Heading:
+	<input class="col-xs-12 col-sm-12 col-md-6 col-lg-6"
+			type='text' 
+			list="direction" 
+			placeholder='{{direction.safe}}' 
+			id="directionInput">
 		<datalist name='direction' id='direction' >
 			{{#if dirOptions.Northbound}}<option value="Northbound"></option>{{/if}}
 			{{#if dirOptions.Eastbound}}<option value="Eastbound"></option>{{/if}}
@@ -10,6 +15,7 @@
 			{{#if dirOptions.Counter-Clockwise}}<option value="Counter-Clockwise"></option>{{/if}}
 			
 		</datalist>
+	</label>
 	<!--Day Of The Week-->
 	<!--<input type='text' list="wkdays" placeholder='{{wkday}}' id="wkdayInput">
 		<datalist name='wkdays' id="wkdays" >
@@ -22,9 +28,12 @@
 			<option value="Sunday"></option>
 		</datalist>-->
 	<!--Time-->
-	<input 	type="time" 
+	<label for="timeInput">Departure Time:
+	<input 	class="col-xs-12 col-sm-12 col-md-6 col-lg-6"
+			type="time" 
 			placeholder="{{time}}"
 			value="{{time}}"
 			id='timeInput'>
+	</label>
 </div>
 

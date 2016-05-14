@@ -48,7 +48,7 @@ IndexController.prototype._trackInstalling = function(worker) {
   var indexController = this;
   worker.addEventListener('statechange', function() {
     if (worker.state == 'installed') {
-      indexController._updateReady(worker);
+      //indexController._updateReady(worker);
     }
   });
 };

@@ -1,5 +1,5 @@
-var staticCacheName = 'wittr-static-v8';
-var contentImgsCache = 'wittr-content-imgs';
+var staticCacheName = 'transit-static-v8';
+var contentImgsCache = 'transit-content-imgs';
 var allCaches = [
   staticCacheName,
   contentImgsCache
@@ -25,7 +25,7 @@ self.addEventListener('activate', function(event) {
     caches.keys().then(function(cacheNames) {
       return Promise.all(
         cacheNames.filter(function(cacheName) {
-          return cacheName.startsWith('wittr-') &&
+          return cacheName.startsWith('transit-') &&
                  !allCaches.includes(cacheName);
         }).map(function(cacheName) {
           return caches.delete(cacheName);

@@ -1,21 +1,42 @@
-<h1>Where Would You Like To Go?</h1>
+<div class="container">
+	<h2>Where Would You Like To Go?</h2>
 
-<div class="nav">
-	<h3 id='navHeader'>Find A Route</h3>
-		<div class="navFilter">
-			<input list='departureStops' placeholder='Departes from...'>
-				<datalist id='departureStops'></datalist>
-			<input list='arrivalStops' id='arrivalStopsInput' placeholder="Arrives at...">
-				<datalist id='arrivalStops'></datalist> 
-		</div>
-		<div class="navDisplay"></div>
-</div>
+	<div class="nav">
+		<h3 id='navHeader'>Find A Route</h3>
+			<div class="navFilter">
+				<div class="row col-xs-12 col-sm-12 col-md-12 col-lg-12">
+					<input 	class="col-xs-12 col-sm-12 col-md-6 col-lg-6"
+							list='departureStops' 
+							placeholder='Departes from...'>
+						<datalist id='departureStops'></datalist>
+				</div>
+				<div class="row col-xs-12 col-sm-12 col-md-12 col-lg-12">
+					<input 	class="col-xs-12 col-sm-12 col-md-6 col-lg-6"
+							list='arrivalStops' 
+							id='arrivalStopsInput' 
+							placeholder="Arrives at...">
+						<datalist id='arrivalStops'></datalist> 	
+				</div>
+				<div class="row col-xs-12 col-sm-12 col-md-12 col-lg-12">
+					<div class="btn btn-primary col-xs-12 col-sm-12 col-md-6 col-lg-6">
+						Seraching
+					</div>
+				</div>
+			</div>
+			
+			<div class="navDisplay"></div>
+			
+	</div>
 
-<div class="sched">
-	<h3 id='schedHeader'>Select A Train</h3>
-		<div class="schedFilter">
-			<input list='trainLines' id='trainLinesInput' placeholder="Red Line">
-				<datalist id='trainLines'></datalist> 
-		</div>
-		<div class="schedDisplay"></div>
+	<div class="sched">
+		<h3 id='schedHeader'>Select A Train</h3>
+			<div class="schedFilter row col-xs-12 col-sm-12 col-md-12 col-lg-12">
+				<input 	class="col-xs-12 col-sm-12 col-md-6 col-lg-6"
+						list='trainLines' 
+						id='trainLinesInput' 
+						placeholder="Red Line">
+					<datalist id='trainLines'></datalist> 
+			</div>
+			<div class="schedDisplay"></div>
+	</div>
 </div>

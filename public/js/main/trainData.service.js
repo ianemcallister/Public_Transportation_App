@@ -101,7 +101,7 @@ class TrainDataService {
 	}
 
 	getDbHeadingRef(line, heading) {
-		
+		console.log(this._schedByDbId, line, heading);
 		return this._schedByDbId[line][heading];
 	}
 
@@ -224,7 +224,7 @@ class TrainDataService {
 				};
 			}
 
-			if(vertSearchY < (timesArray.length - 1)) vertSearchY++;
+			if(vertSearchY < (timesArray.length / 2)) vertSearchY++;
 			else { vertSearchY = 1; vertSearchX++; }
 		}
 		//taking a diferent approach

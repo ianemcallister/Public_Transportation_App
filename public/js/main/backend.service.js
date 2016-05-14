@@ -240,7 +240,7 @@ class BackendService {
 			//if this is a schedule file, unpack it.  Otherwise it's a list of files, map and unpack them
 			switch(parseInt(response.docType)) {
 				case 0: //this is the list of all trains
-					backend._saveListOfTrains(response.data)
+					backend._saveListOfTrains(response.data);
 					break;
 				case 1: //this is the list of all train schedules
 					backend._parseSchedulesList(response.data);
@@ -251,6 +251,14 @@ class BackendService {
 			}
 
 		});
+	}
+
+	offlineSupportFeatures(list) {
+		let backend = this;
+		
+		backend._saveListOfTrains(list);
+
+		//backend._seperateSchedFile(response);
 	}
 
 	getSchedTrainsList() {

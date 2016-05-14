@@ -1,4 +1,5 @@
 import TrainDataService from './trainData.service';
+import Backend from './backend.service'
 
 const allHeadings = {0: "Northbound", 1: "Eastbound", 2:"Southbound", 3:"Westbound", 4:"Clockwise", 5:"Counter-Clockwise"};
 
@@ -248,6 +249,7 @@ class StateService {
 			foundHeading = Object.keys(defaultHeading)[0];
 		}
 		
+		console.log(lineName, foundHeading);
 		//get the reference heading
 		let refHeading = TrainDataService.getDbHeadingRef(lineName, foundHeading);
 		
@@ -296,8 +298,28 @@ class StateService {
 		else return timeObject.selected;
 	}
 
-	noInternetConnection() { console.log('no service'); this.internetConnection = false; }
-	foundInternetConnection() { console.log('internet found'); this.internetConnection = true; }
+	noInternetConnection() { 
+		//notify
+		console.log('no service'); 
+		
+		//set variable
+		this.internetConnection = false;
+		
+		//get the list of trains from the db
+		Backend.getSchedTrainsList().then(list => {
+			//update required lists from DB
+			Backend.offlineSupportFeatures(list); 
+
+		}).catch(e => {
+			console.log('error: ' + e);
+		});
+		
+	}
+	
+	foundInternetConnection() { 
+		console.log('internet found'); 
+		this.internetConnection = true; 
+	}
 
 	//TODO REMOVE THIS LATER
 	setNav(number) {
