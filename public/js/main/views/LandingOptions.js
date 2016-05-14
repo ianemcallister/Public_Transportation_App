@@ -8,6 +8,7 @@ import stopsTemplate from './../../../../templates/stops.hbs';
 import lineTemplate from './../../../../templates/lines.hbs';
 import schedFilterTemplate from './../../../../templates/schedfilter.hbs';
 import timeTableTemplate from './../../../../templates/timeTable.hbs';
+import navSection from './../../../../templates/navSection.hbs';
 
 export default function LandingOptions(container) {
 	var landing = this;
@@ -31,6 +32,7 @@ export default function LandingOptions(container) {
 
 LandingOptions.prototype._initializePage = function() {
 	var landing = this;
+	var foundNetwork = false;
 
 	//addTrainsList
 	landing._addTrainsList();
@@ -39,6 +41,7 @@ LandingOptions.prototype._initializePage = function() {
 	$(document).ready(function() {	
 		//add watchers
 		landing._startWatching()
+
 	});
 };
 
@@ -131,7 +134,8 @@ LandingOptions.prototype._cleanNode = function(node) {
 	}
 }
 
-LandingOptions.prototype.addStopsList = function(stops) {
+LandingOptions.prototype._addStopsList = function(stops) {
+	console.log('got here');
 	//build the options from the model
 	var htmlString = stops.map(function(stop) {
 		return stopsTemplate(stop);
@@ -286,8 +290,6 @@ LandingOptions.prototype._addTimeTable = function() {
 		var currentTime = StateService.getReferenceTime();
 		let startObject = TrainDataServ.findSchedFrinedlyStartTime(stops, currentTime);
 		let train = startObject.train;
-
-		console.log(startObject);
 		
 		//build the template
 		var htmlString = stops.map(function(stop) {
@@ -311,3 +313,14 @@ LandingOptions.prototype._addTimeTable = function() {
 	});
 
 };
+
+LandingOptions.prototype.buildNavView = function() {
+	let landing = this;
+
+	//build the nav view
+	let htmlString = navSection();
+	let nodes = parseHTML(htmlString);
+
+	//append the nodes to the dom
+	landing._bookendsSelector.appendChild(nodes, landing._bookendsSelector);
+}

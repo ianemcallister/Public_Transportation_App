@@ -9,7 +9,7 @@ class StateService {
 		//declare and init variables variables
 		this._nav = this._navInit();
 		this._sched = this._schedInit();
-		this.internetConnection = true;
+		this.internetConnection = false;
 	}
 
 	_navInit() {
@@ -249,7 +249,6 @@ class StateService {
 			foundHeading = Object.keys(defaultHeading)[0];
 		}
 		
-		console.log(lineName, foundHeading);
 		//get the reference heading
 		let refHeading = TrainDataService.getDbHeadingRef(lineName, foundHeading);
 		
@@ -264,7 +263,7 @@ class StateService {
 
 	initializeSched(short_name, heading) {
 		let state = this;
-		console.log()
+
 		//state._setStateValues(true, "_sched", "active");
 		state._setStateValues(TrainDataService.getTrainObjectByName(short_name), "_sched", "inputs", "line", "selected");
 		state._setStateValues(state._wkdayFromTime(state._currentTime().wkday), "_sched", "inputs", "wkday", "default");
@@ -273,7 +272,7 @@ class StateService {
 		state._setStateValues(state._setLineHeadingOptions(), "_sched", "inputs", "heading", "options");
 		state._setStateValues(state._setLineHeadingTemplateModal(), "_sched", "inputs", "heading", "templateModal");
 
-		console.log(this._sched);
+		//console.log(this._sched);
 	}
 
 	activeSection(section) {
@@ -296,6 +295,10 @@ class StateService {
 		
 		if(timeObject.selected == null) return timeObject.default;
 		else return timeObject.selected;
+	}
+
+	isInternetConnection() {
+		return this.internetConnection;
 	}
 
 	noInternetConnection() { 

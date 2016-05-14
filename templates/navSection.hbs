@@ -1,0 +1,29 @@
+<div>
+	<h3 id='navHeader'>Find A Route</h3>
+	<!--This is the nav filter-->
+	<div class="navFilter">
+		<!--departure input-->
+		<div class="row col-xs-12 col-sm-12 col-md-12 col-lg-12">
+			<input 	class="col-xs-12 col-sm-12 col-md-6 col-lg-6"
+					list='departureStops' 
+					placeholder='Departes from...'>
+				<datalist id='departureStops'></datalist>
+		</div>
+		<!--arrival input-->
+		<div class="row col-xs-12 col-sm-12 col-md-12 col-lg-12">
+			<input 	class="col-xs-12 col-sm-12 col-md-6 col-lg-6"
+					list='arrivalStops' 
+					id='arrivalStopsInput' 
+					placeholder="Arrives at...">
+				<datalist id='arrivalStops'></datalist> 	
+		</div>
+		<!--submission button input-->
+		<div class="row col-xs-12 col-sm-12 col-md-12 col-lg-12">
+			<div class="btn btn-primary col-xs-12 col-sm-12 col-md-6 col-lg-6">
+				Search Routes
+			</div>
+		</div>
+	</div>
+	<!--This is the nav display-->
+	<div class="navDisplay"></div>
+</div>

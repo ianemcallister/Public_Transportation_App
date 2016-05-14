@@ -101,7 +101,7 @@ class TrainDataService {
 	}
 
 	getDbHeadingRef(line, heading) {
-		console.log(this._schedByDbId, line, heading);
+		
 		return this._schedByDbId[line][heading];
 	}
 
@@ -204,7 +204,6 @@ class TrainDataService {
 			});
 		});
 
-		console.log(timesArray);
 		//check vertically and horizontally at the same time
 		let searching = true;
 		let horzSearchX = 0;

@@ -54,6 +54,8 @@ IndexController.prototype._trackInstalling = function(worker) {
 };
 
 IndexController.prototype._testconnection = function() {
+  let indexController = this;
+
   fetch("/ping")
   .then(function(response) {
     //update the state
@@ -61,8 +63,11 @@ IndexController.prototype._testconnection = function() {
     //if there is a service worker, then download resources for idb
     Backend.downloadResourceFiles('api/download/allTrains.json');
     Backend.downloadResourceFiles('api/download/schedules.json');
+    //build the nav view
+    indexController._landingView.buildNavView();
   }).catch(function(e) {
     //update the state
+    console.log("error: " + e);
     StateService.noInternetConnection();
   })
 };

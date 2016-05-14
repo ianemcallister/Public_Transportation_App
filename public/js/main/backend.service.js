@@ -101,7 +101,7 @@ class BackendService {
 			});
 			return tx.complete
 		}).then(function() {
-			console.log('trains added to idb');
+			
 			TrainDataService.addSchedByDbId(list);
 		}).catch(function(e) {
 			console.log("error: " + e);
@@ -215,7 +215,7 @@ class BackendService {
 		let backend = this;
 
 		let dbPromise = backend._openDbStore();
-		console.log(dbStoreId);
+		
 		return new Promise(function(resolve, reject) {
 			dbPromise.then(function(db) {
 				let tx = db.transaction(dbStoreId);
