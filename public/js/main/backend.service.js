@@ -1,3 +1,4 @@
+import TrainDataService from './trainData.service';
 import idb from 'idb';
 
 class BackendService {
@@ -76,9 +77,27 @@ class BackendService {
 			});
 
 		});
-	}	
+	}
 
-	_deleteDbStore() {}
+	_saveListOfTrains(list) {
+		let backend = this;
+		let dbPromise = backend._getCachedDbPromise();
+
+		dbPromise.then(function(db) {
+			let tx = db.transaction('trains', 'readwrite');
+			let theStore = tx.objectStore('trains');
+
+			Object.keys(list).forEach(function(train) {
+				//save the train to the store
+				theStore.put(list[train]);
+			});
+			return tx.complete
+		}).then(function() {
+			console.log('trains added to idb');
+		}).catch(function(e) {
+			console.log("error: " + e);
+		});
+	}	
 
 	_buildSequences(lineData) {
 		let backend = this;
@@ -183,18 +202,6 @@ class BackendService {
 		});	
 	}
 
-	updateADbStore(url) {
-		let backend = this;
-
-		this._getJSON(url)
-		.then(function(response) {
-			
-			//if this is a schedule file, unpack it.  Otherwise it's a list of files, map and unpack them
-			if(typeof response.line !== 'undefined') backend._seperateSchedFile(response);
-			//else.....
-		});
-	}
-
 	readLineSequence(dbStoreId) {
 		let backend = this;
 
@@ -214,16 +221,37 @@ class BackendService {
 		})
 	}
 
+	downloadResourceFiles(url) {
+		let backend = this;
+
+		this._getJSON(url)
+		.then(function(response) {
+			console.log(response);
+			//if this is a schedule file, unpack it.  Otherwise it's a list of files, map and unpack them
+			if(typeof response.line !== 'undefined') backend._seperateSchedFile(response);
+			if(typeof response[0].short_name !== 'undefined') backend._saveListOfTrains(response);
+			//else.....
+		});
+	}
+
 	getSchedTrainsList() {
-
+		let backend = this;
 		return new Promise(function(resolve, reject) {
-			return 'good';
-		}).then(function(response) {
-			resolve(response);
-		}).catch(function(error) {
-			console.log("error: " + error);
-		})
+			let dbPromise = backend._getCachedDbPromise()
 
+			dbPromise.then(function(db) {
+				let tx = db.transaction('trains', 'readwrite');
+				let theStore = tx.objectStore('trains');
+
+				//TODO: TURN THIS OVER
+				return theStore.getAll();
+				//return [{long_name:"Red Line", short_name:90}]
+			}).then(function(response) {
+				resolve(response);
+			}).catch(function(error) {
+				console.log("error: " + error);
+			});	
+		});
 	}
 }
 

@@ -16,9 +16,6 @@ IndexController.prototype._registerServiceWorker = function() {
 
   navigator.serviceWorker.register('/sw.js').then(function(reg) {
     if (!navigator.serviceWorker.controller) {
-      //if there is a service worker, then download resources for idb
-      //Backend.downloadResourceFiles('api/download/alTrains.json');
-      //Backend.downloadResourceFiles('api/download/schedules.json');
       return;
     }
 
@@ -59,8 +56,13 @@ IndexController.prototype._trackInstalling = function(worker) {
 IndexController.prototype._testconnection = function() {
   fetch("/ping")
   .then(function(response) {
+    //update the state
     StateService.foundInternetConnection();
+    //if there is a service worker, then download resources for idb
+    Backend.downloadResourceFiles('api/download/allTrains.json');
+    //Backend.downloadResourceFiles('api/download/schedules.json');
   }).catch(function(e) {
+    //update the state
     StateService.noInternetConnection();
   })
 };

@@ -155,25 +155,10 @@ LandingOptions.prototype._addTrainsList = function() {
 			var shortName = train['short_name'];
 			var key = longName.replace(" ", "_");
 			
-			//console.log(train, longName, shortName, key);
 			TrainDataServ.addSchedTrain(key, shortName);
 
-			//landing._trainByName[key] = train['short_name'];
-			//landing._trainByNumber[shortName] = key;
-			//console.log(key, train.directions);
 			TrainDataServ.addSchedLineDirs(key, train.directions);
-			/*landing._trainDirections[key] = {};
 
-			if(typeof train['directions'] !== "undefined") {
-				var bothDirs = train['directions'];
-				var i = 0;
-				
-				Object.keys(bothDirs).forEach(function(direction) {
-					var heading = bothDirs[direction];
-					landing._trainDirections[key][heading] = i;
-					i++;
-				});
-			}*/
 		});
 
 		//build the options from the model
@@ -205,7 +190,7 @@ LandingOptions.prototype._buildSched = function(checkable) {
 	})*/
 
 	//build the filter
-	landing._showSchedFilter(/*landing.state.sched*/);
+	landing._showSchedFilter();
 
 	//build the timetable
 	landing._addTimeTable();

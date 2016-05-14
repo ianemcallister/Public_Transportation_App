@@ -1,5 +1,4 @@
 import Backend from './backend.service'
-import idb from 'idb';
 
 const placeholder = {1: "Eastbound", 3: "Westbound"};
 
@@ -19,15 +18,6 @@ class TrainDataService {
 		//Backend.downloadResourceFiles('api/download/schedules.json');
 
 		//Backend.updateADbStore('api/download/schedules.json');
-	}
-
-	_get() {}
-	_getJSON() {}
-
-	_getCachedDbPromise(db, version, store) {
-		return idb.open(db, version, function(upgradeDb) {
-			let store = upgradeDb.transaction.objectStore(store);
-		});
 	}
 
 	_setTrainList(list, key, short_name) {
