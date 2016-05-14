@@ -215,7 +215,7 @@ class BackendService {
 		let backend = this;
 
 		let dbPromise = backend._openDbStore();
-		
+		console.log(dbStoreId);
 		return new Promise(function(resolve, reject) {
 			dbPromise.then(function(db) {
 				let tx = db.transaction(dbStoreId);
@@ -236,7 +236,7 @@ class BackendService {
 
 		this._getJSON(url)
 		.then(function(response) {
-			console.log(response);
+			
 			//if this is a schedule file, unpack it.  Otherwise it's a list of files, map and unpack them
 			switch(parseInt(response.docType)) {
 				case 0: //this is the list of all trains
@@ -246,7 +246,7 @@ class BackendService {
 					backend._parseSchedulesList(response.data);
 					break;
 				case 2: //this is a train schedule
-					//backend._seperateSchedFile(response);
+					backend._seperateSchedFile(response);
 					break;
 			}
 

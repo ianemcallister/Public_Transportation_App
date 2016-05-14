@@ -27,7 +27,7 @@ class TrainDataService {
 
 	_setSchedByDbId(list) {
 		let ds = this;
-
+		
 		Object.keys(list).forEach(function(key) {
 			let long_name = (list[key].long_name).replace(" ", "_");
 			let short_name = list[key].short_name;
@@ -98,10 +98,6 @@ class TrainDataService {
 		let local = this;
 		if(typeof local._trainsByName[name] !== 'undefined') return true;
 		else return false;
-	}
-
-	getDbLineId(line) {
-		return "90_Red_Line";
 	}
 
 	getDbHeadingRef(line, heading) {
@@ -189,6 +185,81 @@ class TrainDataService {
 		//add to the model
 		this._setTrainDirections(key, directions);
 		
+	}
+
+	findSchedFrinedlyStartTime(stops, currentTime) {
+		//where does the current time come first?
+		let timeHorz = 0;
+		let timeVert = 0;
+		let solution = {};
+		let timesArray = [];
+
+		//readall values into a table
+		Object.keys(stops).forEach(function(stop) {
+			//add a new array for each stop
+			timesArray.push([]);
+
+			stops[stop].arrivals.forEach(function(time) {
+				timesArray[stop].push(time);
+			});
+		});
+
+		console.log(timesArray);
+		//check vertically and horizontally at the same time
+		let searching = true;
+		let horzSearchX = 0;
+		let horzSearchY = 0;
+		let vertSearchX = 0;
+		let vertSearchY = 1;
+
+		while(searching) {
+			//check all vertical start times first, then horizontal
+			if(	timesArray[vertSearchY][vertSearchX] >= currentTime &&
+				timesArray[vertSearchY - 1][vertSearchX] < currentTime ) {
+				searching = false;
+				solution = {
+					train: vertSearchX,
+					stop: vertSearchY,
+					value:timesArray[vertSearchY][vertSearchX]
+				};
+			}
+
+			if(vertSearchY < (timesArray.length - 1)) vertSearchY++;
+			else { vertSearchY = 1; vertSearchX++; }
+		}
+		//taking a diferent approach
+		/*while(searching) {
+			//console.log(horzSearchX, horzSearchY);
+			if(	timesArray[horzSearchY][horzSearchX] >= currentTime &&
+				timesArray[horzSearchY][horzSearchX - 1] < currentTime ) {
+				searching = false;
+				solution = {
+					train: horzSearchX,
+					stop: horzSearchY,
+					value:timesArray[horzSearchY][horzSearchX],
+				};
+			}
+			//console.log(vertSearchY, vertSearchX);
+			if(	timesArray[vertSearchY][vertSearchX] >= currentTime &&
+				timesArray[vertSearchY - 1][vertSearchX] < currentTime ) {
+				searching = false;
+				solution = {
+					train: vertSearchX,
+					stop: vertSearchY,
+					value:timesArray[vertSearchY][vertSearchX]
+				};
+			}
+
+			//incriment the counters
+			//console.log({hX:horzSearchX, len: timesArray[0].length});
+			if(horzSearchX < (timesArray[0].length) - 1) horzSearchX++;
+			else { horzSearchX = 0; horzSearchY++; }
+
+			if(vertSearchY < (timesArray.length - 1)) vertSearchY++;
+			else { vertSearchY = 1; vertSearchX++; }
+		}*/
+
+		return solution
 	}
 }
 

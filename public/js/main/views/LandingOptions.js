@@ -282,25 +282,20 @@ LandingOptions.prototype._addTimeTable = function() {
 		//placeholder for arrival time accross stations
 		let trainNumber = 0;
 		let i = 0;
+		let startStation = 0;
 		var currentTime = StateService.getReferenceTime();
+		let startObject = TrainDataServ.findSchedFrinedlyStartTime(stops, currentTime);
+		let train = startObject.train;
 
+		console.log(startObject);
+		
 		//build the template
 		var htmlString = stops.map(function(stop) {
 			//build context for template
 			var friendlyStop = { stop_name: stop.stop_name, time: '' };
 
-			//on the first station
-			if(i < 1) {
-				//check for the closest arrival time to the current time
-				Object.keys(stop.arrivals).forEach(function(key) {
-					if(stop.arrivals[key] >= currentTime && stop.arrivals[key - 1] < currentTime) {
-						trainNumber = key;
-					}
-				});
-			}
-			i++;
-
-			friendlyStop.time = landing._minToHHmmA(stop.arrivals[trainNumber], "HH:mm a");
+			if(stop.arrivals[train] == null) friendlyStop.time = '-';
+			else friendlyStop.time = landing._minToHHmmA(stop.arrivals[train], "HH:mm a");
 
 			return timeTableTemplate(friendlyStop);
 		}).join('');
