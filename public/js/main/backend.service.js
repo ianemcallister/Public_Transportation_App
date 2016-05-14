@@ -280,6 +280,19 @@ class BackendService {
 			});	
 		});
 	}
+
+	serverRequest(url, requestParams) {
+		let backend = this;
+
+		if(typeof requestParams.dprtStn !== "undefined") {
+			let startStn = requestParams.dprtStn;
+			let endStn = requestParams.arvStn;
+
+			url = url + startStn + '/' + endStn;
+		}
+
+		return backend._getJSON(url);
+	}
 }
 
 let _backendService = new BackendService;
