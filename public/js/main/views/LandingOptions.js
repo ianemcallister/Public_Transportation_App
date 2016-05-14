@@ -10,6 +10,7 @@ import schedFilterTemplate from './../../../../templates/schedfilter.hbs';
 import timeTableTemplate from './../../../../templates/timeTable.hbs';
 import navSection from './../../../../templates/navSection.hbs';
 import navSummary from './../../../../templates/navSummary.hbs';
+import navSteps from './../../../../templates/navSteps.hbs';
 
 export default function LandingOptions(container) {
 	var landing = this;
@@ -320,13 +321,27 @@ LandingOptions.prototype._buildNavSummary = function(context) {
 
 	//if there was a summary there before, delete it.
 	landing._cleanNode(navSumDisplay);
-	
+
 	//build the summary
-	let htmlString = navSummary(context);
-	let nodes = parseHTML(htmlString);
+	let summaryHtmlString = navSummary(context);
+	let summaryNodes = parseHTML(summaryHtmlString);
 
 	//append the nodes to the dom
-	navSumDisplay.appendChild(nodes, navSumDisplay);
+	navSumDisplay.appendChild(summaryNodes, navSumDisplay);
+
+	//define the elements
+	let navStepsDisplay = landing._container.querySelector('.navSteps');
+
+	//build the steps
+	let stepsHtmlString = context.steps.map(function(step) {
+		return navSteps(step);
+	}).join('');
+
+	//parse the html into nodes
+	let stepsNodes = parseHTML(stepsHtmlString);
+
+	//append the nodes to the dom
+	navStepsDisplay.appendChild(stepsNodes, navStepsDisplay);
 
 };
 

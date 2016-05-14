@@ -1,0 +1,39 @@
+<div>
+	<!--If the train is being boarded at this station give details-->
+	{{#if departure}}<div class='row col-xs-12 col-sm-12 col-md-12 col-lg-12'>
+		<div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+			<strong>{{departure.time}}</strong>
+		</div>
+		<div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
+			<strong>Depart: {{departure.station}}</strong>
+		</div>
+	</div>{{/if}}
+	<!--If the train is being ridden give details here-->
+	{{#if ride}}<div class='row col-xs-12 col-sm-12 col-md-12 col-lg-12'>
+		<div class="col-xs-9 col-sm-9 col-md-9 col-lg-9 \
+					col-xs-offset-3 col-sm-offset-3 col-md-offset-3 \
+					col-lg-offset-3">
+			<strong>{{ride.line}}</strong>
+			<span>{{ride.eol}}</span> <br>
+			<span>{{ride.duration}} </span>
+			<span>({{ride.stops}})</span>
+		</div>
+	</div>{{/if}}
+	<!--Transfeer directions-->
+	{{#if transfeer}}<div class='row col-xs-12 col-sm-12 col-md-12 col-lg-12'>
+		<div class="col-xs-9 col-sm-9 col-md-9 col-lg-9 \
+					col-xs-offset-3 col-sm-offset-3 col-md-offset-3 \
+					col-lg-offset-3">
+			<strong>{{transfeer.desc}}</strong>
+		</div>
+	</div>{{/if}}
+	<!--If the train is being disembarked at this station give details-->
+	{{#if arrival}}<div class='row col-xs-12 col-sm-12 col-md-12 col-lg-12'>
+		<div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+			<strong>{{arrival.time}}</strong>
+		</div>
+		<div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
+			<strong>Arrive: {{arrival.station}}</strong>
+		</div>
+	</div>{{/if}}
+</div>
