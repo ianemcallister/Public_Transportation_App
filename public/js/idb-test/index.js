@@ -2,9 +2,21 @@ import idb from 'idb';
 
 console.log('opening idb');
 
-var dbPromise = idb.open('transit-db', 9, function(upgradeDb) {
+var dbPromise = idb.open('TriMet', 1, function(upgradeDb) {
   switch(upgradeDb.oldVersion) {
     case 0:
+      upgradeDb.createObjectStore('trains', {keyPath: 'short_name'});
+      upgradeDb.createObjectStore('90_Red_Line_Eastbound', {keyPath: 'seqId'});
+      upgradeDb.createObjectStore('90_Red_Line_Westbound', {keyPath: 'seqId'});
+      upgradeDb.createObjectStore('100_Blue_Line_Eastbound', {keyPath: 'seqId'});
+      upgradeDb.createObjectStore('100_Blue_Line_Westbound', {keyPath: 'seqId'});
+      upgradeDb.createObjectStore('190_Yellow_Line_Northbound', {keyPath: 'seqId'});
+      upgradeDb.createObjectStore('190_Yellow_Line_Southbound', {keyPath: 'seqId'});
+      upgradeDb.createObjectStore('200_Green_Line_Eastbound', {keyPath: 'seqId'});
+      upgradeDb.createObjectStore('200_Green_Line_Westbound', {keyPath: 'seqId'});
+      upgradeDb.createObjectStore('290_Orange_Line_Northbound', {keyPath: 'seqId'});
+      upgradeDb.createObjectStore('290_Orange_Line_Southbound', {keyPath: 'seqId'});
+    /*case 0:
       upgradeDb.createObjectStore('system-graph', {keyPath: 'stnId'});
       upgradeDb.createObjectStore('arrivals', {keyPath: 'time'});
       upgradeDb.createObjectStore('stops', {keyPath: 'trainId'});
@@ -29,7 +41,7 @@ var dbPromise = idb.open('transit-db', 9, function(upgradeDb) {
     case 8:
       //upgradeDb.createObjectStore('90_Red_Line_Eastbound', {keyPath: 'seqId'});
     case 9:
-      upgradeDb.createObjectStore('90_Red_Line_Westbound', {keyPath: 'seqId'});
+      upgradeDb.createObjectStore('90_Red_Line_Westbound', {keyPath: 'seqId'});*/
   }
   
 });
@@ -42,7 +54,7 @@ var dbPromise = idb.open('transit-db', 9, function(upgradeDb) {
 
 
 });*/
-
+/*
 dbPromise.then(function(db) {
   var tx = db.transaction('trains', 'readwrite');
   var systemGraphStore = tx.objectStore('trains');

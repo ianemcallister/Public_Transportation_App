@@ -8,6 +8,7 @@ class StateService {
 		//declare and init variables variables
 		this._nav = this._navInit();
 		this._sched = this._schedInit();
+		this.internetConnection = true;
 	}
 
 	_navInit() {
@@ -277,6 +278,9 @@ class StateService {
 		if(timeObject.selected == null) return timeObject.default;
 		else return timeObject.selected;
 	}
+
+	noInternetConnection() { console.log('no service'); this.internetConnection = false; }
+	foundInternetConnection() { console.log('internet found'); this.internetConnection = true; }
 
 	//TODO REMOVE THIS LATER
 	setNav(number) {

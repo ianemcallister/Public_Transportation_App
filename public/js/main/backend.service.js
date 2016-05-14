@@ -2,8 +2,8 @@ import idb from 'idb';
 
 class BackendService {
 	constructor() {
-		this.dbVersion = 9;
-		this.dbName = 'transit-db';
+		this.dbVersion = 1;
+		this.dbName = 'TriMet';
 	}
 
 	_get(url) {
@@ -16,22 +16,26 @@ class BackendService {
 		});
 	}
 
-	_getCachedDbPromise(db, version, store, processReq, keyPath) {
-		return idb.open(db, version, function(upgradeDb) {
-			//let store = upgradeDb.transaction.objectStore(store);
-			if(processReq == 'create') upgradeDb.createObjectStore(store, {keyPath: keyPath});
-			//if(processReq == 'read') {}
-			//if(processReq == 'update') {}
-			if(processReq == 'delete') upgradeDb.deleteObjectStore(store);
-			//TODO ADD AN UPDATE PROCESS
-		});
-	}
-
-	_createDbStore(store, keyPath) {
-		let version = this.dbVersion;
+	_getCachedDbPromise() {
+		let version = this.dbVerion;
 		let dbName = this.dbName;
-
-		return this._getCachedDbPromise(dbName, version, store, "create", keyPath);
+		return idb.open(dbName, version, function(upgradeDb) {
+		  switch(upgradeDb.oldVersion) {
+		    case 0:
+		      upgradeDb.createObjectStore('trains', {keyPath: 'short_name'});
+		      upgradeDb.createObjectStore('90_Red_Line_Eastbound', {keyPath: 'seqId'});
+		      upgradeDb.createObjectStore('90_Red_Line_Westbound', {keyPath: 'seqId'});
+		      upgradeDb.createObjectStore('100_Blue_Line_Eastbound', {keyPath: 'seqId'});
+		      upgradeDb.createObjectStore('100_Blue_Line_Westbound', {keyPath: 'seqId'});
+		      upgradeDb.createObjectStore('190_Yellow_Line_Northbound', {keyPath: 'seqId'});
+		      upgradeDb.createObjectStore('190_Yellow_Line_Southbound', {keyPath: 'seqId'});
+		      upgradeDb.createObjectStore('200_Green_Line_Eastbound', {keyPath: 'seqId'});
+		      upgradeDb.createObjectStore('200_Green_Line_Westbound', {keyPath: 'seqId'});
+		      upgradeDb.createObjectStore('290_Orange_Line_Northbound', {keyPath: 'seqId'});
+		      upgradeDb.createObjectStore('290_Orange_Line_Southbound', {keyPath: 'seqId'});
+		  }
+		  
+		});
 	}
 
 	_openDbStore() {
@@ -43,8 +47,10 @@ class BackendService {
 
 	_readDbStore() {}
 	
-	_updateDbStore(dbPromise, store, seqModel) {
-		//make additions to the store
+	_updateDbStore(store, seqModel) {
+		let backend = this;
+		let dbPromise = backend._getCachedDbPromise();
+
 		dbPromise.then(function(db) {
 			let tx = db.transaction(store, 'readwrite');
 			let theStore = tx.objectStore(store);
@@ -63,18 +69,16 @@ class BackendService {
 					}
 					
 					//add it to the store
+					console.log(storeObject);
 					theStore.put(storeObject);
 				}
 
 			});
 
-			console.log(store + " updated");
 		});
-	}
+	}	
 
 	_deleteDbStore() {}
-
-	//add a new store here
 
 	_buildSequences(lineData) {
 		let backend = this;
@@ -111,6 +115,67 @@ class BackendService {
 		return returnObject;
 	}
 
+	_addANewDbStore(storeName, storeModel) {
+		let backend = this;
+		console.log(storeName, storeModel);
+
+		//bump the version
+		//backend.dbVersion += 1;
+		let dbName = backend.dbName;
+		let dbVersion = backend.dbVersion
+
+		let dbPromise = idb.open(dbName, dbVersion, function(upgradeDb) {
+			upgradeDb.createObjectStore(storeName, {keyPath: 'seqId'});
+		});
+
+		dbPromise.then(function(db) {
+		
+			var tx = db.transaction(storeName, 'readwrite');
+  			var store = tx.objectStore(storeName);
+
+  			Object.keys(seqModel).forEach(function(stop) {
+				
+				if(stop !== 'direction') {
+					
+					//build the model
+					let storeObject = {
+						seqId: stop,
+						stop_id: seqModel[stop].stop_id,
+						stop_name: seqModel[stop].stop_name,
+						arrivals: seqModel[stop].arrivals,
+						parent_station: seqModel[stop].parent_station
+					}
+					
+					//add it to the store
+					console.log(storeObject);
+					theStore.put(storeObject);
+				}
+
+			});
+			return tx.complete;
+		})
+		.then(function() {
+			console.log("added " + storeName + ' to the db');
+		})
+		.catch(function(error) {
+			console.log('error: ' + error);
+		});	
+	}
+
+	_seperateSchedFile(trainLineObject) {
+		let backend = this;
+		let bothSequences = {};
+
+		//get both train directions
+		bothSequences = backend._buildSequences(trainLineObject);
+
+		//build one sequence, then the other
+		Object.keys(bothSequences).forEach(function(sequence) {
+
+			backend._updateDbStore(sequence, bothSequences[sequence]);
+		});
+	}
+
 	downloadATrainSched(url) {
 		this._getJSON(url)
 		.then(function(response) {
@@ -118,40 +183,15 @@ class BackendService {
 		});	
 	}
 
-	updateADbStore(url, db, store) {
+	updateADbStore(url) {
 		let backend = this;
 
 		this._getJSON(url)
 		.then(function(response) {
-			let bothSequences = {};
 			
-			//is this a schedule file?
-			if(typeof response.line !== 'undefined') {
-				
-				//if so get both directions
-				bothSequences = backend._buildSequences(response);
-				
-				//build one sequence, then the other
-				Object.keys(bothSequences).forEach(function(sequence) {
-					//console.log(sequence);
-
-					//add a new store
-					if(false) {
-						let dbPromise = backend._createDbStore(sequence, 'seqId');
-						backend._updateDbStore(dbPromise, sequence, bothSequences[sequence]);
-					}
-
-					//update an existing store
-					if(true) {
-						let dbPromise = backend._openDbStore();
-						backend._updateDbStore(dbPromise, sequence, bothSequences[sequence]);
-					}
-				});
-			}
-			
-			//console.log(bothSequences);
-
-			//backend._updateDbContent(db, store, response);
+			//if this is a schedule file, unpack it.  Otherwise it's a list of files, map and unpack them
+			if(typeof response.line !== 'undefined') backend._seperateSchedFile(response);
+			//else.....
 		});
 	}
 
@@ -172,6 +212,18 @@ class BackendService {
 				reject();
 			});
 		})
+	}
+
+	getSchedTrainsList() {
+
+		return new Promise(function(resolve, reject) {
+			return 'good';
+		}).then(function(response) {
+			resolve(response);
+		}).catch(function(error) {
+			console.log("error: " + error);
+		})
+
 	}
 }
 

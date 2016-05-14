@@ -22,9 +22,6 @@ export default function LandingOptions(container) {
 	landing._trainLines = container.querySelector('#trainLines');
 	landing._schedDisplay = container.querySelector('.schedDisplay');
 
-	//test the container
-	console.log(landing._container);
-
 	//download content
 
 	//build page

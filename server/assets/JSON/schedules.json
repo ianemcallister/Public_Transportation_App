@@ -1,0 +1,10 @@
+{
+	"query":"all train schedules",
+	"results": [
+		"90_Red_Line_Stops.json",
+		"100_Blue_Line_Stops.json",
+		"190_Yellow_Line_Stops.json",
+		"200_Green_Line_Stops.json",
+		"290_Orange_Line_Stops.json"
+	]
+}

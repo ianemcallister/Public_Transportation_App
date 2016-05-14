@@ -1,7 +1,8 @@
+
 const readline = require('readline');
 var fs = require('fs');
 
-var file = 9969 + '.txt';
+var file = 7763 + '.txt';
 
 var rl = readline.createInterface({
 	input: fs.createReadStream('./rawFiles/' + file)

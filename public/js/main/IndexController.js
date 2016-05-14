@@ -1,64 +1,12 @@
-import PostsView from './views/Posts';
-import ToastsView from './views/Toasts';
 import LandingView from './views/LandingOptions';
-import idb from 'idb';
-
-function openDatabase() {
-  // If the browser doesn't support service worker,
-  // we don't care about having a database
-  if (!navigator.serviceWorker) {
-    return Promise.resolve();
-  }
-
-  return idb.open('wittr', 1, function(upgradeDb) {
-    var store = upgradeDb.createObjectStore('wittrs', {
-      keyPath: 'id'
-    });
-    store.createIndex('by-date', 'time');
-  });
-}
-
-function getTrains() {
-
-  if (!navigator.serviceWorker) {
-    return Promise.resolve();
-  }
-
-  return idb.open('transit-db', 9, function(upgradeDb) {
-    /*var store = upgradeDb.createObjectStore('trains', {
-      keyPath: 'short_name'
-    });*/
-    var store = upgradeDb.transaction.objectStore('trains');
-  });
-}
+import Backend from './backend.service';
+import StateService from './state.service';
 
 export default function IndexController(container) {
   this._container = container;
-  this._postsView = new PostsView(this._container);
-  this._toastsView = new ToastsView(this._container);
   this._landingView = new LandingView(this._container);
-  this._lostConnectionToast = null;
-  this._dbPromise = openDatabase();
-  this._trainListPromise = getTrains();
   this._registerServiceWorker();
-  this._cleanImageCache();
-
-  var indexController = this;
-
-  setInterval(function() {
-    indexController._cleanImageCache();
-  }, 1000 * 60 * 5);
-
-  console.log(container);
-
-  //adding the select by line section
-  this._showCachedTrains();
-
-  this._showCachedStops();
-
-  this._showCachedMessages().then(function() {
-    indexController._openSocket();
-  });
+  this._testconnection()
 }
 
 IndexController.prototype._registerServiceWorker = function() {
@@ -68,6 +16,9 @@ IndexController.prototype._registerServiceWorker = function() {
 
   navigator.serviceWorker.register('/sw.js').then(function(reg) {
     if (!navigator.serviceWorker.controller) {
+      //if there is a service worker, then download resources for idb
+      //Backend.downloadResourceFiles('api/download/alTrains.json');
+      //Backend.downloadResourceFiles('api/download/schedules.json');
       return;
     }
 
@@ -96,55 +47,6 @@ IndexController.prototype._registerServiceWorker = function() {
   });
 };
 
-IndexController.prototype._showCachedTrains = function() {
-  /*var indexController = this;
-
-  //use the db promise
-  this._trainListPromise.then(function(db) {
-    //if no db notify the user and bounce
-    if(!db) { console.log('no db found'); return; }
-    //get the correct object store
-    var index = db.transaction('trains').objectStore('trains');
-    //return the promise
-    return index.getAll();
-  })
-  .then(function(trains) {
-    //build the list
-    indexController._landingView.addTrainsList(trains); 
-  });*/
-  
-}
-
-IndexController.prototype._showCachedStops = function() {
-  var indexController = this;
-  
-  var stopsJson = [
-    {id: 1, name: 'something'},
-    {id: 2, name: 'another'},
-    {id: 3, name: 'thatone'},
-  ];
-
-  indexController._landingView.addStopsList(stopsJson);
-}
-
-IndexController.prototype._showCachedMessages = function() {
-  var indexController = this;
-
-  return this._dbPromise.then(function(db) {
-    // if we're already showing posts, eg shift-refresh
-    // or the very first load, there's no point fetching
-    // posts from IDB
-    if (!db || indexController._postsView.showingPosts()) return;
-
-    var index = db.transaction('wittrs')
-      .objectStore('wittrs').index('by-date');
-
-    return index.getAll().then(function(messages) {
-      indexController._postsView.addPosts(messages.reverse());
-    });
-  });
-};
-
 IndexController.prototype._trackInstalling = function(worker) {
   var indexController = this;
   worker.addEventListener('statechange', function() {
@@ -154,15 +56,13 @@ IndexController.prototype._trackInstalling = function(worker) {
   });
 };
 
-IndexController.prototype._updateReady = function(worker) {
-  var toast = this._toastsView.show("New version available", {
-    buttons: ['refresh', 'dismiss']
-  });
-
-  toast.answer.then(function(answer) {
-    if (answer != 'refresh') return;
-    worker.postMessage({action: 'skipWaiting'});
-  });
+IndexController.prototype._testconnection = function() {
+  fetch("/ping")
+  .then(function(response) {
+    StateService.foundInternetConnection();
+  }).catch(function(e) {
+    StateService.noInternetConnection();
+  })
 };
 
 // open a connection to the server for live updates
@@ -210,55 +110,3 @@ IndexController.prototype._openSocket = function() {
   });
 };
 
-IndexController.prototype._cleanImageCache = function() {
-  return this._dbPromise.then(function(db) {
-    if (!db) return;
-
-    var imagesNeeded = [];
-
-    var tx = db.transaction('wittrs');
-    return tx.objectStore('wittrs').getAll().then(function(messages) {
-      messages.forEach(function(message) {
-        if (message.photo) {
-          imagesNeeded.push(message.photo);
-        }
-        imagesNeeded.push(message.avatar);
-      });
-
-      return caches.open('wittr-content-imgs');
-    }).then(function(cache) {
-      return cache.keys().then(function(requests) {
-        requests.forEach(function(request) {
-          var url = new URL(request.url);
-          if (!imagesNeeded.includes(url.pathname)) cache.delete(request);
-        });
-      });
-    });
-  });
-};
-
-// called when the web socket sends message data
-IndexController.prototype._onSocketMessage = function(data) {
-  var messages = JSON.parse(data);
-
-  this._dbPromise.then(function(db) {
-    if (!db) return;
-
-    var tx = db.transaction('wittrs', 'readwrite');
-    var store = tx.objectStore('wittrs');
-    messages.forEach(function(message) {
-      store.put(message);
-    });
-
-    // limit store to 30 items
-    store.index('by-date').openCursor(null, "prev").then(function(cursor) {
-      return cursor.advance(30);
-    }).then(function deleteRest(cursor) {
-      if (!cursor) return;
-      cursor.delete();
-      return cursor.continue().then(deleteRest);
-    });
-  });
-
-  this._postsView.addPosts(messages);
-};

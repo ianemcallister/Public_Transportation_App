@@ -14,8 +14,11 @@ class TrainDataService {
 		this._schedByDbId = {
 			"Red_Line": {name:"90_Red_Line", "Westbound":"dir0", "Eastbound":"dir1"} 
 		};
+		//download resource files
+		//Backend.downloadResourceFiles('api/download/alTrains.json');
+		//Backend.downloadResourceFiles('api/download/schedules.json');
 
-		//Backend.updateADbStore('api/download/90_Red_Line_Stops2.json', 'transit-db', '90_Red_line');
+		//Backend.updateADbStore('api/download/schedules.json');
 	}
 
 	_get() {}
@@ -104,15 +107,15 @@ class TrainDataService {
 		//resolvturn a promise for async work
 		return new Promise(function(resolve, reject) {
 
-			ds._getCachedDbPromise('transit-db', 9, 'trains')
-			.then(function(db) {
-				let store = db.transaction('trains').objectStore('trains');
-				return store.getAll();
-			}).then(function(trains) {
-				resolve(trains);
-			}).catch(function(error) {
+			Backend.getSchedTrainsList()
+			.then(function(response) {
+				console.log(response);
+				resolve(response);
+			})
+			.catch(function(error) {
 				console.log("error: " + error);
 			})
+
 		});
 	}
 
@@ -144,20 +147,9 @@ class TrainDataService {
 
 				resolve(returnObject);
 			});
-			/*local._getCachedDbPromise('transit-db', 9, dbLineId)
-			.then(function(db) {
-				let tx = db.transaction(dbLineId);
-				let routeStore = tx.objectStore(dbLineId);
-				let sequence = routeStore.index(currentHeading);
 
-				return sequence.getAll();
-			}).then(function(stops) {
-				resolve(stops);
-			}).catch(function(error) {
-				console.log("error: " + error);
-				reject();
-			});*/
 		});
+
 	}	
 	
 	addSchedTrain(key, short_name) {
