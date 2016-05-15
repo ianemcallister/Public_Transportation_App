@@ -12,7 +12,8 @@ var gtfsParser = {
 	loadResource: loadResource,
 	buildSystemGraph: buildSystemGraph,
 	buildStopsByTrain: buildStopsByTrain,
-	buildAllStationNames: buildAllStationNames
+	buildAllStationNames: buildAllStationNames,
+	buildStationsById: buildStationsById
 }
 
 function _get(url) {
@@ -353,6 +354,29 @@ function buildAllStationNames(allStops) {
 	//write it out for later
 	var writable = fs.createWriteStream(targetFolder + exportFile);
 	writable.write(JSON.stringify(stationsObject, null, '\t'));
+}
+
+function buildStationsById(allStations) {
+	console.log('building Stops By Train');
+	var targetFolder = './assets/models/';
+	var exportFile = 'stopsById.json';
+	var stnsObject = {};
+
+	var allStops = allStations.data;
+	//console.log(allStations.data);
+	//unpack the array
+	allStops.forEach(function(stop) {
+		var stpId = stop.stop_id;
+		var stpName = stop.name;
+
+		console.log(stop, stpId, stpName);
+		stnsObject[stpId] = stpName;
+	});
+
+	console.log('writing file');
+	//write it out for later
+	var writable = fs.createWriteStream(targetFolder + exportFile);
+	writable.write(JSON.stringify(stnsObject, null, '\t'));
 }
 
 module.exports = gtfsParser;

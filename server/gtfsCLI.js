@@ -38,11 +38,20 @@ gtfsParser.loadResource('trainStops.json').then(function(response) {
 });*/
 
 //build all station Names
-
+/*
 gtfsParser.loadResource('systemGraph.json', './assets/JSON/').then(function(response) {
 	var allStops = response;
 
 	gtfsParser.buildAllStationNames(allStops);
+});*/
+
+//build stations by Id
+/*
+gtfsParser.loadResource('allStationNames.json', './assets/JSON/').then(function(response) {
+	var allStations = response;
+
+	gtfsParser.buildStationsById(allStations);
 });
+*/
 
 
