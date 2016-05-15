@@ -1,0 +1,393 @@
+{
+	"docType": 3,
+	"data": [
+		{
+			"stop_id": "7601",
+			"name": "Union Station/NW 5th & Glisan MAX Stn"
+		},
+		{
+			"stop_id": "7606",
+			"name": "PSU South/SW 5th & Jackson MAX Stn"
+		},
+		{
+			"stop_id": "7608",
+			"name": "City Hall/SW 5th & Jefferson MAX Station"
+		},
+		{
+			"stop_id": "7618",
+			"name": "PSU Urban Center/SW 5th & Mill MAX Station"
+		},
+		{
+			"stop_id": "7627",
+			"name": "SW 5th & Oak MAX Station"
+		},
+		{
+			"stop_id": "7646",
+			"name": "Pioneer Place/SW 5th Ave MAX Station"
+		},
+		{
+			"stop_id": "7763",
+			"name": "Union Station/NW 6th & Hoyt MAX Stn"
+		},
+		{
+			"stop_id": "7774",
+			"name": "PSU Urban Center/SW 6th & Montgomery MAX Stn"
+		},
+		{
+			"stop_id": "7777",
+			"name": "Pioneer Courthouse/SW 6th Ave MAX Stn"
+		},
+		{
+			"stop_id": "7787",
+			"name": "SW 6th & Pine MAX Station"
+		},
+		{
+			"stop_id": "8333",
+			"name": "Library/SW 9th Ave MAX Station"
+		},
+		{
+			"stop_id": "8334",
+			"name": "Pioneer Square South MAX Station"
+		},
+		{
+			"stop_id": "8335",
+			"name": "Mall/SW 4th Ave MAX Station"
+		},
+		{
+			"stop_id": "8336",
+			"name": "Yamhill District MAX Station"
+		},
+		{
+			"stop_id": "8359",
+			"name": "Cleveland Ave MAX Station"
+		},
+		{
+			"stop_id": "8381",
+			"name": "Morrison/SW 3rd Ave MAX Station"
+		},
+		{
+			"stop_id": "8382",
+			"name": "Mall/SW 5th Ave MAX Station"
+		},
+		{
+			"stop_id": "8383",
+			"name": "Pioneer Square North MAX Station"
+		},
+		{
+			"stop_id": "8384",
+			"name": "Galleria/SW 10th Ave MAX Station"
+		},
+		{
+			"stop_id": "9299",
+			"name": "NW 6th & Davis MAX Station"
+		},
+		{
+			"stop_id": "9303",
+			"name": "NW 5th & Couch MAX Station"
+		},
+		{
+			"stop_id": "9848",
+			"name": "Hatfield Government Center MAX Station"
+		},
+		{
+			"stop_id": "10293",
+			"name": "PSU South/SW 6th & College MAX Stn"
+		},
+		{
+			"stop_id": "10579",
+			"name": "Portland Int'l Airport MAX Station"
+		},
+		{
+			"stop_id": "11498",
+			"name": "Expo Center MAX Station"
+		},
+		{
+			"stop_id": "13123",
+			"name": "SW 6th & Madison MAX Station"
+		},
+		{
+			"stop_id": "13132",
+			"name": "Clackamas Town Center TC MAX Station"
+		},
+		{
+			"stop_id": "landmark-138",
+			"name": "Oak/SW 1st Ave MAX Station"
+		},
+		{
+			"stop_id": "landmark-118",
+			"name": "Skidmore Fountain MAX Station"
+		},
+		{
+			"stop_id": "landmark-110",
+			"name": "Old Town/Chinatown MAX Station"
+		},
+		{
+			"stop_id": "landmark-137",
+			"name": "Rose Quarter TC MAX Station"
+		},
+		{
+			"stop_id": "landmark-119",
+			"name": "Convention Center MAX Station"
+		},
+		{
+			"stop_id": "landmark-120",
+			"name": "NE 7th Ave MAX Station"
+		},
+		{
+			"stop_id": "landmark-121",
+			"name": "Lloyd Center/NE 11th Ave MAX Station"
+		},
+		{
+			"stop_id": "landmark-122",
+			"name": "Hollywood/NE 42nd Ave TC MAX Station"
+		},
+		{
+			"stop_id": "landmark-136",
+			"name": "NE 60th Ave MAX Station"
+		},
+		{
+			"stop_id": "landmark-123",
+			"name": "NE 82nd Ave MAX Station"
+		},
+		{
+			"stop_id": "landmark-135",
+			"name": "Gateway/NE 99th Ave TC MAX Station"
+		},
+		{
+			"stop_id": "landmark-134",
+			"name": "E 102nd Ave MAX Station"
+		},
+		{
+			"stop_id": "landmark-133",
+			"name": "E 122nd Ave MAX Station"
+		},
+		{
+			"stop_id": "landmark-124",
+			"name": "E 148th Ave MAX Station"
+		},
+		{
+			"stop_id": "landmark-125",
+			"name": "E 162nd Ave MAX Station"
+		},
+		{
+			"stop_id": "landmark-132",
+			"name": "E 172nd Ave MAX Station"
+		},
+		{
+			"stop_id": "landmark-126",
+			"name": "E 181st Ave MAX Station"
+		},
+		{
+			"stop_id": "landmark-127",
+			"name": "Rockwood/E 188th Ave MAX Station"
+		},
+		{
+			"stop_id": "landmark-128",
+			"name": "Ruby Junction/E 197th Ave MAX Station"
+		},
+		{
+			"stop_id": "landmark-129",
+			"name": "Gresham City Hall MAX Station"
+		},
+		{
+			"stop_id": "landmark-130",
+			"name": "Gresham Central TC MAX Station"
+		},
+		{
+			"stop_id": "landmark-143",
+			"name": "Sunset TC MAX Station"
+		},
+		{
+			"stop_id": "landmark-93",
+			"name": "Providence Park MAX Station"
+		},
+		{
+			"stop_id": "landmark-94",
+			"name": "Kings Hill/SW Salmon St MAX Station"
+		},
+		{
+			"stop_id": "landmark-96",
+			"name": "Beaverton TC MAX Station"
+		},
+		{
+			"stop_id": "landmark-95",
+			"name": "Beaverton Creek MAX Station"
+		},
+		{
+			"stop_id": "landmark-97",
+			"name": "Beaverton Central MAX Station"
+		},
+		{
+			"stop_id": "landmark-98",
+			"name": "Millikan Way MAX Station"
+		},
+		{
+			"stop_id": "landmark-99",
+			"name": "Merlo Rd/SW 158th Ave MAX Station"
+		},
+		{
+			"stop_id": "landmark-100",
+			"name": "Elmonica/SW 170th Ave MAX Station"
+		},
+		{
+			"stop_id": "landmark-101",
+			"name": "Willow Creek/SW 185th Ave TC MAX Station"
+		},
+		{
+			"stop_id": "landmark-102",
+			"name": "Quatama/NW 205th Ave MAX Station"
+		},
+		{
+			"stop_id": "landmark-103",
+			"name": "Orenco/NW 231st Ave MAX Station"
+		},
+		{
+			"stop_id": "landmark-104",
+			"name": "Fair Complex/Hillsboro Airport MAX Station"
+		},
+		{
+			"stop_id": "landmark-105",
+			"name": "Hawthorn Farm MAX Station"
+		},
+		{
+			"stop_id": "landmark-106",
+			"name": "Washington/SE 12th Ave MAX Station"
+		},
+		{
+			"stop_id": "landmark-107",
+			"name": "Tuality Hospital/SE 8th Ave MAX Station"
+		},
+		{
+			"stop_id": "landmark-108",
+			"name": "Hillsboro Central/SE 3rd TC MAX Station"
+		},
+		{
+			"stop_id": "landmark-112",
+			"name": "Goose Hollow/SW Jefferson St MAX Station"
+		},
+		{
+			"stop_id": "landmark-113",
+			"name": "Washington Park MAX Station"
+		},
+		{
+			"stop_id": "landmark-144",
+			"name": "Parkrose/Sumner TC MAX Station"
+		},
+		{
+			"stop_id": "landmark-111",
+			"name": "Cascades MAX Station"
+		},
+		{
+			"stop_id": "landmark-145",
+			"name": "Mt Hood Ave MAX Station"
+		},
+		{
+			"stop_id": "landmark-92",
+			"name": "Delta Park/Vanport MAX Station"
+		},
+		{
+			"stop_id": "landmark-84",
+			"name": "Kenton/N Denver Ave MAX Station"
+		},
+		{
+			"stop_id": "landmark-85",
+			"name": "N Lombard TC MAX Station"
+		},
+		{
+			"stop_id": "landmark-86",
+			"name": "Rosa Parks MAX Station"
+		},
+		{
+			"stop_id": "landmark-91",
+			"name": "N Killingsworth St MAX Station"
+		},
+		{
+			"stop_id": "landmark-90",
+			"name": "N Prescott St MAX Station"
+		},
+		{
+			"stop_id": "landmark-87",
+			"name": "Overlook Park MAX Station"
+		},
+		{
+			"stop_id": "landmark-89",
+			"name": "Albina/Mississippi MAX Station"
+		},
+		{
+			"stop_id": "landmark-88",
+			"name": "Interstate/Rose Quarter MAX Station"
+		},
+		{
+			"stop_id": "landmark-1522",
+			"name": "SE Main St MAX Station"
+		},
+		{
+			"stop_id": "landmark-1521",
+			"name": "SE Division St MAX Station"
+		},
+		{
+			"stop_id": "landmark-1520",
+			"name": "SE Powell Blvd MAX Station"
+		},
+		{
+			"stop_id": "landmark-1519",
+			"name": "SE Holgate Blvd MAX Station"
+		},
+		{
+			"stop_id": "landmark-1518",
+			"name": "Lents Town Center/Foster Rd MAX Station"
+		},
+		{
+			"stop_id": "landmark-1517",
+			"name": "SE Flavel St MAX Station"
+		},
+		{
+			"stop_id": "landmark-1515",
+			"name": "SE Fuller Rd MAX Station"
+		},
+		{
+			"stop_id": "landmark-2566",
+			"name": "Civic Drive MAX Station"
+		},
+		{
+			"stop_id": "landmark-2551",
+			"name": "Lincoln St/SW 3rd Ave MAX Station"
+		},
+		{
+			"stop_id": "landmark-2552",
+			"name": "South Waterfront/SW Moody MAX Station"
+		},
+		{
+			"stop_id": "landmark-2553",
+			"name": "OMSI/SE Water MAX Station"
+		},
+		{
+			"stop_id": "landmark-2554",
+			"name": "Clinton St/SE 12th Ave MAX Station"
+		},
+		{
+			"stop_id": "landmark-2555",
+			"name": "SE 17th Ave & Rhine St MAX Station"
+		},
+		{
+			"stop_id": "landmark-2556",
+			"name": "SE 17th Ave & Holgate Blvd MAX Station"
+		},
+		{
+			"stop_id": "landmark-2557",
+			"name": "SE Bybee Blvd MAX Station"
+		},
+		{
+			"stop_id": "landmark-2558",
+			"name": "SE Tacoma/Johnson Creek MAX Station"
+		},
+		{
+			"stop_id": "landmark-2559",
+			"name": "Milwaukie/Main St MAX Station"
+		},
+		{
+			"stop_id": "landmark-2560",
+			"name": "SE Park Ave MAX Station"
+		}
+	]
+}

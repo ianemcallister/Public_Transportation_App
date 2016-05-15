@@ -135,18 +135,6 @@ LandingOptions.prototype._cleanNode = function(node) {
 	}
 }
 
-LandingOptions.prototype._addStopsList = function(stops) {
-	console.log('got here');
-	//build the options from the model
-	var htmlString = stops.map(function(stop) {
-		return stopsTemplate(stop);
-	}).join('');
-
-	//var nodes = parseHTML(htmlString + "" + htmlString + "" );
-
-	//this._navFilter.appendChild(nodes, this._navFilter.firstChild);
-};
-
 LandingOptions.prototype._addTrainsList = function() {
 	var landing = this;
 	var trainLinesInput = landing._trainLines;
@@ -343,6 +331,19 @@ LandingOptions.prototype._buildNavSummary = function(context) {
 	//append the nodes to the dom
 	navStepsDisplay.appendChild(stepsNodes, navStepsDisplay);
 
+};
+
+LandingOptions.prototype.addStopsList = function(stops) {
+	console.log('got here');
+	//build the options from the model
+	/*
+	var htmlString = stops.map(function(stop) {
+		return stopsTemplate(stop);
+	}).join('');*/
+
+	//var nodes = parseHTML(htmlString + "" + htmlString + "" );
+
+	//this._navFilter.appendChild(nodes, this._navFilter.firstChild);
 };
 
 LandingOptions.prototype.buildNavView = function() {

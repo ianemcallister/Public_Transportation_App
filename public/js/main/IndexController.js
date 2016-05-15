@@ -61,8 +61,13 @@ IndexController.prototype._testconnection = function() {
     //update the state
     StateService.foundInternetConnection();
     //if there is a service worker, then download resources for idb
-    Backend.downloadResourceFiles('api/download/allTrains.json');
-    Backend.downloadResourceFiles('api/download/schedules.json');
+    Backend.downloadResourceFiles('api/download/allStationNames.json');//.then((res) => {
+      //after the files have been saved,load the list for the model
+    //  indexController._landingView.addStopsList(res);
+    //});
+
+    Backend.downloadResourceFiles('api/download/allTrains.json');//.then((res) =>{});
+    Backend.downloadResourceFiles('api/download/schedules.json');//.then((res) =>{});;
     //build the nav view
     indexController._landingView.buildNavView();
   }).catch(function(e) {

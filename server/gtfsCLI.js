@@ -1,6 +1,7 @@
 
 var gtfsParser = require('./gtfsParser');
 
+console.log("in the cli");
 //build the trips model from scratch
 /*
 gtfsParser.buildTrips().then(function(response) {
@@ -13,6 +14,7 @@ gtfsParser.buildTrips().then(function(response) {
 //gtfsParser.buildStnsModel();
 
 //build system graph
+/*
 gtfsParser.loadResource('routeTrips.json').then(function(response) {
 	var routes = response;
 
@@ -25,4 +27,22 @@ gtfsParser.loadResource('routeTrips.json').then(function(response) {
 
 	});
 	
+});*/
+
+//build stops by train
+/*
+gtfsParser.loadResource('trainStops.json').then(function(response) {
+	var trainStops = response;
+
+	gtfsParser.buildStopsByTrain(trainStops);
+});*/
+
+//build all station Names
+
+gtfsParser.loadResource('systemGraph.json', './assets/JSON/').then(function(response) {
+	var allStops = response;
+
+	gtfsParser.buildAllStationNames(allStops);
 });
+
+

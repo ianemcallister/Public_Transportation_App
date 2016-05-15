@@ -10,7 +10,9 @@ var gtfsParser = {
 	buildRoutes: buildRoutes,
 	buildStnsModel: buildStnsModel,
 	loadResource: loadResource,
-	buildSystemGraph: buildSystemGraph
+	buildSystemGraph: buildSystemGraph,
+	buildStopsByTrain: buildStopsByTrain,
+	buildAllStationNames: buildAllStationNames
 }
 
 function _get(url) {
@@ -151,9 +153,9 @@ function buildStnsModel() {
 	});
 }
 
-function loadResource(url) {
+function loadResource(url, dir) {
 	console.log('loading routes');
-	var sourceFolder = './assets/gtfs/';
+	var sourceFolder = dir || './assets/gtfs/';
 	var routeTrips = require(sourceFolder + url)
 
 	return new Promise(function(resolve, reject) {
@@ -215,6 +217,9 @@ function buildSystemGraph(allRoutes, allStations) {
 					if(typeof graphObject[parentStn] == 'undefined') {
 						graphObject[parentStn] = {};
 
+						//add the name
+						graphObject[parentStn]['name'] = allStations[parentStn].name;
+
 						//add this child station
 						if(typeof graphObject[parentStn]['childStns'] == 'undefined')
 							graphObject[parentStn]['childStns'] = {};
@@ -265,6 +270,89 @@ function buildSystemGraph(allRoutes, allStations) {
 	//write it out for later
 	var writable = fs.createWriteStream(targetFolder + exportFile);
 	writable.write(JSON.stringify(graphObject, null, '\t'));
+}
+
+function buildStopsByTrain(allTrainStops) {
+	console.log('building Stops By Train');
+	var targetFolder = './assets/JSON/';
+	var exportFile = 'stopsByTrain.json';
+	var trainsObject = {};
+
+	//unpack by train first
+	Object.keys(allTrainStops).forEach(function(train) {
+		var thisTrain = parseInt(train);
+
+		//then by sequence
+		Object.keys(allTrainStops[train]).forEach(function(seqNum) {
+			var thisStop = allTrainStops[train][seqNum];
+			var thisSeqNum = parseInt(seqNum);
+			var stationId = thisStop.stn;
+
+			if(typeof trainsObject[thisTrain] == 'undefined')
+				trainsObject[thisTrain] = {};
+
+			if(typeof trainsObject[thisTrain][stationId] == 'undefined')
+				trainsObject[thisTrain][stationId] = thisSeqNum
+
+		});
+
+	});
+
+	console.log('writing file');
+	//write it out for later
+	var writable = fs.createWriteStream(targetFolder + exportFile);
+	writable.write(JSON.stringify(trainsObject, null, '\t'));
+}
+
+function buildAllStationNames(allStops) {
+	console.log('building all Station Names');
+	var targetFolder = './assets/JSON/';
+	var exportFile = 'allStationNames.json';
+	var allStations = {};
+	var stationsObject = {};
+
+	//add header
+	stationsObject['docType'] = 3;
+	stationsObject['data'] = [];
+
+	//unpack by station first
+	Object.keys(allStops).forEach(function(station) {
+		var thisStnName = '';
+		var thisStnId = '';
+
+		//if it has a parent station move up to that
+		if(typeof allStops[station].parent !== 'undefined')
+			thisStnId = allStops[station].parent;	
+		else thisStnId = station;
+		
+		thisStnName = allStops[thisStnId].name;
+ 		
+ 		//notify the user
+ 		console.log(thisStnId, thisStnName);
+
+ 		//write the value
+		allStations[thisStnId] = thisStnName;
+
+	});
+
+	//after the model is build, add it to the export object
+	
+	console.log('building write file');
+	Object.keys(allStations).forEach(function(id) {
+		//build object
+		var thisStation = {
+			stop_id: id,
+			name: allStations[id]
+		};
+
+		//console.log(thisStation);
+		stationsObject['data'].push(thisStation);
+	});
+
+	console.log('writing file');
+	//write it out for later
+	var writable = fs.createWriteStream(targetFolder + exportFile);
+	writable.write(JSON.stringify(stationsObject, null, '\t'));
 }
 
 module.exports = gtfsParser;

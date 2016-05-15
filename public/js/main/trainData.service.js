@@ -9,7 +9,9 @@ class TrainDataService {
 		this._trainsByNumber = {};
 		this._trainDirections = {};
 		this._schedByDbId = {}; //example: {"Red_Line": {name:"90_Red_Line", "Westbound":"dir0", "Eastbound":"dir1"} };
-
+		this._allStops = [];
+		this._stopsById = {};
+		this._stopsByName = {};
 	}
 
 	_setTrainList(list, key, short_name) {
@@ -48,6 +50,41 @@ class TrainDataService {
 
 		});
 		
+	}
+
+	_setAllStops(list) {
+		this._allStops = list;
+	}
+
+	_setStopsById(list) {
+		let td = this;
+		list.forEach(function(stop) {
+			let stopId = stop.stop_id;
+			let name = stop.name;
+
+			td._stopsById[stopId] = name;
+		});
+	}
+
+	_setStopsByName(list) {
+		let td = this;
+
+		list.forEach(function(stop) {
+			let stopId = stop.stop_id;
+			let name = stop.name;
+
+			td._stopsById[name] = stopId;
+		});
+	}
+
+	getStopsById() {
+		return this._stopsById
+	}
+	getStopsByName() {
+		return this._stopsByName;
+	}
+	getAllStops() {
+		return this._allStops;
 	}
 
 	getTrainNumberByName(name) {
@@ -185,6 +222,17 @@ class TrainDataService {
 		//add to the model
 		this._setTrainDirections(key, directions);
 		
+	}
+
+	addAllTrainStops(list) {
+		let td = this;
+		console.log('returning promise');
+		return new Promise((res, req) => {
+			td._setAllStops(list);
+			td._setStopsById(list);
+			td._setStopsByName(list);
+			res('it worked');
+		});
 	}
 
 	findSchedFrinedlyStartTime(stops, currentTime) {

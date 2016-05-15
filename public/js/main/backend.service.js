@@ -204,6 +204,16 @@ class BackendService {
 		});
 	}
 
+	_saveListOfStops(allStops) {
+		let backend = this;
+
+		return new Promise((res, rej) => {
+			TrainDataService.addAllTrainStops(allStops).then((response) => {
+				res(allStops);
+			});
+		});	
+	}
+
 	downloadATrainSched(url) {
 		this._getJSON(url)
 		.then(function(response) {
@@ -247,6 +257,11 @@ class BackendService {
 					break;
 				case 2: //this is a train schedule
 					backend._seperateSchedFile(response);
+					break;
+				case 3: //this is a list of all train stops
+					backend._saveListOfStops(response.data).then((response) => {
+						console.log(response);
+					});
 					break;
 			}
 
