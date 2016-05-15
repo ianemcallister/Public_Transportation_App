@@ -73,15 +73,15 @@ class TrainDataService {
 			let stopId = stop.stop_id;
 			let name = stop.name;
 
-			td._stopsById[name] = stopId;
+			td._stopsByName[name] = stopId;
 		});
 	}
 
-	getStopsById() {
-		return this._stopsById
+	getStopsById(id) {
+		return this._stopsById[id];
 	}
-	getStopsByName() {
-		return this._stopsByName;
+	getStopsByName(name) {
+		return this._stopsByName[name];
 	}
 	getAllStops() {
 		return this._allStops;
@@ -312,8 +312,12 @@ class TrainDataService {
 	requestRoute(dptInput, arrvInput) {
 		let ds = this;
 
+		//convert the long_name to short_name
+		let dprtStnId = this.getStopsByName(dptInput);
+		let arvlStnId = this.getStopsByName(arrvInput);
+	
 		return new Promise((res, rej) => {
-			Backend.serverRequest('api/nav/', {dprtStn: dptInput, arvStn: arrvInput})
+			Backend.serverRequest('api/nav/', {dprtStn: dprtStnId, arvStn: arvlStnId})
 			.then((response) => {
 				//pass the respon back when received
 				res(response);

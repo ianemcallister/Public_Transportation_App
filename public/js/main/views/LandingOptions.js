@@ -376,11 +376,15 @@ LandingOptions.prototype.buildNavView = function() {
 
 	//add watchers
 	$('#departureStopsInput').on('change keyup',function(event) { 
-		console.log('dep updated');
+		var checkable = ($('#departureStopsInput').val());
+		
+		dptInput = checkable;
 	});
 
 	$('#arrivalStopsInput').on('change keyup',function(event) { 
-		console.log('arriv updated');
+		var checkable = ($('#arrivalStopsInput').val());
+		
+		arrvInput = checkable;
 	});
 
 	$('#navSubmission').on('click',function(event) { 
