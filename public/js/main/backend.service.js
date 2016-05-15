@@ -244,26 +244,29 @@ class BackendService {
 	downloadResourceFiles(url) {
 		let backend = this;
 
-		this._getJSON(url)
-		.then(function(response) {
-			
-			//if this is a schedule file, unpack it.  Otherwise it's a list of files, map and unpack them
-			switch(parseInt(response.docType)) {
-				case 0: //this is the list of all trains
-					backend._saveListOfTrains(response.data);
-					break;
-				case 1: //this is the list of all train schedules
-					backend._parseSchedulesList(response.data);
-					break;
-				case 2: //this is a train schedule
-					backend._seperateSchedFile(response);
-					break;
-				case 3: //this is a list of all train stops
-					backend._saveListOfStops(response.data).then((response) => {
-						console.log(response);
-					});
-					break;
-			}
+		return new Promise((res, req) => {
+			this._getJSON(url)
+			.then(function(response) {
+				
+				//if this is a schedule file, unpack it.  Otherwise it's a list of files, map and unpack them
+				switch(parseInt(response.docType)) {
+					case 0: //this is the list of all trains
+						backend._saveListOfTrains(response.data);
+						break;
+					case 1: //this is the list of all train schedules
+						backend._parseSchedulesList(response.data);
+						break;
+					case 2: //this is a train schedule
+						backend._seperateSchedFile(response);
+						break;
+					case 3: //this is a list of all train stops
+						backend._saveListOfStops(response.data).then((response) => {
+							res(response);
+						});	
+						break;
+				}
+				
+			});
 
 		});
 	}

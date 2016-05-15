@@ -334,16 +334,22 @@ LandingOptions.prototype._buildNavSummary = function(context) {
 };
 
 LandingOptions.prototype.addStopsList = function(stops) {
-	console.log('got here');
+	let landing = this;
+
+	//console.log(stops);
 	//build the options from the model
-	/*
-	var htmlString = stops.map(function(stop) {
+	let htmlString = stops.map(function(stop) {
+		//console.log(stop.stop_id, stop.name);
 		return stopsTemplate(stop);
-	}).join('');*/
+	}).join('');
 
-	//var nodes = parseHTML(htmlString + "" + htmlString + "" );
+	//console.log(htmlString);
 
-	//this._navFilter.appendChild(nodes, this._navFilter.firstChild);
+	let nodes = parseHTML(htmlString);
+	let nodes2 = parseHTML(htmlString);
+
+	landing._dprtDatalist.appendChild(nodes, landing._dprtDatalist.firstChild);
+	landing._arrvDatalist.appendChild(nodes2, landing._arrvDatalist.firstChild);
 };
 
 LandingOptions.prototype.buildNavView = function() {
@@ -359,6 +365,9 @@ LandingOptions.prototype.buildNavView = function() {
 	//define elements
 	landing._dptInput = landing._container.querySelector('#departureStopsInput');
 	landing._arrvInput = landing._container.querySelector('#arrivalStopsInput');
+	landing._dprtDatalist = landing._container.querySelector('#departureStops');
+	landing._arrvDatalist = landing._container.querySelector('#arrivalStops');
+
 	landing._navDisplay = landing._container.querySelector('.navDisplay');
 
 	//define input variables
