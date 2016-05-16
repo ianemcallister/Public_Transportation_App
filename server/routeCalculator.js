@@ -8,9 +8,9 @@ var cursorGenerator = require('./cursorModel');
 var RouteCalculator = {
   _formatTime: _formatTime,
   _formatDuration: _formatDuration,
+  _objectLength: _objectLength,
   _buildStationInfo: _buildStationInfo,
-  _linesObjToArray: _linesObjToArray,
-  _getUnvisitedConnections: _getUnvisitedConnections,
+  _getMoveOptions: _getMoveOptions,
   _calcRoute: _calcRoute,
   getNewRoute: getNewRoute
 }
@@ -29,6 +29,16 @@ function _formatDuration(mins) {
   return mins + "min";
 }
 
+function _objectLength(object) {
+  var length = 0;
+    for( var key in object ) {
+        if( object.hasOwnProperty(key) ) {
+            ++length;
+        }
+    }
+    return length;
+}
+
 function _buildStationInfo(stnId) {
   return {
     name: stopsModel[stnId].name,
@@ -37,67 +47,130 @@ function _buildStationInfo(stnId) {
   }
 }
 
-function _linesObjToArray(obj) {
-  let returnArray = [];
+function _getMoveOptions(pos) {
+  var calc = this;
+  var holdingObj = {};
+  var retObj = [];
+  var consFound = false;
 
-  Object.keys(obj).forEach(function(key) {
-    returnArray.push(key);
+  //check for direct connections
+  if(typeof systemGraph[pos].connections !== 'undefined') {
+    var dirCons = systemGraph[pos].connections;
+    var displayArray = [];
+
+    //run through direct cons
+    Object.keys(dirCons).forEach(function(con) {
+      //add next station to the queue
+      holdingObj[dirCons[con]] = true;
+    });
+
+    Object.keys(holdingObj).forEach(function(con) {
+      displayArray.push(con);
+    });
+
+    //for show
+    //console.log('dirct cons: ', displayArray);
+
+    consFound = true;
+  }
+
+  //check for connectsion through parent station
+  if(typeof systemGraph[pos].parent !== 'undefined') {
+    var parStn = systemGraph[pos].parent;
+    var parCons = systemGraph[parStn].childStns;
+    var displayArray = [];
+
+
+    //run through parent cons
+    Object.keys(parCons).forEach(function(route) {
+      
+      Object.keys(parCons[route]).forEach(function(con) {
+        
+        //add next station to the queue
+        holdingObj[con] = true;
+
+      });
+      
+    });
+
+    Object.keys(holdingObj).forEach(function(con) {
+      displayArray.push(con);
+    });
+
+    //for show
+    //console.log('parent cons: ', displayArray);
+    
+    consFound = true;
+  }
+
+  //convert the holding object to an array
+  Object.keys(holdingObj).forEach(function(stn) {
+    retObj.push(parseInt(stn));
   });
 
-  return returnArray;
-}
-
-function _getUnvisitedConnections(currentNode, visitedStns) {
-  var uc = this;
-  var holdingObject = {};
-  var returnArray = [];
-  console.log('current node is: ', currentNode);
-  //get connections
-  var connections = systemGraph[currentNode].connections;
-  
-  //build as model first (to avoid collisions);
-  Object.keys(connections).forEach(function(connection) {
-    var station = connections[connection];
-    holdingObject[station] = true;
-  });
-  
-  //then transfeer the model to an array
-  Object.keys(holdingObject).forEach(function(connection) {
-    returnArray.push(connection);
-  });
-
-  //return the array
-  return returnArray;
+  if(consFound) {
+   
+    //if cons were found pass them back, or throw an error
+    //console.log('cons found: ', retObj);
+    return retObj;
+  } else {
+    console.log('no cons found');
+    throw 'No connections found';
+  }
 }
 
 function _calcRoute(depart, arrive) {
   var calc = this;
   var routeObject = {};
-  var dprtHeading = systemGraph[depart].dir;
-  var linesObj = systemGraph[depart].lines;
-  var dprtLines = calc._linesObjToArray(linesObj);
 
   //calc nodes
+  var cursor = null;
   var queue = [];
   var toCheck = {};
-  var visitedStns = {};
+  var found = false;
+  var winning = {};
+  var visited = {};
+  var i = 0;
+  var found = false;
+  //set the inital cursor position
+  queue[0] = depart;
 
-  //1. set the cursor on the current node, and add to the path
-  var cursor = new cursorGenerator;
-  cursor.setPosition(depart);
-  cursor.addPathStep({stn: depart, lineOptions: dprtLines, heading: dprtHeading});
+  while(!(cursor == arrive) && !found) {  //check if the destination has been reached
+    //get the first station in the queue
+    if(typeof queue[0] !== 'undefined') {
+      cursor = queue[0];
+      //then remove record from the queue
+      queue.splice(0,1);
+    } else {
+      found = true;
+    }
 
-  //2. add each unvisited connection to a que of nodes to check
-  var cursorPosition = cursor.getPosition();
-  
-  toCheck = calc._getUnvisitedConnections(cursorPosition, visitedStns);
-  //3. move cursor to the first qued node and save it's unique path
+    //add cursor to the visited queue
+    if(typeof visited[cursor] == 'undefined') visited[cursor] = i;
 
-  //4. if this is the destination node throw the flag and, return the path
+    //get move options
+    var moveOptions = [];
+    moveOptions = calc._getMoveOptions(cursor);
 
-  //5. otherwise, add the unvisited connecting nodes to the que and return to #3
-  console.log(toCheck);
+    //add move options to the queue
+    moveOptions.forEach(function(opt) {
+      if(typeof visited[opt] == 'undefined') {
+        queue.push(opt);  
+      } else {
+        //console.log('aready added this one');
+      }
 
+    });
+
+    //print the queue
+    console.log('LOOK HERE: the queue is: ', queue);
+    //console.log('LOOK HERE: visited stations: ', visited);
+
+    i++;
+    if(i==200) found = true;
+  }
+
+  console.log('found the end! ', visited);
 
   //add the values to the model
   routeObject['deprtTime'] = 913;
