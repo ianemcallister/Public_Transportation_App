@@ -13,7 +13,8 @@ var gtfsParser = {
 	buildSystemGraph: buildSystemGraph,
 	buildStopsByTrain: buildStopsByTrain,
 	buildAllStationNames: buildAllStationNames,
-	buildStationsById: buildStationsById
+	buildStationsById: buildStationsById,
+	buildAdjacencies: buildAdjacencies
 }
 
 function _get(url) {
@@ -377,6 +378,75 @@ function buildStationsById(allStations) {
 	//write it out for later
 	var writable = fs.createWriteStream(targetFolder + exportFile);
 	writable.write(JSON.stringify(stnsObject, null, '\t'));
+}
+
+function buildAdjacencies(allStops) {
+	console.log('building all Station Names');
+	var targetFolder = './assets/models/';
+	var exportFile = 'stnAgacencies.json';
+	var exportFile2 = 'allStns.json';
+	var allStations = {};
+	var stationsObject = {};
+
+	//unpack by station first
+	Object.keys(allStops).forEach(function(station) {
+		var allCons = {};
+		var localArray = [];
+
+		//if there are connections find them
+		if(typeof allStops[station].connections !== 'undefined') {
+			var dirCons = allStops[station].connections;
+
+			//unpack each line
+			Object.keys(dirCons).forEach(function(con) {
+				var thisStn = dirCons[con];
+
+				allCons[thisStn] = null;
+			});
+		}
+
+		//if there are parent connections find them
+		if(typeof allStops[station].parent !== 'undefined') {
+			var prnStn = allStops[station].parent;
+			var pntCons = allStops[prnStn].childStns;
+
+			//unpack by line
+			Object.keys(pntCons).forEach(function(route) {
+				var thisRoute = pntCons[route];
+
+				//then by station
+				Object.keys(thisRoute).forEach(function(con) {
+					if(con != station) allCons[con] = null;
+				});
+
+			});
+		}
+		
+		//make each list of connection an array before passing back
+		Object.keys(allCons).forEach(function(stns) {
+			localArray.push(stns);
+		});
+
+		//if it's a parent station don't write it
+		console.log(station.search('landmark'));
+		if(station.search('landmark') !== 0) {
+
+			//add the values to the model
+			stationsObject[station] = localArray;
+
+			//and add all stations to it's own model
+			allStations[station] = null;
+		}
+	
+	});
+
+	console.log('writing file');
+	//write it out for later
+	var writable = fs.createWriteStream(targetFolder + exportFile);
+	writable.write(JSON.stringify(stationsObject, null, '\t'));
+
+	var anotherWritable = fs.createWriteStream(targetFolder + exportFile2);
+	anotherWritable.write(JSON.stringify(allStations, null, '\t'));
 }
 
 module.exports = gtfsParser;

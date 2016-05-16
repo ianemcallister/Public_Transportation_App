@@ -2,15 +2,25 @@
 
 var calculator = require('./routeCalculator');
 var stopsModel = require('./assets/gtfs/stopsModel');
-var systemGraph = require('./assets/JSON/systemGraph');
-var cursorGenerator = require('./cursorModel');
+//var systemGraph = require('./assets/JSON/systemGraph');
+//var cursorGenerator = require('./cursorModel');
+var stnAgacencies = require('./assets/models/stnAgacencies');
+var allStns = require('./assets/models/allStns');
+var readline = require('readline');
 
 var RouteCalculator = {
+  _queue: [],
+  _vertex: [],
+  _endpoint: [],
+  _action: [],
+  _distance: {},
   _formatTime: _formatTime,
   _formatDuration: _formatDuration,
-  _objectLength: _objectLength,
   _buildStationInfo: _buildStationInfo,
-  _getMoveOptions: _getMoveOptions,
+  _objectLength: _objectLength,
+  _buildPath: _buildPath,
+  _findPath:_findPath,
+  _findLines: _findLines,
   _calcRoute: _calcRoute,
   getNewRoute: getNewRoute
 }
@@ -29,6 +39,14 @@ function _formatDuration(mins) {
   return mins + "min";
 }
 
+function _buildStationInfo(stnId) {
+  return {
+    name: stopsModel[stnId].name,
+    id: ("Station " + stnId),
+    desc: stopsModel[stnId].desc
+  }
+}
+
 function _objectLength(object) {
   var length = 0;
     for( var key in object ) {
@@ -39,138 +57,139 @@ function _objectLength(object) {
     return length;
 }
 
-function _buildStationInfo(stnId) {
-  return {
-    name: stopsModel[stnId].name,
-    id: ("Station " + stnId),
-    desc: stopsModel[stnId].desc
+function _buildPath(start, end, path) {
+  var calc = this;
+  var found = false;
+  var i = 0;
+
+  //add the arrival station
+  path.push(end);
+
+  while(!found) {
+    
+    //log the state
+    console.log(i + '. vertex: ' + calc._vertex[i] + ' endpoint: ' + calc._endpoint[i]);  
+
+    if(calc._vertex[i] == start && calc._endpoint[i] == end) found = true;
+
+    if(calc._endpoint[i] == end) {
+      
+      //add the value to the path
+      path.push(calc._vertex[i]);
+
+      //set end to the start value
+      end = calc._vertex[i];
+
+      //reset the counter
+      i = 0;
+    }
+
+    //bail if it gets too high
+    if(i==500) found = true;
+    i++
   }
+
+  return path;
 }
 
-function _getMoveOptions(pos) {
+function _findPath(depart, arrive) {
   var calc = this;
-  var holdingObj = {};
-  var retObj = [];
-  var consFound = false;
+  var allStations = allStns;
+  var found = false;
+  var distanceTraveled = 0;
+  var vertCount = 0;
+  var endPntCnt = 0;
 
-  //check for direct connections
-  if(typeof systemGraph[pos].connections !== 'undefined') {
-    var dirCons = systemGraph[pos].connections;
-    var displayArray = [];
+  //add the starting station to the queue
+  calc._queue.push(depart);
 
-    //run through direct cons
-    Object.keys(dirCons).forEach(function(con) {
-      //add next station to the queue
-      holdingObj[dirCons[con]] = true;
-    });
+  //set the distance of the start as 0;
+  allStations[depart] = 0;
 
-    Object.keys(holdingObj).forEach(function(con) {
-      displayArray.push(con);
-    });
+  while(!found) {
+    //get the first value from the queue
+    calc._vertex[endPntCnt] = calc._queue[0];
 
-    //for show
-    //console.log('dirct cons: ', displayArray);
+    //save for later
+    var thisvertex = calc._vertex[endPntCnt];
 
-    consFound = true;
-  }
+    //delete the value from the queue
+    calc._queue.splice(0,1);
 
-  //check for connectsion through parent station
-  if(typeof systemGraph[pos].parent !== 'undefined') {
-    var parStn = systemGraph[pos].parent;
-    var parCons = systemGraph[parStn].childStns;
-    var displayArray = [];
+    //update the distance traveled
+    distanceTraveled++;
 
+    //is it the end point?
+    if(!(calc._vertex[endPntCnt] == arrive)) {
+      //if it's not the value we're looking for evalute further
+      //console.log(calc._vertex);
+      //loop through all adjacent stations
+      stnAgacencies[calc._vertex[endPntCnt]].forEach(function(stn) {
 
-    //run through parent cons
-    Object.keys(parCons).forEach(function(route) {
-      
-      Object.keys(parCons[route]).forEach(function(con) {
-        
-        //add next station to the queue
-        holdingObj[con] = true;
+        //set the endpoint
+        calc._endpoint[endPntCnt] = stn;
 
+        //set the vertix value
+        calc._vertex[endPntCnt] = thisvertex;
+
+        //if we haven't visited this station before
+        if(allStations[stn] == null) {
+          //calculate the distance
+          allStations[stn] = allStations[depart] + distanceTraveled;
+
+          //add that station to the queue
+          calc._queue.push(stn);
+        }
+
+        //log out the findings before moving on
+        console.log(endPntCnt + ': vertex: ' + calc._vertex[endPntCnt] + ' endpoint: ' 
+                + calc._endpoint[endPntCnt] + ' distance: ' + distanceTraveled + ' queue:' + calc._queue);
+
+        endPntCnt++;
       });
-      
-    });
 
-    Object.keys(holdingObj).forEach(function(con) {
-      displayArray.push(con);
-    });
+    } else {
+      found = true;
 
-    //for show
-    //console.log('parent cons: ', displayArray);
+      //log out the findings before moving on
+      console.log(endPntCnt + ': vertex: ' + calc._vertex[endPntCnt] + ' endpoint: ' 
+                + calc._endpoint[endPntCnt] + ' distance: ' + distanceTraveled + ' queue:' + calc._queue);
     
-    consFound = true;
-  }
+    }
 
-  //convert the holding object to an array
-  Object.keys(holdingObj).forEach(function(stn) {
-    retObj.push(parseInt(stn));
-  });
+    //incriment the counter
+    vertCount++; if(vertCount==200) found = true;
 
-  if(consFound) {
-   
-    //if cons were found pass them back, or throw an error
-    //console.log('cons found: ', retObj);
-    return retObj;
-  } else {
-    console.log('no cons found');
-    throw 'No connections found';
   }
+  
+  console.log('found the solution');
+  
+  //console.log(calc._vertex);
+  //console.log(calc._endpoint);
+
+  //now that the solution has been found, step back through it to find the route
+  //var path = [];
+  //var thePath = calc._recursivePlayback(depart, arrive, path, 0);
+  //console.log(thePath);
+} 
+
+function _findLines(aPath) {
+  
 }
 
 function _calcRoute(depart, arrive) {
   var calc = this;
   var routeObject = {};
 
-  //calc nodes
-  var cursor = null;
-  var queue = [];
-  var toCheck = {};
-  var found = false;
-  var winning = {};
-  var visited = {};
-  var i = 0;
-  var found = false;
-  //set the inital cursor position
-  queue[0] = depart;
+  //calculate a path
+  calc._findPath(depart, arrive);
 
-  while(!(cursor == arrive) && !found) {  //check if the destination has been reached
-    //get the first station in the queue
-    if(typeof queue[0] !== 'undefined') {
-      cursor = queue[0];
-      //then remove record from the queue
-      queue.splice(0,1);
-    } else {
-      found = true;
-    }
+  //distill the path
+  var aPath = [];
+  var distilledPath = calc._buildPath(depart, arrive, aPath);
 
-    //add cursor to the visited queue
-    if(typeof visited[cursor] == 'undefined') visited[cursor] = i;
-
-    //get move options
-    var moveOptions = [];
-    moveOptions = calc._getMoveOptions(cursor);
-
-    //add move options to the queue
-    moveOptions.forEach(function(opt) {
-      if(typeof visited[opt] == 'undefined') {
-        queue.push(opt);  
-      } else {
-        //console.log('aready added this one');
-      }
-
-    });
-
-    //print the queue
-    console.log('LOOK HERE: the queue is: ', queue);
-    //console.log('LOOK HERE: visited stations: ', visited);
-
-    i++;
-    if(i==200) found = true;
-  }
-
-  console.log('found the end! ', visited);
+  //find lines for that path
+  calc._findLines(distilledPath);
 
   //add the values to the model
   routeObject['deprtTime'] = 913;

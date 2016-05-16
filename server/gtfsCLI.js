@@ -54,4 +54,10 @@ gtfsParser.loadResource('allStationNames.json', './assets/JSON/').then(function(
 });
 */
 
+//build adjecencies file
 
+gtfsParser.loadResource('systemGraph.json', './assets/JSON/').then(function(response) {
+	var allStops = response;
+
+	gtfsParser.buildAdjacencies(allStops);
+});
