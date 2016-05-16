@@ -1,4 +1,5 @@
 
 var calculator = require('./routeCalculator');
 
-calculator.getNewRoute(8359, 8336);
+var value = calculator.getNewRoute(7601, 8336)
+//console.log(value);
