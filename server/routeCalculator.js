@@ -306,7 +306,7 @@ function _getTimesAndTrains(routes) {
   //console.log(routes[1][1][90]);
   var travelPlan = {};
 
-  return new Promise(function(resolve, reject) {
+  //return new Promise(function(resolve, reject) {
     //check all route options
     Object.keys(routes).forEach(function(option) {
       var thisOption = routes[option];
@@ -341,7 +341,7 @@ function _getTimesAndTrains(routes) {
                 if(arrivalTimes[time] == thisTrain) thisOption[step].arrive = time;
               });
              
-
+              travelPlan = routes;
               //throw the flag
               found=true;
             }
@@ -356,8 +356,8 @@ function _getTimesAndTrains(routes) {
 
     });
 
-    resolve(routes);
-
+    //resolve(routes);
+    return travelPlan;
     //pick the best time to return
     /*var completeOptions = calc._calcDurations(routes);
     var bestDuration = {time: null, option: null};
@@ -376,7 +376,7 @@ function _getTimesAndTrains(routes) {
 
     return completeOptions[bestDuration.option];*/
     
-  });
+  //});
   
 }
 
@@ -389,7 +389,7 @@ function _calcRoute(depart, arrive) {
   var calc = this;
   var routeObject = {};
 
-  return new Promise(function(resolve, reject) {
+  //return new Promise(function(resolve, reject) {
     //calculate a path
     calc._findPath(depart, arrive);
 
@@ -404,38 +404,41 @@ function _calcRoute(depart, arrive) {
     var routeProposal = calc._proposeRoutes(possibleLines);
 
     //get times and trains for that route
-    calc._getTimesAndTrains(routeProposal).then(function(response) {
-      //console.log(response[1]);
-     
-      var dprtStn = systemGraph[response[1].start].name;
-      var arrvStn = systemGraph[response[1].end].name;
-      var lineNme = null;
+    var response = calc._getTimesAndTrains(routeProposal);//.then(function(response) {
+      
+      var thisStart = response[1][1].start;
+      var thisEnd = response[1][1].end;
 
+      var dprtStn = systemGraph[thisStart].name;
+      var arrvStn = systemGraph[thisEnd].name;
+      var lineNme = null;
+      
       //console.log(dprtStn, arrvStn);
       Object.keys(allTrains.data).forEach(function(line) {
-        if(line.short_name = response[1].line) {
+        if(line.short_name == response[1][1].line) {
           lineNme = line.long_name;
         }
       });
-
+      
       //only using the first option right now
-      routeObject['deprtTime'] = response[1].depart;
-      routeObject['arrvTime'] = response[1].arrive;
-      routeObject['tripDuration'] = response[1].arrive - response[1].depart;
-      routeObject['totalStops'] = response[1].stops;
+      routeObject['deprtTime'] = '11:00am';//response[1].depart;
+      routeObject['arrvTime'] = response[1][1].arrive;
+      routeObject['tripDuration'] = response[1][1].arrive - response[1][1].depart;
+      routeObject['totalStops'] = response[1][1].stops;
 
       routeObject['steps'] = [
-            {departure: {time: calc._formatTime(response[1].depart), station:dprtStn}, ride:false, transfeer: false, arrival: false},
-            {departure: false, ride:{line:lineNme, eol:"Expo Center", duration:(response[1].arrive - response[1].depart +" min"), stops:(response[1].stops+" stops")}, transfeer: false, arrival: false},
-            {departure: false, ride:false, transfeer: false, arrival: {time:calc._formatTime(response[1].arrive), station:arrvStn}}
+            {departure: {time: calc._formatTime(response[1][1].depart), station:dprtStn}, ride:false, transfeer: false, arrival: false},
+            {departure: false, ride:{line:lineNme, eol:"Expo Center", duration:(response[1][1].arrive - response[1][1].depart +" min"), stops:(response[1][1].stops+" stops")}, transfeer: false, arrival: false},
+            {departure: false, ride:false, transfeer: false, arrival: {time:calc._formatTime(response[1][1].arrive), station:arrvStn}}
           ];
 
-      console.log(routeObject);
-      
-    });
-
-    resolve(routeObject);
-  });
+      //console.log(routeObject);
+      //resolve('testing');
+    //});
+    //console.log(routeObject);
+    return routeObject;
+    //return 'testing';
+  //});
 
 }
 
@@ -447,9 +450,10 @@ function getNewRoute(depart, arrive) {
   var newRoute = {};
 
   return new Promise(function(resolve, reject) {
-
-    rc._calcRoute(depart, arrive).then(function(response) {
-      newRoute = response;
+resolve(depart);    
+    var newRoute = rc._calcRoute(depart, arrive);//.then(function(response) {
+      //console.log('here?');
+      console.log(newRoute);
 
       //build the times
       journeyObject['deprtTime'] = rc._formatTime(newRoute.deprtTime);
@@ -468,12 +472,13 @@ function getNewRoute(depart, arrive) {
       journeyObject['arrivalStn'] = rc._buildStationInfo(arrive);
 
       //build the steps
+      //journeyObject['steps'] = newRoute.steps;
       journeyObject['steps'] = newRoute.steps;
+      //console.log('here?');
+    //});
 
-    });
-
+    //resolve(journeyObject);
     resolve(journeyObject);
-
   });
 
 }
