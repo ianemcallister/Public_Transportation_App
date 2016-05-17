@@ -8,7 +8,7 @@ It is a transporation app for the Portland Oregon MAX train system.  Users can v
 
 ## Features
 
-TODO: add this later
+This project features a service worker for offline functionality and backend services.
 
 ## Instructions
 
@@ -20,25 +20,17 @@ TODO: add this later
 
 	To install the required dependencies call `npm install` from the root directory.
 
-3. **Load Serverside Resources**
-
-	This project utilizies a serverside component to download the GTFS.zip file from [Trimet.org](https://developer.trimet.org/GTFS.shtml), parse the csv files, then save JSON files to be used by the application.
-
-	* To download and unzip the GTFS.zip navigate to the server file, `cd server` from the root director and run `node scripts/download`
-
-	* After downloading build the required JSON files from ther `server` directory by running `node scripts/build`
-
 4. **Launch the server and run the client site**
 
-	After you have build the required JSON files from the root director (you may need to `cd ..`), run `gulp serve`.
+	Run `gulp serve` to serve the project up. Use port 8889 to toggle the network connection on and off to exprience offline functionality
 
 ## Dependencies
 
-This project utilizes a number of dependencies that can be thorougly expored in the package.json file.  Most notabley though...
-
-TODO: add this later
+This project utilizes a number of dependencies that can be thorougly expored in the package.json file.  
 
 ## Credits
+* I took a lot of different paths on this, tryied a lot of differnt tools, this is not an exhaustive list but gets started.
+* Thank you to [jakearchibald](https://github.com/jakearchibald) for designing the example and putting together the tutorial.
 * Thank you to [brendannee](https://github.com/brendannee) for his [node-gtfs](https://github.com/brendannee/node-gtfs) repository.  I referenced it early on and learned a bit about dealint with GTFS files.
 * I scaffolded this project using [generator-angular-fullstack](https://github.com/angular-fullstack/generator-angular-fullstack), thanks to [Andrew Koroluk](https://github.com/Awk34), [Tyler Henkel](https://github.com/DaftMonk), and [Cody Mize](https://github.com/kingcody).
 
