@@ -175,16 +175,10 @@ export default class Server {
     this._app.get('/api/nav/:startStn/:endStn', (req, res) => {
 
       //calculate the route
-      //var newRoute = {}
-      console.log(req.params.startStn, req.params.endStn);
-      
-      routeCalculator.getNewRoute(req.params.startStn, req.params.endStn).then(function(response) {
-        console.log(response);
-        res.send(response);
-      });
+      var newRoute = routeCalculator.getNewRoute(req.params.startStn, req.params.endStn);
       
       //respond with the route
-      
+      res.send(newRoute);
     });
 
     generateReady.then(_ => {
