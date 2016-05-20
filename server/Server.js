@@ -172,13 +172,20 @@ export default class Server {
       });
     });
 
+    //THIS IS THE NAVIGATION ENDPOINT
     this._app.get('/api/nav/:startStn/:endStn', (req, res) => {
 
       //calculate the route
-      var newRoute = routeCalculator.getNewRoute(req.params.startStn, req.params.endStn);
-      
+      //var newRoute = routeCalculator.getNewRoute(req.params.startStn, req.params.endStn);
+      routeCalculator.getNewRoute(req.params.startStn, req.params.endStn)
+      .then(function(response) {
+        res.send(response);
+      })
+      .catch(function(error) {
+        console.log('error: ' + error);
+      });
       //respond with the route
-      res.send(newRoute);
+      //res.send(newRoute);
     });
 
     generateReady.then(_ => {
