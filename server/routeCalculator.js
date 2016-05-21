@@ -16,11 +16,24 @@ var RouteCalculator = {
   _formatDuration: _formatDuration,
   _buildStationInfo: _buildStationInfo,
   _objectLength: _objectLength,
+  _getAllTrains: _getAllTrains,
   _formatSummary: _formatSummary,
   _formatSteps:_formatSteps,
   _stationsPath: _stationsPath,
-  _linesForStations:_linesForStations,
+  _areSameLine: _areSameLine,
+  _buildLinesScorecard: _buildLinesScorecard,
+  _buildLinesPerStop: _buildLinesPerStop,
+  _getStepsFromRide: _getStepsFromRide,
+  _findSegments: _findSegments,
+  _buildNewDeparture: _buildNewDeparture,
+  _buildNewRide: _buildNewRide,
+  _buildNewArrival: _buildNewArrival,
+  _buildNewTransfeer: _buildNewTransfeer,
+  _calculateRideTimes:_calculateRideTimes,
+  _buildJourneyTree: _buildJourneyTree,
+  _connectingTrains: _connectingTrains,
   _selectFastestRoute:_selectFastestRoute,
+  _searchStations: _searchStations,
   _buildAJourney: _buildAJourney,
   _calcRoute: _calcRoute,
   getNewRoute: getNewRoute
@@ -65,6 +78,22 @@ function _objectLength(object) {
         }
     }
     return length;
+}
+
+function _getAllTrains(format) {
+  var blankTrainsObject = {};
+
+  if(format == 'bool') {
+    allTrains.data.forEach(function(line) {
+      blankTrainsObject[line.short_name] = false;
+    });
+  } else {
+    allTrains.data.forEach(function(line) {
+      blankTrainsObject[line.short_name] = 0;
+    });
+  }
+
+  return blankTrainsObject;
 }
 
 function _buildAJourney(depart, arrive) {
@@ -112,7 +141,7 @@ function _formatSummary(rawJourney) {
   return thisRouteObject;
 }
 
-function _stationsPath(start, end) {
+function _searchStations(start, end) {
   var calc = this;
 
   //declare local Object
@@ -182,6 +211,8 @@ function _stationsPath(start, end) {
 
   //only pass back the required values
   var rawPathObject = {
+    depart: start,
+    arrive: end,
     start: route.vertex,
     end: route.endpoint
   };
@@ -189,8 +220,580 @@ function _stationsPath(start, end) {
   return rawPathObject;
 }
 
-function _linesForStations(allSteps) {}
-function _selectFastestRoute(allOptions) {}
+function _stationsPath(allSteps) {
+  var calc = this;
+
+  //loop variables
+  var found = false;
+  var i = 0;
+  var path = [];
+  var thisEnd = allSteps.arrive;
+
+  //add the arrival station 
+  path.push(allSteps.arrive);
+
+  //work backwards to find the appropriate connections
+
+  while(!found) { 
+
+    //if both values match we've found our path
+    if( allSteps.start[i] == allSteps.depart && 
+        allSteps.end[i] == thisEnd) 
+          found = true;
+
+    //if we're not finished...
+    if(allSteps.end[i] == thisEnd) {
+
+      //add the value to the path
+      path.push(allSteps.start[i]);
+
+      //set the end to the start value
+      thisEnd = allSteps.start[i];
+
+      //reset the counter
+      i = 0;
+    }
+
+    //if it's taking too long, bail
+    i++; if(i == 500) found = true; 
+  }
+
+  return path;
+
+}
+
+function _buildLinesScorecard(allStops) {
+  var calc = this;
+  var linesScorecard = calc._getAllTrains();
+
+  //determine which lines serve each station on the path
+  allStops.forEach(function(stationId) {
+    var thisStnTrains = systemGraph[stationId].trains;
+
+    Object.keys(thisStnTrains).forEach(function(line) {
+
+      //credit the line
+      linesScorecard[line]++;
+
+    });
+
+  });
+
+  return linesScorecard;
+}
+
+function _connectingTrains(start, end, line) {
+  var calc = this;
+  var departureOptions = systemGraph[start].trains[line];
+  var trainsList = [];
+
+  //find a train leaving this station on this line
+  //var departureTrain = 
+  //does it reach the ending station?
+  Object.keys(departureOptions).forEach(function(key) {
+    var thisTrain = departureOptions[key];
+    //does that train connect to our ending stop?
+    if(typeof stopsByTrain[thisTrain][end] == 'number') {
+      trainsList.push(thisTrain)
+    }
+
+  });
+
+  return trainsList;
+}
+
+function _buildLinesPerStop(allStops) {
+  var calc = this;
+  var stopsHaveLines = {};
+
+  //determine which lines serve each station on the path
+  allStops.forEach(function(stationId) {
+    //get the trains for this station
+    var thisStnTrains = systemGraph[stationId].trains;
+    //add all trains to the holding object
+    stopsHaveLines[stationId] = calc._getAllTrains('bool');
+
+    Object.keys(thisStnTrains).forEach(function(line) {
+
+      //add the line to the holding object
+      stopsHaveLines[stationId][line] = true;
+
+    });
+
+  });
+
+  return stopsHaveLines
+}
+
+function _areSameLine(start, end) {
+  var calc = this;
+  var sameLines = [];
+  var allTrainLines = calc._getAllTrains();
+  var connections = {
+    start: {},
+    end: {}
+  };
+
+  //check for direct connections
+  if(typeof systemGraph[start].connections !== 'undefined') {
+
+    //loop through them
+    Object.keys(systemGraph[start].connections).forEach(function(key) {
+      connections.start[key] = true;
+    });
+
+  }
+
+  if(typeof systemGraph[end].connections !== 'undefined') {
+
+    //loop through them
+    Object.keys(systemGraph[end].connections).forEach(function(key) {
+      connections.end[key] = true;
+    });
+
+  }
+
+  //check for parent connections
+  if(typeof systemGraph[start].parent !== 'undefined') {
+    var parentStn = systemGraph[start].parent;
+    
+    Object.keys(systemGraph[parentStn].childStns).forEach(function(key) {
+      connections.start[key] = true;
+    });
+
+  }
+
+  if(typeof systemGraph[end].parent !== 'undefined') {
+    var parentStn = systemGraph[end].parent;
+    
+    Object.keys(systemGraph[parentStn].childStns).forEach(function(key) {
+      connections.end[key] = true;
+    });
+
+  }
+
+  //post the objects to comare
+  //console.log('comparing ', connections);
+
+  //loop through all the lines
+  Object.keys(allTrainLines).forEach(function(key) {
+
+    //check for lines served
+    if(connections.start[key] && connections.end[key])
+      sameLines.push(key);
+    
+  });
+
+  return sameLines;
+}
+
+function _findSegments(allRides, remainingStops) {
+  var calc = this;
+
+  //console.log('in _findSegments:', allRides, remainingStops);
+
+  //check for remaining stops
+  if(remainingStops.length > 0) {
+    //if there are remaining stops...
+    //local variables
+    var found = false;
+    var departure = parseInt(remainingStops[0]);
+    var revsePath = remainingStops.reverse();
+    var lastStation = parseInt(revsePath[0]);
+    var newRemainingStops = [];
+
+    //now that lastStaions is saved, update the reversePath
+    revsePath.splice(0,1);
+
+    //console.log('looking between ' + departure + ' and ' + lastStation);
+
+    while(!found) {
+      //calculate similar lines
+      var similarLines = calc._areSameLine(departure, lastStation);
+
+      //evaluate similar lines
+      if(similarLines.length > 0) {
+        
+        //console.log('found similar lines ' + similarLines);
+        //save route options for this ride
+        var thisRide = {
+          start: departure,
+          end: lastStation,
+          lines: similarLines
+        };
+
+        //push the route onto the object
+        allRides.push(thisRide);
+
+        //if there is a revi
+        //console.log('# of reminaing stops', newRemainingStops.length );
+
+        //call this function again with a revised object
+        calc._findSegments(allRides, newRemainingStops.reverse());
+
+        //throw the flag
+        found = true;
+
+      } else {
+        //console.log('no similar line found');
+        //if a similar route is not found
+        //if the newRemainingStops object is empty push the last stop
+        if(newRemainingStops.length == 0)
+          newRemainingStops.push(lastStation);
+
+        //push the second to last station on to the newRemainingStops object
+        newRemainingStops.push(revsePath[0]);
+
+      }
+
+      //get a new ending point
+      lastStation = revsePath[0];
+      revsePath.splice(0,1);
+
+    }
+
+    return allRides;
+
+  } else {
+    //if there are no more remaining stops, return the rides object
+    return allRides;
+  }
+
+}
+
+function _buildNewDeparture(aRide) {
+  var calc = this;
+
+  //local variables
+  var start = parseInt(aRide.start);
+  var end = parseInt(aRide.end);
+  var trainLines = aRide.lines;
+  var bestDeparture = {time: 1000000, line:null};
+  var currentTime = calc._getCurrentTime();
+  var departureTimes = {};
+  var departureObject = {
+    time: null,
+    station: null,
+    line: null
+  };
+
+  //loop through each train line option
+  trainLines.forEach(function(line) {
+
+    //local variables
+    var trainTimes = systemGraph[start].trains[line];
+    var testTime = currentTime;
+    var found = false;
+
+    console.log(trainTimes);
+
+    while(!found) {
+
+      console.log(testTime, trainTimes[testTime]);
+      if(typeof trainTimes[testTime] !== 'undefined') {
+        var thisTrain = trainTimes[testTime];
+
+        //as long as this train goes all the way through
+        if(typeof stopsByTrain[thisTrain] !== 'undefined') {
+          departureTimes[line] = testTime;
+          found = true;
+        }
+      }
+
+      //if nothing was found incriment time by 1 min
+      testTime++; if(testTime > 1600) throw 'an error occured';
+    }
+
+  });
+
+  //figure out which is the best departure time
+  Object.keys(departureTimes).forEach(function(key) {
+    if(departureTimes[key] < bestDeparture.time) {
+      bestDeparture.time = departureTimes[key];
+      bestDeparture.line = key;
+    }
+  });
+
+  //get a departure time
+  departureObject.time = bestDeparture.time;
+  departureObject.line = bestDeparture.line;
+
+  //get a departure station
+  departureObject.station = systemGraph[start].name;
+
+  return departureObject;
+}
+
+function _buildNewRide(aRide) {
+  return {line: null, eol:null, duration: null, stops: null};
+}
+
+function _buildNewArrival(aRide) {
+  return {time: null, station:null};
+}
+
+function _buildNewTransfeer(aRide) {
+  return {desc: null};
+}
+
+
+function _getStepsFromRide(allRides) {
+  var calc = this;
+
+  //local variables
+  var totalNoOfRides = calc._objectLength(allRides);
+  var allSteps = [];
+  var noOfRides = 0;
+
+  //departure e.g. {time: "3:13 PM", station:"Beaverton"}
+  //ride e.g. {line:"MAX Blue Line", eol:"Expo Center", duration:"4 min", stops:"2 stops"}
+  //transfeer e.g. {desc: "Change to the Yellow line"}
+  //arrive e.g. {time:"5:46 PM", station:"Millikan Way MAX Station"}
+
+  //step through each step
+  allRides.forEach(function(aRide) {
+    //count this line
+    noOfRides++;
+
+    //build step objects, either departure, ride, transfeer, or arrive
+    //build departure {time: null, station:null};
+    var newDeparture = calc._buildNewDeparture(aRide);
+    allSteps.push(newDeparture);
+
+    //build ride {line: null, eol:null, duration: null, stops: null};
+    var newRide = calc._buildNewRide(aRide);
+    allSteps.push(newRide);
+
+    //build arrival {time: null, station:null};
+    var newArrival = calc._buildNewArrival(aRide);
+    allSteps.push(newArrival);
+
+    //if this is not the last ride build a transfeer {desc: null};
+    if(totalNoOfRides > noOfRides) {
+      var newTransfeer = calc._buildNewTransfeer(aRide);
+      allSteps.push(newTransfeer);
+    }
+
+
+
+  });
+
+  return allSteps;
+}
+
+function _selectFastestRoute(journeyTree) {
+  var calc = this;
+  var currentRide = 1;
+  var journeyOptions = {};
+  var bestRoute = {
+    summary: {
+      deprtTime: null,
+      arrvTime: null,
+      tripDuration: null,
+      totalStops: null,
+      departureStn: '',
+      arrivalStn: ''
+    },
+    steps: []
+  }
+
+  //departure e.g. {time: "3:13 PM", station:"Beaverton"}
+  //ride e.g. {line:"MAX Blue Line", eol:"Expo Center", duration:"4 min", stops:"2 stops"}
+  //transfeer e.g. {desc: "Change to the Yellow line"}
+  //arrive e.g. {time:"5:46 PM", station:"Millikan Way MAX Station"}
+
+  //step through each step of the journey
+  allRides.forEach(function(ride) {
+    //each ride has a departure, a ride, and an arrival
+
+    //turn each ride into steps
+    var stepsForRide = calc._getStepsFromRide(ride);
+
+    //add these steps to the whole ride
+    stepsForRide.forEach(function(step) {
+      bestRoute
+    });
+    
+    //build departure first
+    var departureStationId = ride.start;
+    var departureStationName = systemGraph[departureStationId].name;
+    var departureStationHeading = systemGraph[departureStationId].dir;
+    var departureStationTrains = ride.lines;
+    var arrivalStationId = ride.end;
+
+    //get the current time
+    var currentTime = calc._getCurrentTime();
+    var trainTime = 0;
+
+    //check for the closest time to the current time
+    departureStationTrains.forEach(function(line) {
+      var currentline = systemGraph[departureStationId].trains[line];
+      var found = false;
+      var testingTime = currentTime;
+
+      console.log('checking this line', currentline);
+
+      while(!found) { 
+        console.log('testing train time: ', testingTime);
+
+        //is this an arrival time?
+        if(typeof currentline[testingTime] !== 'undefined') {
+          var connectingTrain = currentline[testingTime];
+          
+          //make sure this train goes to the next station
+          if(typeof stopsByTrain[connectingTrain][arrivalStationId] !== 'undefined') {
+
+            //set the train time
+            trainTime = testingTime;
+
+            //throw the flag
+            found = true;
+          }
+
+        }
+
+        //if not incriment the testing time by a minue
+        testingTime++; if(testingTime >  1600) throw 'error finding time';
+      }
+
+    });
+
+    throw ('found this time ' + trainTime);
+
+    if(currentRide == 1) {
+      //if this is the first ride, save the departure info to the summary
+
+    }
+    //if there's another ride then add a transfeer
+  });
+
+  //return the best route
+  return bestRoute;
+}
+
+function _buildJourneyTree(journeyTree, allRides, level) {
+  var calc = this;
+  var numberOfLevels = calc._objectLength(allRides);
+
+  //console.log('rides left', calc._objectLength(allRides), allRides);
+  console.log("level", level, '#Objects', numberOfLevels);
+
+  //check for the last ride
+  if(level < (numberOfLevels - 1)) {
+
+    //and go deeper
+    journeyTree = calc._buildJourneyTree(journeyTree, allRides, (level + 1));
+
+    var newJourneyTree = {};
+    var departureStn = allRides[level].start;
+    var allLines = allRides[level].lines;
+    var arrivalStn = allRides[level].end;
+
+    console.log('the level is ', level, departureStn);
+
+    //set values
+    newJourneyTree['stn'] = arrivalStn;
+    newJourneyTree['arrive'] = null;
+    newJourneyTree['depart'] = null;
+    newJourneyTree['lines'] = {};
+    newJourneyTree['nextStn'] = journeyTree;
+
+    //loop through lines
+    allLines.forEach(function(line) {
+      newJourneyTree.lines[line] = {};
+    });
+
+  } else {
+    //if we're at the bottom
+    console.log('at the bottom');
+    
+    var departureStn = allRides[level].start;
+    var allLines = allRides[level].lines;
+    var arrivalStn = allRides[level].end;
+
+    //build arrival station
+    var arrivalStation = { stn:arrivalStn, arrive:{} };
+
+    //console.log(arrivalStation);
+
+    /*
+    //build the journeyTree
+    journeyTree['stn'] = departureStn;
+    journeyTree['arrive'] = null;
+    journeyTree['depart'] = null;
+    journeyTree['lines'] = {};
+
+    allLines.forEach(function(line) {
+      //add the arrival station to the end of the chain
+      //journeyTree.lines[line] = {train:null, duration:null, arrive:arrivalStation};
+      journeyTree.lines[line] = {};
+      arrivalStation.arrive[line] = {};
+
+    });
+
+    journeyTree['nextStn'] = arrivalStation;
+
+    //console.log('got the the bottom', journeyTree);
+
+    return journeyTree;*/
+    return arrivalStation;
+  }
+
+  journeyTree['stn'] = departureStn;
+  journeyTree['arrive'] = null;
+  journeyTree['depart'] = null;
+  journeyTree['lines'] = {};
+  journeyTree['nextStn'] = newJourneyTree;
+
+  //loop through lines
+  allLines.forEach(function(line) {
+    journeyTree.lines[line] = {};
+  });
+
+  //return the tree
+  return journeyTree;
+
+}
+
+function _calculateRideTimes(journeyTree) {
+  var calc = this;
+
+  console.log('_calculateRideTimes');
+  //get the current time
+  var currentTime = calc._getCurrentTime();
+
+  //find a train leaving this station, for the next station at the right time
+  var startStn = journeyTree.stn;
+  if(typeof journeyTree.nextStn.stn !== 'undefined')
+    var endStn = journeyTree.nextStn.stn;
+
+  //check each line for this station
+  Object.keys(journeyTree.lines).forEach(function(key) {
+    var arrivalTimes = systemGraph[startStn].trains[key];
+    var testTime = currentTime;
+    var found = false;
+
+    while(!found) {
+
+      if(typeof arrivalTimes[testTime] !== 'undefined') {
+        var thisTrain = arrivalTimes[testTime];
+
+        //make sure this train goes all the way through
+        found = true;
+      }
+
+      //if the time wasn't valid incriment by a minute
+      testTime++; if(testTime > 1600) throw 'counted too high';
+    }
+
+    console.log(startStn, key, testTime);
+
+  });
+
+
+  //if(typeof journeyTree.nextStn !== 'undefined')
+    //calc._calculateRideTimes(journeyTree.nextStn);
+}
 
 function _calcRoute(depart, arrive) {
   var calc = this;
@@ -200,17 +803,45 @@ function _calcRoute(depart, arrive) {
       var found = false;
       var i = 0;
 
-      //1. find a path with specific steps between dep and arr
-      var stepsBetweenStations = calc._stationsPath(depart, arrive);
+      console.log('looking for a path');
+      //1. search all stations until a route is found
+      var allSearchedStations = calc._searchStations(depart, arrive);
 
       //see what I got back
-      console.log(stepsBetweenStations);
+      //console.log('all stops searched', allSearchedStations);
 
-      //2. reduce the steps to rides on train lines
-      var lineOptionsRoute = calc._linesForStations(stepsBetweenStations);
+      console.log('looking for steps');
+      //2. find a path with specific steps between dep and arr
+      var pathBetweenStations = calc._stationsPath(allSearchedStations);
 
-      //3. find best arrival and departure times on those lines
-      var routeObject = calc._selectFastestRoute(lineOptionsRoute);
+      //see what I got back
+      //console.log('the path is', pathBetweenStations);
+
+      console.log('looking for rides');
+      //3. reduce the steps to rides on train lines
+      var allRides = calc._findSegments([], pathBetweenStations);
+
+      console.log('got these rides', allRides);
+
+      //4. turn rides into steps
+      var allSteps = calc._getStepsFromRide(allRides);
+
+      console.log('got these steps', allSteps);
+      //4. create a tree of ride possiblities
+      //var journeyTree = calc._buildJourneyTree({}, allRides, 0);
+
+      //console.log('got this tree', journeyTree);
+      //5. calculate ride times
+      //var treeWithTimes = calc._calculateRideTimes(journeyTree);
+
+      //console.log(journeyTree);
+      throw 'cutting out';
+      //5. find trains between stations
+      //5. find the fastest route
+      //var routeObject = calc._selectFastestRoute(journeyTree);
+
+      //see what I got back
+      //console.log('the fastest route is', routeObject);
 
       //4. return the fastest route to the user
       resolve(routeObject);
@@ -234,7 +865,7 @@ function getNewRoute(depart, arrive) {
   var calc = this;
   var journeyObject = {};
 
-  console.log(depart, arrive);
+  //console.log(depart, arrive);
 
   //return as a promise to the server
   return new Promise(function(resolve, reject) {
