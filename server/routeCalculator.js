@@ -238,11 +238,14 @@ function _stationsPath(allSteps) {
 
     //if both values match we've found our path
     if( allSteps.start[i] == allSteps.depart && 
-        allSteps.end[i] == thisEnd) 
+        allSteps.end[i] == thisEnd) {
           found = true;
+        }
 
     //if we're not finished...
     if(allSteps.end[i] == thisEnd) {
+
+      console.log('found ' + thisEnd + ' after ' + i + ' checks. Start: ' +  allSteps.start[i] + ' end: '+ allSteps.end[i]);
 
       //add the value to the path
       path.push(allSteps.start[i]);
@@ -254,11 +257,13 @@ function _stationsPath(allSteps) {
       i = 0;
     }
 
+    //console.log('looking for ' + thisEnd + ' start: ' + allSteps.start[i] + ' end: '+ allSteps.end[i]);
+
     //if it's taking too long, bail
     i++; if(i == 500) found = true; 
   }
 
-  return path;
+  return path.reverse();
 
 }
 
@@ -461,7 +466,7 @@ function _findSegments(allRides, remainingStops) {
 
 }
 
-function _buildNewDeparture(aRide) {
+function _buildNewDeparture(aRide, startTime) {
   var calc = this;
 
   //local variables
@@ -469,7 +474,6 @@ function _buildNewDeparture(aRide) {
   var end = parseInt(aRide.end);
   var trainLines = aRide.lines;
   var bestDeparture = {time: 1000000, line:null};
-  var currentTime = calc._getCurrentTime();
   var departureTimes = {};
   var departureObject = {
     time: null,
@@ -482,21 +486,30 @@ function _buildNewDeparture(aRide) {
 
     //local variables
     var trainTimes = systemGraph[start].trains[line];
-    var testTime = currentTime;
+    var testTime = startTime;
     var found = false;
 
-    console.log(trainTimes);
+    //console.log(trainTimes);
 
     while(!found) {
 
-      console.log(testTime, trainTimes[testTime]);
+      //console.log(testTime, trainTimes[testTime]);
       if(typeof trainTimes[testTime] !== 'undefined') {
         var thisTrain = trainTimes[testTime];
 
+        //console.log('looking for ', thisTrain);
         //as long as this train goes all the way through
-        if(typeof stopsByTrain[thisTrain] !== 'undefined') {
-          departureTimes[line] = testTime;
-          found = true;
+        //console.log('found train', thisTrain, 'start', start, 'end', end, 'works', typeof stopsByTrain[thisTrain][start] !== 'undefined' && typeof stopsByTrain[thisTrain][end] !== 'undefined');
+
+        if( typeof stopsByTrain[thisTrain][start] !== 'undefined' && 
+            typeof stopsByTrain[thisTrain][end] !== 'undefined') {
+          //console.log('it\'s valid');
+
+          if(stopsByTrain[thisTrain][end] > stopsByTrain[thisTrain][start]) {
+            departureTimes[line] = testTime;
+            found = true;
+          } else throw 'train goes wrong direction';
+
         }
       }
 
@@ -520,12 +533,47 @@ function _buildNewDeparture(aRide) {
 
   //get a departure station
   departureObject.station = systemGraph[start].name;
+  
+  //add the departure train for confirmation
+
+  departureObject['train'] = systemGraph[start].trains[departureObject.line][departureObject.time];
 
   return departureObject;
 }
 
-function _buildNewRide(aRide) {
-  return {line: null, eol:null, duration: null, stops: null};
+function _buildNewRide(aRide, departureObject) {
+  var calc = this;
+
+  //declare local variables
+  var start = parseInt(aRide.start);
+  var end = parseInt(aRide.end);
+  var startTime = departureObject.time;
+  var train = departureObject.train;
+  var thisLine = departureObject.line;
+  var returnObject = {
+    line: null, 
+    eol:null, 
+    duration: null, 
+    stops: null
+  };
+
+  //get the train line name
+  allTrains.data.forEach(function(trainLine) {
+
+    if(trainLine.short_name == thisLine) {
+      returnObject.line = trainLine.long_name;
+    }
+
+  });
+
+  //get the eol name
+  //get the duration
+  //save the number of stops
+  //console.log(train, start, end, '#ofStops:', stopsByTrain[train][start], stopsByTrain[train][end]);
+
+  returnObject.stops = (stopsByTrain[train][end] - stopsByTrain[train][start]);
+
+  return returnObject;
 }
 
 function _buildNewArrival(aRide) {
@@ -544,6 +592,7 @@ function _getStepsFromRide(allRides) {
   var totalNoOfRides = calc._objectLength(allRides);
   var allSteps = [];
   var noOfRides = 0;
+  var stnArrivalTime = calc._getCurrentTime();
 
   //departure e.g. {time: "3:13 PM", station:"Beaverton"}
   //ride e.g. {line:"MAX Blue Line", eol:"Expo Center", duration:"4 min", stops:"2 stops"}
@@ -557,11 +606,11 @@ function _getStepsFromRide(allRides) {
 
     //build step objects, either departure, ride, transfeer, or arrive
     //build departure {time: null, station:null};
-    var newDeparture = calc._buildNewDeparture(aRide);
+    var newDeparture = calc._buildNewDeparture(aRide, stnArrivalTime);
     allSteps.push(newDeparture);
 
     //build ride {line: null, eol:null, duration: null, stops: null};
-    var newRide = calc._buildNewRide(aRide);
+    var newRide = calc._buildNewRide(aRide, newDeparture);
     allSteps.push(newRide);
 
     //build arrival {time: null, station:null};
@@ -574,7 +623,7 @@ function _getStepsFromRide(allRides) {
       allSteps.push(newTransfeer);
     }
 
-
+    stnArrivalTime = newArrival.time;
 
   });
 
@@ -810,10 +859,12 @@ function _calcRoute(depart, arrive) {
       //see what I got back
       //console.log('all stops searched', allSearchedStations);
 
-      console.log('looking for steps');
+      console.log('looking for steps'/*, allSearchedStations*/);
       //2. find a path with specific steps between dep and arr
       var pathBetweenStations = calc._stationsPath(allSearchedStations);
 
+      console.log('the path is', pathBetweenStations);
+      throw 'waiting here';
       //see what I got back
       //console.log('the path is', pathBetweenStations);
 
