@@ -4,18 +4,30 @@ var systemGraph = require('./assets/JSON/systemGraph');
 var stnAdjacencies = require('./assets/models/stnAgacencies');
 var cursorGenerator = require('./cursorModel');
 var allStns = require('./assets/models/allStns');
+var stopsByTrain = require('./assets/JSON/stopsByTrain');
+
 
 //the variable itself
 var API = {
 	_calcRoute: _calcRoute,			//local methods
+	_getCurrentTime:_getCurrentTime,
 	_formatSummary: _formatSummary, 
 	_formatSteps: _formatSteps,
 	_markStationVisited: _markStationVisited,
 	_visitedBefore: _visitedBefore,
+	_pathToRides: _pathToRides,
 	_searchStations: _searchStations,
+	_getNextTrain: _getNextTrain,
 	getNewRoute: getNewRoute,		//external methods
 }
+function _getCurrentTime() {
+  var newTime = new Date();
+  var hours = newTime.getHours();
+  var mins = newTime.getMinutes();
+  var minsOnly = ((hours * 60) + mins);
 
+  return minsOnly;
+}
 function _formatSummary(rawJourney) {
 	return {};
 }
@@ -32,8 +44,6 @@ function _visitedBefore(stnId) {
 }
 function _searchStations(start, end) {
 	var api = this;
-
-	console.log(start, end);
 
 	var route = {queue:[], vertex:[], endpoint:[], edge:[], path:[]};
 	var found = false;
@@ -57,7 +67,7 @@ function _searchStations(start, end) {
 		//check if this is the station we're looking for
 		if(currentCursor.pos == end) {
 			//throw the flag
-			console.log('found it', currentCursor.path.length, 'steps');
+			//console.log('found it', currentCursor.path.length, 'steps');
 			found = true;
 
 		} else {
@@ -97,19 +107,106 @@ function _searchStations(start, end) {
 		}
 
 	}
+
+	if(found) {
+		return currentCursor.path;
+	} else {
+		return {error: 'No path between these stations could be found' };
+	}
+
+}
+function _getNextTrain(connections, startStn, nextStn) {
+	var testTime = _getCurrentTime();
+	var possibleTrain = null;
+
+	//check each of the connections
+	Object.keys(connections).forEach(function(line) {
+		
+		//if a connection is for the next station
+		if(nextStn == connections[line]) {
+			
+			//find the next train from that station on that line
+			var trinsOnLine = systemGraph[startStn].trains[line];
+			
+			var found = false;
+
+			while(!found) {
+				if(typeof trinsOnLine[testTime] !== 'undefined') {
+					
+					possibleTrain = trinsOnLine[testTime]; 
+					
+					if(typeof stopsByTrain[possibleTrain][startStn] !== 'undefined')
+						var startStnSeqNo = stopsByTrain[possibleTrain][startStn];
+					
+					if(typeof stopsByTrain[possibleTrain][nextStn] !== 'undefined')
+						var nextStnSeqNo = stopsByTrain[possibleTrain][nextStn];
+					
+					//console.log(startStnSeqNo, nextStnSeqNo, startStnSeqNo < nextStnSeqNo);
+					if(startStnSeqNo < nextStnSeqNo) {
+						found = true;
+					}
+					 
+				}
+				testTime++; if(testTime > 1600) throw 'too many tries';
+			}
+
+		}
+
+	});
+
+	//return the findings
+	return possibleTrain;
+}
+function _pathToRides(stnsPath) {
+	var api = this;
+	var unusedStns = stnsPath;
+	var usedStns = [];
+	var ridesObject = {};
+	var currentRide = 0;
+
+	console.log(unusedStns.length, unusedStns.length > 0);
+
+	//loop through stns until all have been used
+	//while(unusedStns.length > 0) {
+
+		//check for a connection object
+		if(typeof systemGraph[unusedStns[0]].connections !== 'undefined') {
+			
+			//save the connections values
+			var connections = systemGraph[unusedStns[0]].connections;
+
+			var nextTrain = api._getNextTrain(connections, unusedStns[0], unusedStns[1]);
+
+			console.log('the next train is ', nextTrain);
+		}
+
+	//}
+
+	return ('test');
+	//return connections;
 }
 function _calcRoute(depart, arrive) {
 	var api = this;
 
 	return new Promise(function(resolve, reject) {
-		var found = false;
-		var i = 0;
 
 		//1. search all stations until a route is found
-		var searchGrid = api._searchStations(depart, arrive);
-		//return the created object
-		resolve({'testing':'again'});
+		var stnsPath = api._searchStations(depart, arrive);
+		
+		//if a round was found explore the route more
+		if(typeof stnsPath.error == 'undefined') {
 
+			//2. break the path into rides
+			var trainRides = api._pathToRides(stnsPath);
+
+			//return the object when we're finished with it
+			resolve(trainRides);
+
+		} else {
+			//but if no path was found, send back the error'
+			resolve(stnsPath);
+		}
+		
 	}).catch(function(e) {
       console.log('Error: ' + e);
     });
