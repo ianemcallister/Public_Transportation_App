@@ -390,8 +390,16 @@ LandingOptions.prototype.buildNavView = function() {
 	$('#navSubmission').on('click',function(event) { 
 		console.log('submission clicked');
 		
+		//request stns Data
+		TrainDataServ.requestStnsData(dptInput, arrvInput).then(function(response) {
+
+			console.log(response);
+			//landing._buildStnsDataSummary(response);
+
+		}).catch(e => { console.log("error: " + e); });
+
 		//request the route
-		TrainDataServ.requestRoute(dptInput, arrvInput)
+		/*TrainDataServ.requestRoute(dptInput, arrvInput)
 		.then(function(response) {
 
 			//build the route summary, passing in the context
@@ -399,7 +407,7 @@ LandingOptions.prototype.buildNavView = function() {
 
 		}).catch(e => {
 			console.log("error: " + e);
-		});
+		});*/
 
 	});
 

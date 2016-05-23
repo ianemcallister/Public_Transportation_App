@@ -326,6 +326,24 @@ class TrainDataService {
 			});
 		});
 	}
+
+	requestStnsData(dptInput, arrvInput) {
+		let ds = this;
+
+		//convert the long_name to short_name
+		let dprtStnId = this.getStopsByName(dptInput);
+		let arvlStnId = this.getStopsByName(arrvInput);
+	
+		return new Promise((res, rej) => {
+			Backend.serverRequest('api/nav/', {dprtStn: dprtStnId, arvStn: arvlStnId})
+			.then((response) => {
+				//pass the respon back when received
+				res(response);
+			}).catch((e) => {
+				console.log("error: ", e);
+			});
+		});
+	}
 }
 
 let _trainDataService = new TrainDataService;

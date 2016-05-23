@@ -3,9 +3,9 @@
 var systemGraph = require('./assets/JSON/systemGraph');
 var stnAdjacencies = require('./assets/models/stnAgacencies');
 var cursorGenerator = require('./cursorModel');
+var rideGenerator = require('./rideModel');
 var allStns = require('./assets/models/allStns');
 var stopsByTrain = require('./assets/JSON/stopsByTrain');
-
 
 //the variable itself
 var API = {
@@ -18,7 +18,11 @@ var API = {
 	_pathToRides: _pathToRides,
 	_searchStations: _searchStations,
 	_getNextTrain: _getNextTrain,
+	_onThisLine:_onThisLine,
+	_compileStnData:_compileStnData,
+	_getStnValue:_getStnValue,
 	getNewRoute: getNewRoute,		//external methods
+	getEndpointsData: getEndpointsData
 }
 function _getCurrentTime() {
   var newTime = new Date();
@@ -117,7 +121,7 @@ function _searchStations(start, end) {
 }
 function _getNextTrain(connections, startStn, nextStn) {
 	var testTime = _getCurrentTime();
-	var possibleTrain = null;
+	var possibleTrain = {line: null, num: null};
 
 	//check each of the connections
 	Object.keys(connections).forEach(function(line) {
@@ -126,20 +130,21 @@ function _getNextTrain(connections, startStn, nextStn) {
 		if(nextStn == connections[line]) {
 			
 			//find the next train from that station on that line
-			var trinsOnLine = systemGraph[startStn].trains[line];
+			var trainsOnLine = systemGraph[startStn].trains[line];
 			
 			var found = false;
 
 			while(!found) {
-				if(typeof trinsOnLine[testTime] !== 'undefined') {
+				if(typeof trainsOnLine[testTime] !== 'undefined') {
 					
-					possibleTrain = trinsOnLine[testTime]; 
+					possibleTrain.num = trainsOnLine[testTime];
+					possibleTrain.line = line; 
 					
-					if(typeof stopsByTrain[possibleTrain][startStn] !== 'undefined')
-						var startStnSeqNo = stopsByTrain[possibleTrain][startStn];
+					if(typeof stopsByTrain[possibleTrain.num][startStn] !== 'undefined')
+						var startStnSeqNo = stopsByTrain[possibleTrain.num][startStn];
 					
-					if(typeof stopsByTrain[possibleTrain][nextStn] !== 'undefined')
-						var nextStnSeqNo = stopsByTrain[possibleTrain][nextStn];
+					if(typeof stopsByTrain[possibleTrain.num][nextStn] !== 'undefined')
+						var nextStnSeqNo = stopsByTrain[possibleTrain.num][nextStn];
 					
 					//console.log(startStnSeqNo, nextStnSeqNo, startStnSeqNo < nextStnSeqNo);
 					if(startStnSeqNo < nextStnSeqNo) {
@@ -157,10 +162,25 @@ function _getNextTrain(connections, startStn, nextStn) {
 	//return the findings
 	return possibleTrain;
 }
+function _onThisLine(currentRide, nextStn) {
+	var api = this;
+	var line = currentRide.line;
+	var train = currentRide.train;
+	var lastStnNum = currentRide.path.length - 1;
+	var lastStn = currentRide.path[lastStnNum];
+
+	console.log(lastStn, nextStn);
+	console.log(typeof stopsByTrain[train][nextStn] !== 'undefined', stopsByTrain[train][nextStn] > stopsByTrain[train][lastStn]);
+	//check if the next stn is on the line
+	if(	typeof stopsByTrain[train][nextStn] !== 'undefined' && 
+		stopsByTrain[train][nextStn] > stopsByTrain[train][lastStn])
+		return true;
+	else return false;
+}
 function _pathToRides(stnsPath) {
 	var api = this;
 	var unusedStns = stnsPath;
-	var usedStns = [];
+	//var usedStns = [];
 	var ridesObject = {};
 	var currentRide = 0;
 
@@ -168,7 +188,7 @@ function _pathToRides(stnsPath) {
 
 	//loop through stns until all have been used
 	//while(unusedStns.length > 0) {
-
+		console.log('unusedStns length: ', unusedStns.length);
 		//check for a connection object
 		if(typeof systemGraph[unusedStns[0]].connections !== 'undefined') {
 			
@@ -177,12 +197,37 @@ function _pathToRides(stnsPath) {
 
 			var nextTrain = api._getNextTrain(connections, unusedStns[0], unusedStns[1]);
 
-			console.log('the next train is ', nextTrain);
+			//console.log('the next train is ', nextTrain);
+			if(typeof nextTrain !== 'undefined') {
+				currentRide++;
+
+				//start a new ride
+				var aNewRide = new rideGenerator(nextTrain, unusedStns[0], unusedStns[1]);
+
+				//remove the first two stations from the list
+				unusedStns.splice(0,2);
+
+				console.log(aNewRide);
+
+				while(api._onThisLine(aNewRide, unusedStns[0])) {
+
+					//add the stn to the list
+					aNewRide.addStnToPath(unusedStns[0]);
+
+					//remove it from the unused list
+					unusedStns.split(0,1);
+				}
+				
+				//add the newride to the ride object
+				ridesObject[currentRide] = aNewRide;
+
+			}
+
 		}
 
 	//}
 
-	return ('test');
+	return (ridesObject);
 	//return connections;
 }
 function _calcRoute(depart, arrive) {
@@ -211,6 +256,65 @@ function _calcRoute(depart, arrive) {
       console.log('Error: ' + e);
     });
 }
+function _getStnValue(stn, attribute) {
+	var api = this;
+	var soughtValue = {};
+	var stnValues = {'name':0, 'heading':1, 'description':2, 'trains':3 };
+
+	console.log('getting: ', stn, attribute);
+
+	switch(stnValues[attribute]) {
+		case 0:
+			//get the name of the station
+			soughtValue = systemGraph[stn].name;
+			break;
+		case 1:
+			//get the heading of the station
+			soughtValue = systemGraph[stn].dir;
+			break;
+		case 2:
+			//get the description of the stn
+			soughtValue = systemGraph[stn].desc;
+			break;
+		case 3:
+			//get the trains that serve this stn, by line, and their next arrivals
+			var allTrains = systemGraph[stn].trains;
+
+			//drill through each train first
+			Object.keys(allTrains).forEach(function(train) {
+				var thisTrain = allTrains[train];
+				soughtValue[train] = [];
+
+				//then add the departure times for the remainder of the day
+				Object.keys(thisTrain).forEach(function(time) {
+					var currentTime = api._getCurrentTime();
+
+					if(time >= currentTime) {
+						soughtValue[train].push(time);
+					}
+
+				});
+
+			});
+
+			break;
+		default:
+			break;
+	}
+
+	return soughtValue;
+}
+function _compileStnData(stn) {
+	var api = this;
+	var returnObject = {};
+
+	returnObject['name'] = api._getStnValue(stn, 'name');
+	returnObject['heading'] = api._getStnValue(stn, 'heading');
+	returnObject['description'] = api._getStnValue(stn, 'description');
+	returnObject['trains'] = api._getStnValue(stn, 'trains');
+
+	return returnObject;
+}
 function getNewRoute(depart, arrive) {
 	var api = this;
 	var journeyObject = {};
@@ -220,8 +324,7 @@ function getNewRoute(depart, arrive) {
 
 		//pass values to the calculator and get them back 
 	    api._calcRoute(depart, arrive).then(function(rawJourney) {
-	
-
+		
 		//first build the summary
 		//journeyObject = api._formatSummary(rawJourney);
 
@@ -237,6 +340,21 @@ function getNewRoute(depart, arrive) {
 
 	}).catch(function(e) {
 		console.log('Error:' + e);
+	});
+}
+function getEndpointsData(depart, arrive) {
+	var api = this;
+	var endpointsObject = {};
+
+	return new Promise(function(resolve, reject) {
+
+		endpointsObject['departure'] = api._compileStnData(depart);
+		endpointsObject['arrival'] = api._compileStnData(arrive);
+		
+		resolve(endpointsObject);
+
+	}).catch(function(e) {
+		console.log('Error: '+ e);
 	});
 }
 
