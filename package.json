@@ -47,6 +47,7 @@
     "ws": "^0.8.0"
   },
   "dependencies": {
+    "gulp-uglify": "^1.5.3",
     "jquery": "^2.2.3"
   }
 }

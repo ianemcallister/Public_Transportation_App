@@ -1,0 +1,33 @@
+<div>
+	<!--Departure Station Summary: Contains Description, Heading, Name, & Trains-->
+	<div class="stationSummary">
+		<div class="row">
+			<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+				<h4>Leaving From: {{departure.name}}</h4>
+				<p><strong>{{departure.heading}}bound</strong></p>
+				<p><i>{{departure.description}}</i></p>
+				<p><strong>Trains Departing On:</strong> <br>
+				{{#list departure.trains}}
+					<strong>{{name}}:</strong> {{times}}
+				{{/list}}
+				</p>
+			</div>
+		</div>
+	</div>
+
+	<!--Arrival Station Summary: Contains Description, Heading, Name, & Trains-->
+	<div class="stationSummary">
+		<div class="row">
+			<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+				<h4>Arriving At: {{arrival.name}}</h4>
+				<p><strong>{{arrival.heading}}bound</strong></p>
+				<p><i>{{arrival.description}}</i></p>
+				<p><strong>Trains Arriving On:</strong> <br>s
+				{{#list arrival.trains}}
+					<strong>{{name}}:</strong> {{times}}
+				{{/list}}
+			</div>
+		</div>
+	</div>
+
+</div>

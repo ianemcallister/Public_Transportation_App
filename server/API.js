@@ -6,11 +6,13 @@ var cursorGenerator = require('./cursorModel');
 var rideGenerator = require('./rideModel');
 var allStns = require('./assets/models/allStns');
 var stopsByTrain = require('./assets/JSON/stopsByTrain');
+var allTrainData = require('./assets/JSON/allTrains.json');
 
 //the variable itself
 var API = {
 	_calcRoute: _calcRoute,			//local methods
 	_getCurrentTime:_getCurrentTime,
+	_getReadableTime:_getReadableTime,
 	_formatSummary: _formatSummary, 
 	_formatSteps: _formatSteps,
 	_markStationVisited: _markStationVisited,
@@ -31,6 +33,29 @@ function _getCurrentTime() {
   var minsOnly = ((hours * 60) + mins);
 
   return minsOnly;
+}
+function _getReadableTime(minutes) {
+  var hours = Math.floor(minutes / 60);
+  var mins = minutes % 60;
+  var A = '';
+
+  if(minutes > 719 && minutes < 1440) {
+  	A = " pm";
+  } else {
+  	A = " am";
+  }
+
+  if(minutes > 779) {
+  	if(minutes < 1500) hours = hours - 12;
+  	else hours = hours - 24;
+  }
+
+  var readableTime = hours + ":";
+
+  if(mins < 10) readableTime = readableTime + "0" + mins + A; 
+  else readableTime = readableTime + mins + A; 
+
+  return readableTime;
 }
 function _formatSummary(rawJourney) {
 	return {};
@@ -279,21 +304,35 @@ function _getStnValue(stn, attribute) {
 		case 3:
 			//get the trains that serve this stn, by line, and their next arrivals
 			var allTrains = systemGraph[stn].trains;
+			soughtValue = [];
 
 			//drill through each train first
 			Object.keys(allTrains).forEach(function(train) {
 				var thisTrain = allTrains[train];
-				soughtValue[train] = [];
+				var trainObject = {};
+
+				trainObject['line'] = train;
+				trainObject['times'] = [];
+
+				allTrainData.data.forEach(function(trainLine) {
+					if(trainLine.short_name == train) trainObject['name'] = trainLine.long_name;
+				});
 
 				//then add the departure times for the remainder of the day
 				Object.keys(thisTrain).forEach(function(time) {
 					var currentTime = api._getCurrentTime();
 
 					if(time >= currentTime) {
-						soughtValue[train].push(time);
+						//convert the time to a readable format
+						var readableTime = " " + api._getReadableTime(time);
+
+						trainObject['times'].push(readableTime);
 					}
 
 				});
+
+				//after the object is finished, add it to the soughtValue
+				soughtValue.push(trainObject);
 
 			});
 

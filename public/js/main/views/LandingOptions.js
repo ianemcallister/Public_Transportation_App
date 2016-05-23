@@ -11,6 +11,9 @@ import timeTableTemplate from './../../../../templates/timeTable.hbs';
 import navSection from './../../../../templates/navSection.hbs';
 import navSummary from './../../../../templates/navSummary.hbs';
 import navSteps from './../../../../templates/navSteps.hbs';
+import stnsSummary from './../../../../templates/stnsSummary.hbs';
+
+var Handlebars = require("handlebars/runtime")
 
 export default function LandingOptions(container) {
 	var landing = this;
@@ -303,6 +306,41 @@ LandingOptions.prototype._addTimeTable = function() {
 
 };
 
+LandingOptions.prototype._buildStnsDataSummary = function(context) {
+	let landing = this;
+	let navSumDisplay = landing._navDisplay;
+
+	//add the helper
+	Handlebars.registerHelper('list', function(items, options){
+		let out = "<ul>";
+
+		for(let i=0; i<items.length; i++) {
+			console.log(items[i]);
+			out = out + "<li>"+ options.fn(items[i]) + "</li>";
+		}
+
+		return out + "</ul>";
+	});
+
+	Handlebars.registerHelper('nextTimes', function(items, options) {
+		let out = '';
+
+		for(let i=0; i < items.length; i++) {
+			out = out + options.fn(items[i]) + ", ";
+		}
+	});
+
+	//if there was a summary there before, delete it.
+	landing._cleanNode(navSumDisplay);
+
+	//build the summary
+	let summaryHtmlString = stnsSummary(context);
+	let summaryNodes = parseHTML(summaryHtmlString);
+
+	//append the nodes to the dom
+	navSumDisplay.appendChild(summaryNodes, navSumDisplay);
+}
+
 LandingOptions.prototype._buildNavSummary = function(context) {
 	let landing = this;
 	let navSumDisplay = landing._navDisplay;
@@ -394,7 +432,7 @@ LandingOptions.prototype.buildNavView = function() {
 		TrainDataServ.requestStnsData(dptInput, arrvInput).then(function(response) {
 
 			console.log(response);
-			//landing._buildStnsDataSummary(response);
+			landing._buildStnsDataSummary(response);
 
 		}).catch(e => { console.log("error: " + e); });
 

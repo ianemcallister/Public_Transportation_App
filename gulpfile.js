@@ -11,6 +11,7 @@ var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
 var mergeStream = require('merge-stream');
 var through = require('through2');
+var uglify = require('gulp-uglify');
 
 var args = process.argv.slice(3);
 
@@ -71,6 +72,7 @@ function bundle(b, outputPath) {
     // optional, remove if you dont want sourcemaps
     .pipe(plugins.sourcemaps.init({loadMaps: true})) // loads map from browserify file
        // Add transformation tasks to the pipeline here.
+    .pipe(uglify())
     .pipe(plugins.sourcemaps.write('./')) // writes .map file
     .pipe(gulp.dest('build/public/' + outputDir));
 }
