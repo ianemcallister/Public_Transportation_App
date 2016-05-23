@@ -1,7 +1,7 @@
 'use strict';
 
 var calculator = require('./routeCalculator');
-var stopsModel = require('./assets/gtfs/stopsModel');
+var stopsModel = require('./assets/JSON/stopsModel');
 var systemGraph = require('./assets/JSON/systemGraph');
 //var cursorGenerator = require('./cursorModel');
 var stnAdjacencies = require('./assets/models/stnAgacencies');
